@@ -11,13 +11,11 @@ import { ButtonComponent } from "./ui_components/Button";
 import {
   selectedComponentAtom,
   selectedComponentPropertiesAtom,
-  // updatedComponentPropertiesAtom,
 } from "./state/atoms";
 
 function Plugin() {
   const [selectedComponent] = useAtom(selectedComponentAtom);
   const [componentProps] = useAtom(selectedComponentPropertiesAtom);
-  // const [updatedComponentProps] = useAtom(updatedComponentPropertiesAtom);
 
   const propertyKeys = Object.keys(componentProps);
 
@@ -40,12 +38,12 @@ function Plugin() {
         <VerticalSpace space="small" />
         <DropdownComponent components={components} />
         <VerticalSpace space="large" />
-        {/* {propertyKeys.map((propertyKey) => (
+        {propertyKeys.map((propertyKey) => (
           <div key={propertyKey}>
             <CheckboxComponent propertyKey={propertyKey} />
             <VerticalSpace space="small" />
           </div>
-        ))} */}
+        ))}
       </div>
       <div style={{ flexGrow: 1 }}></div>
       <div>

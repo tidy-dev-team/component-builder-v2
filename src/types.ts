@@ -29,24 +29,24 @@ export interface ComponentPropertyInfo {
   };
 }
 
-// export interface DependentProperty {
-//   kind: "text" | "instance swap";
-//   name: string;
-//   value: string;
-// }
+export interface DependentProperty {
+  kind: "text" | "instance swap";
+  name: string;
+  value: string;
+}
 
-// export interface ComponentProperty {
-//   name: string;
-//   displayName: string;
-//   value: string | boolean;
-//   used: boolean;
-//   dependentProperty?: DependentProperty;
-//   variants?: string[];
-// }
+export interface ComponentProperty {
+  name: string;
+  displayName: string;
+  value: string | boolean;
+  used: boolean;
+  dependentProperty?: DependentProperty;
+  variants?: string[];
+}
 
-// export interface ComponentProperties {
-//   [key: string]: ComponentProperty;
-// }
+export interface ComponentProperties {
+  [key: string]: ComponentProperty;
+}
 
 // export interface ComponentDataMap {
 //   [componentName: string]: ComponentProperties;
