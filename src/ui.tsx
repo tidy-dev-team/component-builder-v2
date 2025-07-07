@@ -1,7 +1,7 @@
 import { Container, render, VerticalSpace } from "@create-figma-plugin/ui";
-import { emit } from "@create-figma-plugin/utilities";
+import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
-import { useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { components } from "./componentData";
 import { useAtom } from "jotai";
 
@@ -12,12 +12,16 @@ import {
   selectedComponentAtom,
   selectedComponentPropertiesAtom,
 } from "./state/atoms";
+import { ComponentPropertyInfo } from "./types";
 
 function Plugin() {
   const [selectedComponent] = useAtom(selectedComponentAtom);
-  const [componentProps] = useAtom(selectedComponentPropertiesAtom);
+  const [componentProps, setComponentProps] = useAtom(
+    selectedComponentPropertiesAtom
+  );
+  const [propertyMap, setPropertyMap] = useState([]);
 
-  const propertyKeys = Object.keys(componentProps);
+  // const propertyKeys = Object.keys(componentProps);
 
   function handleButtonClick() {
     // emit("BUILD", updatedComponentProps);
@@ -25,9 +29,22 @@ function Plugin() {
 
   useEffect(() => {
     if (selectedComponent) {
-      emit("GET_COMPONENT_PROPERTIES", components[selectedComponent]);
+      emit("GET_COMPONENT_SET_PROPERTIES", components[selectedComponent]);
     }
   }, [selectedComponent]);
+
+  useEffect(() => {
+    const unsubscribe = on("COMPONENT_SET_PROPERTIES", (data) => {
+      setComponentProps(data);
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    if (componentProps) {
+      for (const prop of componentProps) console.log(getCleanName(prop));
+    }
+  }, [componentProps]);
 
   return (
     <Container
@@ -38,12 +55,12 @@ function Plugin() {
         <VerticalSpace space="small" />
         <DropdownComponent components={components} />
         <VerticalSpace space="large" />
-        {propertyKeys.map((propertyKey) => (
+        {/* {propertyKeys.map((propertyKey) => (
           <div key={propertyKey}>
             <CheckboxComponent propertyKey={propertyKey} />
             <VerticalSpace space="small" />
           </div>
-        ))}
+        ))} */}
       </div>
       <div style={{ flexGrow: 1 }}></div>
       <div>
@@ -55,3 +72,8 @@ function Plugin() {
 }
 
 export default render(Plugin);
+
+export function getCleanName(prop: ComponentPropertyInfo): string {
+  const [cleanName] = prop.name.split("#");
+  return cleanName;
+}
