@@ -11,7 +11,7 @@ import { ButtonComponent } from "./ui_components/Button";
 import {
   selectedComponentAtom,
   selectedComponentPropertiesAtom,
-  propertyUsedStatesAtom, // Import the new atom
+  propertyUsedStatesAtom,
 } from "./state/atoms";
 import { ComponentPropertyInfo } from "./types";
 import { shouldBeHidden } from "./ui_utils";
@@ -21,14 +21,12 @@ function Plugin() {
   const [componentProps, setComponentProps] = useAtom(
     selectedComponentPropertiesAtom
   );
-  const [propertyUsedStates] = useAtom(propertyUsedStatesAtom); // Get the checked states
+  const [propertyUsedStates, setPropertyUsedStates] = useAtom(
+    propertyUsedStatesAtom
+  ); // Get the setter for used states
 
   function handleButtonClick() {
-    const buildData = Object.entries(propertyUsedStates)
-      .filter(([, isUsed]) => isUsed)
-      .map(([name]) => name);
-
-    emit("BUILD", buildData);
+    emit("BUILD", propertyUsedStates);
   }
 
   useEffect(() => {
@@ -38,17 +36,23 @@ function Plugin() {
   }, [selectedComponent]);
 
   useEffect(() => {
-    const unsubscribe = on("COMPONENT_SET_PROPERTIES", (data) => {
-      setComponentProps(data);
-    });
+    const unsubscribe = on(
+      "COMPONENT_SET_PROPERTIES",
+      (data: ComponentPropertyInfo[]) => {
+        setComponentProps(data);
+        // Create an object with all property names set to true
+        const initialUsedStates = data.reduce(
+          (acc, prop) => {
+            acc[prop.name] = true;
+            return acc;
+          },
+          {} as Record<string, boolean>
+        );
+        setPropertyUsedStates(initialUsedStates);
+      }
+    );
     return unsubscribe;
-  }, []);
-
-  // useEffect(() => {
-  //   if (componentProps) {
-  //     for (const prop of componentProps) console.log(getCleanName(prop));
-  //   }
-  // }, [componentProps]);
+  }, [setComponentProps, setPropertyUsedStates]); // Add setters to dependency array
 
   return (
     <Container

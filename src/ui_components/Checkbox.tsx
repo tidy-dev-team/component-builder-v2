@@ -11,15 +11,14 @@ export function CheckboxComponent(
   const [usedStates, setUsedStates] = useAtom(propertyUsedStatesAtom);
   const cleanName = getCleanName(prop);
 
-  const handleChange = (event: JSX.TargetedEvent<HTMLInputElement>) => {
-    const newValue = event.currentTarget.checked;
-    setUsedStates((prev) => ({ ...prev, [prop.name]: newValue }));
+  const handleChange = (value: boolean) => {
+    setUsedStates((prev) => ({ ...prev, [prop.name]: value }));
   };
 
   return (
     <Checkbox
-      onValueChange={() => handleChange}
-      value={usedStates[prop.name] ?? false}
+      onValueChange={handleChange}
+      value={usedStates[prop.name] ?? true}
       disabled={prop.disabled}
     >
       {cleanName}

@@ -10,7 +10,8 @@ export default function () {
     await getComponentSet(data.key);
     emit("COMPONENT_SET_PROPERTIES", cachedComponentProps);
   });
-  on("BUILD", () => {
+  on("BUILD", (buildData: string[]) => {
+    console.log("buildData :>> ", buildData);
     const clonedComponentSet = cachedComponentSet?.clone();
     if (clonedComponentSet) {
       figma.currentPage.appendChild(clonedComponentSet);

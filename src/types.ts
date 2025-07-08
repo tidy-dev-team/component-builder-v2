@@ -2,12 +2,22 @@ import { EventHandler } from "@create-figma-plugin/utilities";
 
 export interface BuildHandler extends EventHandler {
   name: "BUILD";
-  handler: (data: ComponentProperties) => void;
+  handler: (data: string[]) => void;
 }
 
 export interface CloseHandler extends EventHandler {
   name: "CLOSE";
   handler: () => void;
+}
+
+export interface GetComponentSetPropertiesHandler extends EventHandler {
+  name: "GET_COMPONENT_SET_PROPERTIES";
+  handler: (data: { key: string }) => void;
+}
+
+export interface ComponentSetPropertiesHandler extends EventHandler {
+  name: "COMPONENT_SET_PROPERTIES";
+  handler: (data: ComponentPropertyInfo[]) => void;
 }
 
 export interface ComponentData {
