@@ -10,8 +10,15 @@ export default function () {
     await getComponentSet(data.key);
     emit("COMPONENT_SET_PROPERTIES", cachedComponentProps);
   });
+  on("BUILD", () => {
+    const clonedComponentSet = cachedComponentSet?.clone();
+    if (clonedComponentSet) {
+      figma.currentPage.appendChild(clonedComponentSet);
+      figma.viewport.scrollAndZoomIntoView([clonedComponentSet]);
+    }
+  });
   showUI({
-    height: 360,
+    height: 500,
     width: 320,
   });
 }

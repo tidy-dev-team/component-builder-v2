@@ -1,52 +1,28 @@
 import { h, JSX } from "preact";
-import { useEffect, useState } from "preact/hooks";
-import { Checkbox, Text } from "@create-figma-plugin/ui";
+import { Checkbox } from "@create-figma-plugin/ui";
 import { useAtom } from "jotai";
-import {
-  selectedComponentPropertiesAtom,
-  propertyUsedStatesAtom,
-} from "../state/atoms";
+import { propertyUsedStatesAtom } from "../state/atoms";
+import { getCleanName } from "../ui_utils";
+import { ComponentPropertyInfo } from "../types";
 
-interface CheckboxComponentProps {
-  propertyKey: string;
-}
+export function CheckboxComponent(
+  prop: ComponentPropertyInfo & { disabled: boolean }
+) {
+  const [usedStates, setUsedStates] = useAtom(propertyUsedStatesAtom);
+  const cleanName = getCleanName(prop);
 
-export function CheckboxComponent({ propertyKey }: CheckboxComponentProps) {
-  const [componentProps] = useAtom(selectedComponentPropertiesAtom);
-  const [propertyUsedStates, setPropertyUsedStates] = useAtom(propertyUsedStatesAtom);
-  const property = componentProps[propertyKey];
-  
-  const [value, setValue] = useState<boolean>(() => 
-    propertyUsedStates[propertyKey] ?? property?.used ?? true
-  );
-
-  useEffect(() => {
-    if (property && !(propertyKey in propertyUsedStates)) {
-      const initialState = property.used;
-      setValue(initialState);
-      setPropertyUsedStates((prev) => ({
-        ...prev,
-        [propertyKey]: initialState,
-      }));
-    }
-  }, [property, propertyKey, setPropertyUsedStates]);
-
-  function handleChange(event: JSX.TargetedEvent<HTMLInputElement>) {
+  const handleChange = (event: JSX.TargetedEvent<HTMLInputElement>) => {
     const newValue = event.currentTarget.checked;
-    setValue(newValue);
-    setPropertyUsedStates((prev) => ({
-      ...prev,
-      [propertyKey]: newValue,
-    }));
-  }
-
-  if (!property) {
-    return null;
-  }
+    setUsedStates((prev) => ({ ...prev, [prop.name]: newValue }));
+  };
 
   return (
-    <Checkbox onChange={handleChange} value={value}>
-      <Text>{property.displayName}</Text>
+    <Checkbox
+      onValueChange={() => handleChange}
+      value={usedStates[prop.name] ?? false}
+      disabled={prop.disabled}
+    >
+      {cleanName}
     </Checkbox>
   );
 }

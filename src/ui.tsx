@@ -11,20 +11,24 @@ import { ButtonComponent } from "./ui_components/Button";
 import {
   selectedComponentAtom,
   selectedComponentPropertiesAtom,
+  propertyUsedStatesAtom, // Import the new atom
 } from "./state/atoms";
 import { ComponentPropertyInfo } from "./types";
+import { shouldBeHidden } from "./ui_utils";
 
 function Plugin() {
   const [selectedComponent] = useAtom(selectedComponentAtom);
   const [componentProps, setComponentProps] = useAtom(
     selectedComponentPropertiesAtom
   );
-  const [propertyMap, setPropertyMap] = useState([]);
-
-  // const propertyKeys = Object.keys(componentProps);
+  const [propertyUsedStates] = useAtom(propertyUsedStatesAtom); // Get the checked states
 
   function handleButtonClick() {
-    // emit("BUILD", updatedComponentProps);
+    const buildData = Object.entries(propertyUsedStates)
+      .filter(([, isUsed]) => isUsed)
+      .map(([name]) => name);
+
+    emit("BUILD", buildData);
   }
 
   useEffect(() => {
@@ -40,11 +44,11 @@ function Plugin() {
     return unsubscribe;
   }, []);
 
-  useEffect(() => {
-    if (componentProps) {
-      for (const prop of componentProps) console.log(getCleanName(prop));
-    }
-  }, [componentProps]);
+  // useEffect(() => {
+  //   if (componentProps) {
+  //     for (const prop of componentProps) console.log(getCleanName(prop));
+  //   }
+  // }, [componentProps]);
 
   return (
     <Container
@@ -55,12 +59,15 @@ function Plugin() {
         <VerticalSpace space="small" />
         <DropdownComponent components={components} />
         <VerticalSpace space="large" />
-        {/* {propertyKeys.map((propertyKey) => (
-          <div key={propertyKey}>
-            <CheckboxComponent propertyKey={propertyKey} />
-            <VerticalSpace space="small" />
-          </div>
-        ))} */}
+        {componentProps.map((prop) => {
+          const isDisabled = shouldBeHidden(prop);
+          return (
+            <div key={prop.name}>
+              <CheckboxComponent {...prop} disabled={isDisabled} />
+              <VerticalSpace space="small" />
+            </div>
+          );
+        })}
       </div>
       <div style={{ flexGrow: 1 }}></div>
       <div>
@@ -72,8 +79,3 @@ function Plugin() {
 }
 
 export default render(Plugin);
-
-export function getCleanName(prop: ComponentPropertyInfo): string {
-  const [cleanName] = prop.name.split("#");
-  return cleanName;
-}
