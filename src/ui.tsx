@@ -23,7 +23,7 @@ function Plugin() {
   );
   const [propertyUsedStates, setPropertyUsedStates] = useAtom(
     propertyUsedStatesAtom
-  ); // Get the setter for used states
+  );
 
   function handleButtonClick() {
     emit("BUILD", propertyUsedStates);
@@ -40,7 +40,6 @@ function Plugin() {
       "COMPONENT_SET_PROPERTIES",
       (data: ComponentPropertyInfo[]) => {
         setComponentProps(data);
-        // Create an object with all property names set to true
         const initialUsedStates = data.reduce(
           (acc, prop) => {
             acc[prop.name] = true;
