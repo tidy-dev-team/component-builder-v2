@@ -27,29 +27,26 @@ export function getElementsWithComponentProperty(
 export async function deleteVariantsExcept(
   componentSetNode: ComponentSetNode,
   property: string,
-  valueToKeep: string
+  valueToKeep?: string
 ) {
-  if (!componentSetNode || componentSetNode.type !== "COMPONENT_SET") {
-    figma.notify("Error: Please provide a valid Component Set node.");
-    return;
+  if (!valueToKeep) {
+    const propertyDefinitions = componentSetNode.componentPropertyDefinitions;
+    if (propertyDefinitions && propertyDefinitions[property]) {
+      valueToKeep = propertyDefinitions[property].defaultValue as string;
+    }
   }
 
   figma.notify(
     `Deleting variants where "${property}" is not "${valueToKeep}"...`
   );
 
-  // We iterate over a copy of the children array because removing a child
-  // while iterating over the original array can lead to skipping elements.
   const variants = [...componentSetNode.children];
   let deletedCount = 0;
 
-  // Loop through each variant component to check its properties.
   for (const variant of variants) {
     if (variant.type === "COMPONENT") {
-      // The variant properties are stored in a "key=value, key2=value2" format in the component's name.
       const originalName = variant.name;
 
-      // Parse the existing properties from the name string into an object.
       const properties = originalName.split(",").reduce(
         (acc, part) => {
           const [key, value] = part.split("=").map((s) => s.trim());
@@ -61,14 +58,18 @@ export async function deleteVariantsExcept(
         {} as Record<string, string>
       );
 
-      // Check if the variant has the target property AND its value is NOT the one we want to keep.
       if (
         properties.hasOwnProperty(property) &&
         properties[property] !== valueToKeep
       ) {
-        // If the condition is met, remove the variant node from the document.
         variant.remove();
         deletedCount++;
+      } else if (properties.hasOwnProperty(property)) {
+        delete properties[property];
+        const updatedName = Object.entries(properties)
+          .map(([key, value]) => `${key}=${value}`)
+          .join(", ");
+        variant.name = updatedName;
       }
     }
   }
@@ -80,4 +81,24 @@ export async function deleteVariantsExcept(
       `No variants were found where "${property}" was not "${valueToKeep}".`
     );
   }
+}
+
+/**
+ * Gets the type of a component property from a ComponentSet.
+ *
+ * @param componentSet - The ComponentSetNode to search in
+ * @param propertyName - The name of the property to find the type for
+ * @returns The ComponentPropertyType if found, undefined otherwise
+ */
+export function getComponentPropertyType(
+  componentSet: ComponentSetNode,
+  propertyName: string
+): ComponentPropertyType | undefined {
+  const componentProperties = componentSet.componentPropertyDefinitions;
+
+  if (componentProperties && componentProperties[propertyName]) {
+    return componentProperties[propertyName].type;
+  }
+
+  return undefined;
 }

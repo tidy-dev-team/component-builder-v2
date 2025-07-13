@@ -1,7 +1,11 @@
 import { on, emit, showUI } from "@create-figma-plugin/utilities";
 import { getComponentPropertyInfo } from "./figma_functions/utils";
 import type { ComponentPropertyInfo } from "./types";
-import { getElementsWithComponentProperty } from "./figma_functions/coreUtils";
+import {
+  getElementsWithComponentProperty,
+  getComponentPropertyType,
+  deleteVariantsExcept,
+} from "./figma_functions/coreUtils";
 import { getEnabledProperties, isDependentProperty } from "./ui_utils";
 import { UI_DIMENSIONS } from "./constants";
 
@@ -50,23 +54,33 @@ function buildComponent(buildData: Record<string, boolean>): void {
   }
 
   for (const propKey of propKeys) {
-    const propertyName = propKey.split("#")[0];
-    const foundElements = getElementsWithComponentProperty(
-      clonedComponentSet,
-      propKey
-    );
+    const propertyType = getComponentPropertyType(clonedComponentSet, propKey);
+    if (propertyType === "VARIANT") {
+      deleteVariantsExcept(clonedComponentSet, propKey);
+      if (clonedComponentSet.componentPropertyDefinitions[propKey]) {
+        clonedComponentSet.deleteComponentProperty(propKey);
+      }
+    } else {
+      const propertyName = propKey.split("#")[0];
+      const foundElements = getElementsWithComponentProperty(
+        clonedComponentSet,
+        propKey
+      );
 
-    if (foundElements.length > 0) {
-      clonedComponentSet.deleteComponentProperty(propKey);
-      foundElements.forEach(element => element.remove());
-    }
+      if (foundElements.length > 0) {
+        if (clonedComponentSet.componentPropertyDefinitions[propKey]) {
+          clonedComponentSet.deleteComponentProperty(propKey);
+        }
+        foundElements.forEach((element) => element.remove());
+      }
 
-    const dependentProp = dataKeys.find(property => 
-      isDependentProperty(property, propertyName)
-    );
+      const dependentProp = dataKeys.find((property) =>
+        isDependentProperty(property, propertyName)
+      );
 
-    if (dependentProp) {
-      clonedComponentSet.deleteComponentProperty(dependentProp);
+      if (dependentProp && clonedComponentSet.componentPropertyDefinitions[dependentProp]) {
+        clonedComponentSet.deleteComponentProperty(dependentProp);
+      }
     }
   }
 
