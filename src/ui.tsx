@@ -51,7 +51,7 @@ function Plugin() {
       }
     );
     return unsubscribe;
-  }, [setComponentProps, setPropertyUsedStates]); // Add setters to dependency array
+  }, [setComponentProps, setPropertyUsedStates]);
 
   return (
     <Container
