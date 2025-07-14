@@ -16,6 +16,11 @@ export const components: ComponentData = {
     key: "0a0e2be0f6ece4620ef8d28b39ee6995656393b2",
     type: "componentSet",
   },
+  CheckboxTest: {
+    name: "Checkbox for test",
+    key: "d921cc1b6daeca95638113d222cca11a2f117273",
+    type: "componentSet",
+  },
   RadioButtons: {
     name: "Radio Buttons",
     key: "67b1272ac6d5fedbf7cba7f4e99224e463abe392",

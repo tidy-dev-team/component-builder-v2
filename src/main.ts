@@ -1,5 +1,5 @@
 import { on, emit, showUI } from "@create-figma-plugin/utilities";
-import { getComponentPropertyInfo } from "./figma_functions/utils";
+import { getComponentPropertyInfo } from "./figma_functions/coreUtils";
 import type { ComponentPropertyInfo } from "./types";
 import { UI_DIMENSIONS } from "./constants";
 import { buildUpdatedComponent } from "./buildComponent";

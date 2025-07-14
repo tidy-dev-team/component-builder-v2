@@ -1,5 +1,3 @@
-import { ComponentPropertyInfo } from "../types";
-
 function getComponentPropertyName(
   component: ComponentNode,
   propName: string
@@ -43,17 +41,4 @@ export function addNewBooleanProperty(
   if (objName) {
     setComponentPropertyReference(node, "visible", objName);
   }
-}
-
-//TODO this function should return additionally index of the element to which this property applide (on a tree like 1-1-3-2)
-export function getComponentPropertyInfo(
-  node: ComponentNode | ComponentSetNode
-): ComponentPropertyInfo[] {
-  const properties = node.componentPropertyDefinitions;
-  return Object.entries(properties)
-    .map(([name, definition]) => ({
-      name,
-      ...definition,
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name));
 }

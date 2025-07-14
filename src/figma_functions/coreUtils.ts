@@ -1,10 +1,5 @@
-/**
- * Finds all elements within a ComponentSet that reference a given component property.
- *
- * @param componentSet - The ComponentSetNode to search inside
- * @param propertyName - The component property key (e.g., "icon#2192:308") to match
- * @returns Array of SceneNode elements that have matching componentPropertyReferences
- */
+import { ComponentPropertyInfo } from "../types";
+
 export function getElementsWithComponentProperty(
   componentSet: ComponentSetNode,
   propertyName: string
@@ -83,13 +78,6 @@ export async function deleteVariantsExcept(
   }
 }
 
-/**
- * Gets the type of a component property from a ComponentSet.
- *
- * @param componentSet - The ComponentSetNode to search in
- * @param propertyName - The name of the property to find the type for
- * @returns The ComponentPropertyType if found, undefined otherwise
- */
 export function getComponentPropertyType(
   componentSet: ComponentSetNode,
   propertyName: string
@@ -107,13 +95,11 @@ export function getPathToDefaultVariant(
   componentSet: ComponentSetNode,
   element: SceneNode
 ): number[] {
-  // 1) Grab the default variant (the “top‐left” one) :contentReference[oaicite:0]{index=0}
   const defaultVariant = componentSet.defaultVariant as ComponentNode;
 
   const path: number[] = [];
   let current: SceneNode = element;
 
-  // 2) Climb up until we hit the default variant
   while (current !== defaultVariant) {
     const parent = current.parent;
     if (!parent || !("children" in parent)) {
@@ -122,7 +108,6 @@ export function getPathToDefaultVariant(
       );
     }
 
-    // 3) Find current’s index among its parent’s children
     const siblings = (parent as ChildrenMixin).children as SceneNode[];
     const idx = siblings.indexOf(current);
     if (idx === -1) {
@@ -130,9 +115,20 @@ export function getPathToDefaultVariant(
     }
     path.push(idx);
 
-    // 4) Move up
     current = parent as SceneNode;
   }
 
   return path.reverse();
+} //TODO this function should return additionally index of the element to which this property applide (on a tree like 1-1-3-2)
+
+export function getComponentPropertyInfo(
+  node: ComponentNode | ComponentSetNode
+): ComponentPropertyInfo[] {
+  const properties = node.componentPropertyDefinitions;
+  return Object.entries(properties)
+    .map(([name, definition]) => ({
+      name,
+      ...definition,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
