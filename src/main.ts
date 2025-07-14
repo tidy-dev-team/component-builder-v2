@@ -13,9 +13,9 @@ let cachedComponentSet: ComponentSetNode | null = null;
 let cachedComponentProps: ComponentPropertyInfo[] | null = null;
 
 export default function () {
-  on("GET_COMPONENT_SET_PROPERTIES", async (data) => {
+  on("GET_COMPONENT_SET_PROPERTIES", async (componentSetData) => {
     try {
-      await getComponentSet(data.key);
+      await getComponentSet(componentSetData.key);
       emit("COMPONENT_SET_PROPERTIES", cachedComponentProps);
     } catch (error) {
       console.error("Failed to get component set properties:", error);
@@ -78,7 +78,10 @@ function buildComponent(buildData: Record<string, boolean>): void {
         isDependentProperty(property, propertyName)
       );
 
-      if (dependentProp && clonedComponentSet.componentPropertyDefinitions[dependentProp]) {
+      if (
+        dependentProp &&
+        clonedComponentSet.componentPropertyDefinitions[dependentProp]
+      ) {
         clonedComponentSet.deleteComponentProperty(dependentProp);
       }
     }
