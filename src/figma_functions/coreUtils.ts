@@ -102,3 +102,37 @@ export function getComponentPropertyType(
 
   return undefined;
 }
+
+export function getPathToDefaultVariant(
+  componentSet: ComponentSetNode,
+  element: SceneNode
+): number[] {
+  // 1) Grab the default variant (the “top‐left” one) :contentReference[oaicite:0]{index=0}
+  const defaultVariant = componentSet.defaultVariant as ComponentNode;
+
+  const path: number[] = [];
+  let current: SceneNode = element;
+
+  // 2) Climb up until we hit the default variant
+  while (current !== defaultVariant) {
+    const parent = current.parent;
+    if (!parent || !("children" in parent)) {
+      throw new Error(
+        `Node is not inside the default variant "${defaultVariant.name}"`
+      );
+    }
+
+    // 3) Find current’s index among its parent’s children
+    const siblings = (parent as ChildrenMixin).children as SceneNode[];
+    const idx = siblings.indexOf(current);
+    if (idx === -1) {
+      throw new Error("Failed to locate node in parent.children");
+    }
+    path.push(idx);
+
+    // 4) Move up
+    current = parent as SceneNode;
+  }
+
+  return path.reverse();
+}
