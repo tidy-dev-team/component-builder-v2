@@ -1,6 +1,6 @@
 import { Container, render, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
-import { h } from "preact";
+import { h, Fragment } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { components } from "./componentData";
 import { useAtom } from "jotai";
@@ -63,15 +63,49 @@ function Plugin() {
         <VerticalSpace space="small" />
         <DropdownComponent components={components} />
         <VerticalSpace space="large" />
-        {componentProps.map((prop) => {
-          const isDisabled = shouldBeHidden(prop);
+{(() => {
+          const sortedProps = componentProps.sort((a, b) => {
+            // Show VARIANT properties first
+            if (a.type === "VARIANT" && b.type !== "VARIANT") return -1;
+            if (a.type !== "VARIANT" && b.type === "VARIANT") return 1;
+            // Then sort alphabetically within each group
+            return a.name.localeCompare(b.name);
+          });
+
+          const variantProps = sortedProps.filter(prop => prop.type === "VARIANT");
+          const otherProps = sortedProps.filter(prop => prop.type !== "VARIANT");
+
           return (
-            <div key={prop.name}>
-              <CheckboxComponent {...prop} disabled={isDisabled} />
-              <VerticalSpace space="small" />
-            </div>
+            <Fragment>
+              {variantProps.length > 0 && (
+                <Fragment>
+                  <div style={{ fontSize: "11px", fontWeight: "600", color: "#666", marginBottom: "8px" }}>
+                    Variants
+                  </div>
+                  {variantProps.map((prop) => {
+                    const isDisabled = shouldBeHidden(prop);
+                    return (
+                      <div key={prop.name}>
+                        <CheckboxComponent {...prop} disabled={isDisabled} />
+                        <VerticalSpace space="small" />
+                      </div>
+                    );
+                  })}
+                  <div style={{ height: "1px", backgroundColor: "#e0e0e0", margin: "12px 0" }} />
+                </Fragment>
+              )}
+              {otherProps.map((prop) => {
+                const isDisabled = shouldBeHidden(prop);
+                return (
+                  <div key={prop.name}>
+                    <CheckboxComponent {...prop} disabled={isDisabled} />
+                    <VerticalSpace space="small" />
+                  </div>
+                );
+              })}
+            </Fragment>
           );
-        })}
+        })()}
       </div>
       <div style={{ flexGrow: 1 }}></div>
       <div>
