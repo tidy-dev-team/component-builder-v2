@@ -64,16 +64,30 @@ function Plugin() {
         <DropdownComponent components={components} />
         <VerticalSpace space="large" />
 {(() => {
-          const sortedProps = componentProps.sort((a, b) => {
-            // Show VARIANT properties first
-            if (a.type === "VARIANT" && b.type !== "VARIANT") return -1;
-            if (a.type !== "VARIANT" && b.type === "VARIANT") return 1;
-            // Then sort alphabetically within each group
+          const variantProps = componentProps.filter(prop => prop.type === "VARIANT");
+          const otherProps = componentProps.filter(prop => prop.type !== "VARIANT");
+
+          // Sort variants alphabetically
+          variantProps.sort((a, b) => a.name.localeCompare(b.name));
+          
+          // Sort other props by path hierarchy (depth first, then by path values)
+          otherProps.sort((a, b) => {
+            const pathA = a.path || [];
+            const pathB = b.path || [];
+            
+            // Compare path arrays element by element
+            for (let i = 0; i < Math.max(pathA.length, pathB.length); i++) {
+              const valueA = pathA[i] !== undefined ? pathA[i] : -1;
+              const valueB = pathB[i] !== undefined ? pathB[i] : -1;
+              
+              if (valueA !== valueB) {
+                return valueA - valueB;
+              }
+            }
+            
+            // If paths are equal, sort by name
             return a.name.localeCompare(b.name);
           });
-
-          const variantProps = sortedProps.filter(prop => prop.type === "VARIANT");
-          const otherProps = sortedProps.filter(prop => prop.type !== "VARIANT");
 
           return (
             <Fragment>
@@ -82,11 +96,10 @@ function Plugin() {
                   <div style={{ fontSize: "11px", fontWeight: "600", color: "#666", marginBottom: "8px" }}>
                     Variants
                   </div>
-                  {variantProps.map((prop) => {
-                    const isDisabled = shouldBeHidden(prop);
+                  {variantProps.filter(prop => !shouldBeHidden(prop)).map((prop) => {
                     return (
                       <div key={prop.name}>
-                        <CheckboxComponent {...prop} disabled={isDisabled} />
+                        <CheckboxComponent {...prop} disabled={false} />
                         <VerticalSpace space="small" />
                       </div>
                     );
@@ -94,11 +107,26 @@ function Plugin() {
                   <div style={{ height: "1px", backgroundColor: "#e0e0e0", margin: "12px 0" }} />
                 </Fragment>
               )}
-              {otherProps.map((prop) => {
-                const isDisabled = shouldBeHidden(prop);
+{otherProps.filter(prop => !shouldBeHidden(prop)).map((prop) => {
+                const depth = prop.path ? prop.path.length : 0;
+                const indent = '    '.repeat(Math.max(0, depth - 1)); // First level (depth 1) = 0 spaces, then 4 spaces per level
+                const treeSymbol = depth > 0 ? '└─ ' : '';
+                
                 return (
-                  <div key={prop.name}>
-                    <CheckboxComponent {...prop} disabled={isDisabled} />
+                  <div key={prop.name} style={{ fontFamily: 'monospace' }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <span style={{ 
+                        color: '#999', 
+                        fontSize: '11px', 
+                        marginRight: '4px',
+                        whiteSpace: 'pre' // Preserve spaces
+                      }}>
+                        {indent}{treeSymbol}
+                      </span>
+                      <div style={{ flex: 1 }}>
+                        <CheckboxComponent {...prop} disabled={false} />
+                      </div>
+                    </div>
                     <VerticalSpace space="small" />
                   </div>
                 );

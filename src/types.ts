@@ -15,4 +15,5 @@ export interface ComponentPropertyInfo {
   boundVariables?: {
     [field in "value"]?: VariableAlias;
   };
+  path?: number[];
 }
