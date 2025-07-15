@@ -7,16 +7,23 @@ export function getElementsWithComponentProperty(
   const matchedNodes: SceneNode[] = [];
 
   for (const variant of componentSet.children) {
-    const nodes = (variant as ComponentNode).findAll((node: SceneNode) => {
-      const refs: Record<string, string> | undefined = (node as any)
-        .componentPropertyReferences;
-      if (!refs) return false;
-      return Object.values(refs).includes(propertyName);
-    });
+    const nodes = getNodesWithPropertyReference(variant, propertyName);
     matchedNodes.push(...nodes);
   }
 
   return matchedNodes;
+}
+
+function getNodesWithPropertyReference(
+  variant: SceneNode,
+  propertyName: string
+): SceneNode[] {
+  return (variant as ComponentNode).findAll((node: SceneNode) => {
+    const refs: Record<string, string> | undefined = (node as any)
+      .componentPropertyReferences;
+    if (!refs) return false;
+    return Object.values(refs).includes(propertyName);
+  });
 }
 
 export async function deleteVariantsExcept(
@@ -119,16 +126,28 @@ export function getPathToDefaultVariant(
   }
 
   return path.reverse();
-} //TODO this function should return additionally index of the element to which this property applide (on a tree like 1-1-3-2)
+}
 
 export function getComponentPropertyInfo(
-  node: ComponentNode | ComponentSetNode
+  node: ComponentSetNode
 ): ComponentPropertyInfo[] {
   const properties = node.componentPropertyDefinitions;
   return Object.entries(properties)
-    .map(([name, definition]) => ({
-      name,
-      ...definition,
-    }))
+    .map(([name, definition]) => {
+      const nodeWithProps = getNodesWithPropertyReference(
+        node.defaultVariant,
+        name
+      );
+      const path =
+        nodeWithProps.length > 0
+          ? getPathToDefaultVariant(node, nodeWithProps[0])
+          : [];
+
+      return {
+        name,
+        ...definition,
+        path,
+      };
+    })
     .sort((a, b) => a.name.localeCompare(b.name));
 }

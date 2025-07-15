@@ -39,6 +39,7 @@ function Plugin() {
     const unsubscribe = on(
       "COMPONENT_SET_PROPERTIES",
       (data: ComponentPropertyInfo[]) => {
+        console.log("data with path :>> ", data);
         setComponentProps(data);
         const initialUsedStates = data.reduce(
           (acc, prop) => {
