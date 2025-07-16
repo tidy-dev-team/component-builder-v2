@@ -25,15 +25,7 @@ export function buildUpdatedComponent(
   const variantOptionsToKeep: Record<string, string[]> = {};
   const variantPropsToRemove: Set<string> = new Set();
 
-  for (const propKey of propKeys) {
-    const propertyType = getComponentPropertyType(clonedComponentSet, propKey);
-    if (propertyType === "VARIANT") {
-      // This is a variant property itself being disabled
-      variantPropsToRemove.add(propKey);
-    }
-  }
-
-  // Process variant options from buildData
+  // Process all variant options from buildData to see which ones are enabled
   for (const [key, enabled] of Object.entries(buildData)) {
     if (key.includes("#")) {
       // This is a variant option
@@ -47,21 +39,40 @@ export function buildUpdatedComponent(
     }
   }
 
+  // Find all variant properties that exist in the component set
+  const componentProperties = clonedComponentSet.componentPropertyDefinitions;
+  const allVariantProps = Object.keys(componentProperties).filter(
+    propName => componentProperties[propName].type === "VARIANT"
+  );
+
   // Handle variant properties
+  for (const variantProp of allVariantProps) {
+    const isVariantPropDisabled = !buildData[variantProp];
+    
+    if (isVariantPropDisabled) {
+      // Variant property is disabled, keep only default
+      deleteVariantsExcept(clonedComponentSet, variantProp);
+      if (clonedComponentSet.componentPropertyDefinitions[variantProp]) {
+        clonedComponentSet.deleteComponentProperty(variantProp);
+      }
+    } else if (variantOptionsToKeep[variantProp] && variantOptionsToKeep[variantProp].length > 0) {
+      // Variant property is enabled, but some options might be disabled
+      // Check if we have all options or just some
+      const allOptions = componentProperties[variantProp].variantOptions || [];
+      const enabledOptions = variantOptionsToKeep[variantProp];
+      
+      if (enabledOptions.length < allOptions.length) {
+        // Some options are disabled, remove variants for disabled options
+        deleteVariantsWithValues(clonedComponentSet, variantProp, enabledOptions);
+      }
+      // If all options are enabled, do nothing (keep all variants)
+    }
+  }
+
+  // Handle non-variant properties
   for (const propKey of propKeys) {
     const propertyType = getComponentPropertyType(clonedComponentSet, propKey);
-    if (propertyType === "VARIANT") {
-      if (variantOptionsToKeep[propKey] && variantOptionsToKeep[propKey].length > 0) {
-        // Some variant options are selected, keep only those
-        deleteVariantsWithValues(clonedComponentSet, propKey, variantOptionsToKeep[propKey]);
-      } else {
-        // No variant options are selected or the whole property is disabled, keep only default
-        deleteVariantsExcept(clonedComponentSet, propKey);
-        if (clonedComponentSet.componentPropertyDefinitions[propKey]) {
-          clonedComponentSet.deleteComponentProperty(propKey);
-        }
-      }
-    } else {
+    if (propertyType !== "VARIANT") {
       const propertyName = propKey.split("#")[0];
       const foundElements = getElementsWithComponentProperty(
         clonedComponentSet,

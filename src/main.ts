@@ -19,6 +19,7 @@ export default function () {
   });
 
   on("BUILD", (buildData: Record<string, boolean>) => {
+    console.log("buildData :>> ", buildData);
     try {
       buildUpdatedComponent(buildData);
     } catch (error) {
