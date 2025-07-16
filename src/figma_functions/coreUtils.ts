@@ -130,27 +130,9 @@ export async function deleteVariantsWithValues(
     }
   }
 
-  // Only update the component property definition if we're keeping multiple values
-  // If we're only keeping one value, the property should be deleted entirely
-  const propertyDefinitions = componentSetNode.componentPropertyDefinitions;
-  if (propertyDefinitions && propertyDefinitions[property] && valuesToKeep.length > 1) {
-    const currentDef = propertyDefinitions[property];
-    if (currentDef.type === "VARIANT") {
-      try {
-        // Update the variant options to only include the kept values
-        const updatedDef = {
-          ...currentDef,
-          variantOptions: valuesToKeep
-        };
-        // Remove the old property and add the updated one
-        componentSetNode.deleteComponentProperty(property);
-        componentSetNode.addComponentProperty(property, updatedDef.type, updatedDef.defaultValue, updatedDef);
-      } catch (error) {
-        console.error(`Failed to update component property "${property}":`, error);
-        figma.notify(`Warning: Could not update property "${property}". Property may have been modified.`);
-      }
-    }
-  }
+  // The variant removal is complete, no need to update component property definitions
+  // Figma automatically updates the property definition when variants are removed
+  // Attempting to manually update can cause "Invalid component property name" errors
 
   if (deletedCount > 0) {
     figma.notify(`Successfully deleted ${deletedCount} variant(s).`);
