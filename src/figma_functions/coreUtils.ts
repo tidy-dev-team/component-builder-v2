@@ -130,19 +130,25 @@ export async function deleteVariantsWithValues(
     }
   }
 
-  // Update the component property definition to only include the kept values
+  // Only update the component property definition if we're keeping multiple values
+  // If we're only keeping one value, the property should be deleted entirely
   const propertyDefinitions = componentSetNode.componentPropertyDefinitions;
-  if (propertyDefinitions && propertyDefinitions[property]) {
+  if (propertyDefinitions && propertyDefinitions[property] && valuesToKeep.length > 1) {
     const currentDef = propertyDefinitions[property];
     if (currentDef.type === "VARIANT") {
-      // Update the variant options to only include the kept values
-      const updatedDef = {
-        ...currentDef,
-        variantOptions: valuesToKeep
-      };
-      // Remove the old property and add the updated one
-      componentSetNode.deleteComponentProperty(property);
-      componentSetNode.addComponentProperty(property, updatedDef.type, updatedDef.defaultValue, updatedDef);
+      try {
+        // Update the variant options to only include the kept values
+        const updatedDef = {
+          ...currentDef,
+          variantOptions: valuesToKeep
+        };
+        // Remove the old property and add the updated one
+        componentSetNode.deleteComponentProperty(property);
+        componentSetNode.addComponentProperty(property, updatedDef.type, updatedDef.defaultValue, updatedDef);
+      } catch (error) {
+        console.error(`Failed to update component property "${property}":`, error);
+        figma.notify(`Warning: Could not update property "${property}". Property may have been modified.`);
+      }
     }
   }
 

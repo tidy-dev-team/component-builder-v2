@@ -3,7 +3,7 @@ export const PROPERTY_PREFIXES = {
   INSTANCE_SWAP_DEPENDENCY: "🔁",
 } as const;
 
-export const HIDDEN_PROPERTIES = ["type", "state", "selection type"] as const;
+export const HIDDEN_PROPERTIES = ["state", "selection type"] as const;
 
 export const UI_DIMENSIONS = {
   HEIGHT: 600,

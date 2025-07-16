@@ -47,25 +47,47 @@ export function buildUpdatedComponent(
 
   // Handle variant properties
   for (const variantProp of allVariantProps) {
-    const isVariantPropDisabled = !buildData[variantProp];
-    
-    if (isVariantPropDisabled) {
-      // Variant property is disabled, keep only default
-      deleteVariantsExcept(clonedComponentSet, variantProp);
-      if (clonedComponentSet.componentPropertyDefinitions[variantProp]) {
-        clonedComponentSet.deleteComponentProperty(variantProp);
-      }
-    } else if (variantOptionsToKeep[variantProp] && variantOptionsToKeep[variantProp].length > 0) {
-      // Variant property is enabled, but some options might be disabled
-      // Check if we have all options or just some
-      const allOptions = componentProperties[variantProp].variantOptions || [];
-      const enabledOptions = variantOptionsToKeep[variantProp];
+    try {
+      const isVariantPropDisabled = !buildData[variantProp];
       
-      if (enabledOptions.length < allOptions.length) {
-        // Some options are disabled, remove variants for disabled options
-        deleteVariantsWithValues(clonedComponentSet, variantProp, enabledOptions);
+      if (isVariantPropDisabled) {
+        // Variant property is disabled, keep only default
+        deleteVariantsExcept(clonedComponentSet, variantProp);
+        if (clonedComponentSet.componentPropertyDefinitions[variantProp]) {
+          try {
+            clonedComponentSet.deleteComponentProperty(variantProp);
+          } catch (deleteError) {
+            console.error(`Failed to delete component property "${variantProp}":`, deleteError);
+          }
+        }
+      } else if (variantOptionsToKeep[variantProp] && variantOptionsToKeep[variantProp].length > 0) {
+        // Variant property is enabled, but some options might be disabled
+        // Check if we have all options or just some
+        const allOptions = componentProperties[variantProp].variantOptions || [];
+        const enabledOptions = variantOptionsToKeep[variantProp];
+        
+        if (enabledOptions.length < allOptions.length) {
+          // Some options are disabled, remove variants for disabled options
+          if (enabledOptions.length === 1) {
+            // Only one variant option remains, delete all other variants and remove the property
+            deleteVariantsExcept(clonedComponentSet, variantProp, enabledOptions[0]);
+            if (clonedComponentSet.componentPropertyDefinitions[variantProp]) {
+              try {
+                clonedComponentSet.deleteComponentProperty(variantProp);
+              } catch (deleteError) {
+                console.error(`Failed to delete component property "${variantProp}":`, deleteError);
+              }
+            }
+          } else {
+            // Multiple variants remain, just remove the unwanted ones
+            deleteVariantsWithValues(clonedComponentSet, variantProp, enabledOptions);
+          }
+        }
+        // If all options are enabled, do nothing (keep all variants)
       }
-      // If all options are enabled, do nothing (keep all variants)
+    } catch (error) {
+      console.error(`Failed to process variant property "${variantProp}":`, error);
+      figma.notify(`Warning: Could not process variant property "${variantProp}"`);
     }
   }
 
