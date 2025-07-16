@@ -85,6 +85,76 @@ export async function deleteVariantsExcept(
   }
 }
 
+export async function deleteVariantsWithValues(
+  componentSetNode: ComponentSetNode,
+  property: string,
+  valuesToKeep: string[]
+) {
+  if (valuesToKeep.length === 0) {
+    // If no values to keep, default to keeping only the default value
+    const propertyDefinitions = componentSetNode.componentPropertyDefinitions;
+    if (propertyDefinitions && propertyDefinitions[property]) {
+      valuesToKeep = [propertyDefinitions[property].defaultValue as string];
+    }
+  }
+
+  figma.notify(
+    `Deleting variants where "${property}" is not in [${valuesToKeep.join(", ")}]...`
+  );
+
+  const variants = [...componentSetNode.children];
+  let deletedCount = 0;
+
+  for (const variant of variants) {
+    if (variant.type === "COMPONENT") {
+      const originalName = variant.name;
+
+      const properties = originalName.split(",").reduce(
+        (acc, part) => {
+          const [key, value] = part.split("=").map((s) => s.trim());
+          if (key && value) {
+            acc[key] = value;
+          }
+          return acc;
+        },
+        {} as Record<string, string>
+      );
+
+      if (
+        properties.hasOwnProperty(property) &&
+        !valuesToKeep.includes(properties[property])
+      ) {
+        variant.remove();
+        deletedCount++;
+      }
+    }
+  }
+
+  // Update the component property definition to only include the kept values
+  const propertyDefinitions = componentSetNode.componentPropertyDefinitions;
+  if (propertyDefinitions && propertyDefinitions[property]) {
+    const currentDef = propertyDefinitions[property];
+    if (currentDef.type === "VARIANT") {
+      // Update the variant options to only include the kept values
+      const updatedDef = {
+        ...currentDef,
+        variantOptions: valuesToKeep
+      };
+      // Remove the old property and add the updated one
+      componentSetNode.deleteComponentProperty(property);
+      componentSetNode.addComponentProperty(property, updatedDef.type, updatedDef.defaultValue, updatedDef);
+    }
+  }
+
+  if (deletedCount > 0) {
+    figma.notify(`Successfully deleted ${deletedCount} variant(s).`);
+  } else {
+    figma.notify(
+      `No variants were found where "${property}" was not in the kept values.`
+    );
+  }
+}
+
 export function getComponentPropertyType(
   componentSet: ComponentSetNode,
   propertyName: string

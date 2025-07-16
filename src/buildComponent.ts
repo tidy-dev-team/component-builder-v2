@@ -1,6 +1,7 @@
 import {
   getComponentPropertyType,
   deleteVariantsExcept,
+  deleteVariantsWithValues,
   getElementsWithComponentProperty,
   getPathToDefaultVariant,
 } from "./figma_functions/coreUtils";
@@ -20,12 +21,45 @@ export function buildUpdatedComponent(
     return;
   }
 
+  // Group variant options by their parent property
+  const variantOptionsToKeep: Record<string, string[]> = {};
+  const variantPropsToRemove: Set<string> = new Set();
+
   for (const propKey of propKeys) {
     const propertyType = getComponentPropertyType(clonedComponentSet, propKey);
     if (propertyType === "VARIANT") {
-      deleteVariantsExcept(clonedComponentSet, propKey);
-      if (clonedComponentSet.componentPropertyDefinitions[propKey]) {
-        clonedComponentSet.deleteComponentProperty(propKey);
+      // This is a variant property itself being disabled
+      variantPropsToRemove.add(propKey);
+    }
+  }
+
+  // Process variant options from buildData
+  for (const [key, enabled] of Object.entries(buildData)) {
+    if (key.includes("#")) {
+      // This is a variant option
+      const [variantProp, variantValue] = key.split("#");
+      if (enabled) {
+        if (!variantOptionsToKeep[variantProp]) {
+          variantOptionsToKeep[variantProp] = [];
+        }
+        variantOptionsToKeep[variantProp].push(variantValue);
+      }
+    }
+  }
+
+  // Handle variant properties
+  for (const propKey of propKeys) {
+    const propertyType = getComponentPropertyType(clonedComponentSet, propKey);
+    if (propertyType === "VARIANT") {
+      if (variantOptionsToKeep[propKey] && variantOptionsToKeep[propKey].length > 0) {
+        // Some variant options are selected, keep only those
+        deleteVariantsWithValues(clonedComponentSet, propKey, variantOptionsToKeep[propKey]);
+      } else {
+        // No variant options are selected or the whole property is disabled, keep only default
+        deleteVariantsExcept(clonedComponentSet, propKey);
+        if (clonedComponentSet.componentPropertyDefinitions[propKey]) {
+          clonedComponentSet.deleteComponentProperty(propKey);
+        }
       }
     } else {
       const propertyName = propKey.split("#")[0];

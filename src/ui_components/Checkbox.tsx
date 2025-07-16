@@ -15,12 +15,33 @@ export function CheckboxComponent(
   const cleanName = getCleanName(prop);
 
   const handleChange = (value: boolean) => {
-    if (prop.allProperties && prop.type !== "VARIANT") {
-      // Only apply parent-child logic to non-variant properties
-      const childProperties = findChildProperties(prop, prop.allProperties);
+    setUsedStates((prev) => {
+      const newStates = { ...prev, [prop.name]: value };
       
-      setUsedStates((prev) => {
-        const newStates = { ...prev, [prop.name]: value };
+      // Handle variant property parent-child relationships
+      if (prop.type === "VARIANT" && !prop.name.includes("#")) {
+        // This is a main variant property (e.g., "size")
+        // Find all variant options for this property
+        const variantOptions = Object.keys(prev).filter(key => 
+          key.startsWith(`${prop.name}#`)
+        );
+        
+        if (!value) {
+          // If unchecking main variant, uncheck all its options
+          variantOptions.forEach(option => {
+            newStates[option] = false;
+          });
+        } else {
+          // If checking main variant, re-enable all its options
+          variantOptions.forEach(option => {
+            newStates[option] = true;
+          });
+        }
+      }
+      
+      // Handle regular property parent-child relationships
+      if (prop.allProperties && prop.type !== "VARIANT") {
+        const childProperties = findChildProperties(prop, prop.allProperties);
         
         if (!value) {
           // If unchecking, uncheck all child properties
@@ -33,13 +54,10 @@ export function CheckboxComponent(
             newStates[child.name] = true;
           });
         }
-        
-        return newStates;
-      });
-    } else {
-      // Normal behavior for variants and properties without children
-      setUsedStates((prev) => ({ ...prev, [prop.name]: value }));
-    }
+      }
+      
+      return newStates;
+    });
   };
 
   return (

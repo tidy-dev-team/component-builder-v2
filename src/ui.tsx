@@ -44,6 +44,12 @@ function Plugin() {
         const initialUsedStates = data.reduce(
           (acc, prop) => {
             acc[prop.name] = true;
+            // Initialize variant options states
+            if (prop.type === "VARIANT" && prop.variantOptions) {
+              prop.variantOptions.forEach(option => {
+                acc[`${prop.name}#${option}`] = true;
+              });
+            }
             return acc;
           },
           {} as Record<string, boolean>
@@ -101,6 +107,30 @@ function Plugin() {
                       <div key={prop.name}>
                         <CheckboxComponent {...prop} disabled={false} allProperties={componentProps} />
                         <VerticalSpace space="small" />
+                        {/* Show variant options as sub-properties */}
+                        {prop.variantOptions && prop.variantOptions.length > 0 && (
+                          <div style={{ marginLeft: "20px" }}>
+                            {prop.variantOptions.map((option) => {
+                              const variantOptionKey = `${prop.name}#${option}`;
+                              const variantOptionProp: ComponentPropertyInfo = {
+                                name: variantOptionKey,
+                                type: prop.type,
+                                defaultValue: option,
+                                path: prop.path
+                              };
+                              return (
+                                <div key={variantOptionKey}>
+                                  <CheckboxComponent 
+                                    {...variantOptionProp}
+                                    disabled={!propertyUsedStates[prop.name]}
+                                    allProperties={componentProps}
+                                  />
+                                  <VerticalSpace space="small" />
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
                     );
                   })}

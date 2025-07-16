@@ -2,8 +2,19 @@ import { ComponentPropertyInfo } from "./types";
 import { PROPERTY_PREFIXES, HIDDEN_PROPERTIES } from "./constants";
 
 export function getCleanName(prop: ComponentPropertyInfo): string {
-  const [cleanName] = prop.name.split("#");
-  return cleanName;
+  if (prop.name.includes("#")) {
+    if (prop.type === "VARIANT") {
+      // For variant options, show the option value (after #)
+      const [, optionValue] = prop.name.split("#");
+      return optionValue;
+    } else {
+      // For regular properties with #, show the part before # (clean name)
+      const [cleanName] = prop.name.split("#");
+      return cleanName;
+    }
+  }
+  // For properties without #, show the property name
+  return prop.name;
 }
 
 export function shouldBeHidden(prop: ComponentPropertyInfo): boolean {
