@@ -26,4 +26,9 @@ export const components: ComponentData = {
     key: "67b1272ac6d5fedbf7cba7f4e99224e463abe392",
     type: "componentSet",
   },
+  RadioButtonsTest: {
+    name: "Radio ButtonsTest",
+    key: "32ae1243ca038828b08e5c78f5fb332af3386134",
+    type: "componentSet",
+  },
 };

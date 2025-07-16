@@ -14,7 +14,7 @@ import {
   propertyUsedStatesAtom,
 } from "./state/atoms";
 import { ComponentPropertyInfo } from "./types";
-import { shouldBeHidden } from "./ui_utils";
+import { shouldBeHidden, isChildDisabledByParent } from "./ui_utils";
 
 function Plugin() {
   const [selectedComponent] = useAtom(selectedComponentAtom);
@@ -99,7 +99,7 @@ function Plugin() {
                   {variantProps.filter(prop => !shouldBeHidden(prop)).map((prop) => {
                     return (
                       <div key={prop.name}>
-                        <CheckboxComponent {...prop} disabled={false} />
+                        <CheckboxComponent {...prop} disabled={false} allProperties={componentProps} />
                         <VerticalSpace space="small" />
                       </div>
                     );
@@ -111,6 +111,9 @@ function Plugin() {
                 const depth = prop.path ? prop.path.length : 0;
                 const indent = '    '.repeat(Math.max(0, depth - 1)); // First level (depth 1) = 0 spaces, then 4 spaces per level
                 const treeSymbol = depth > 0 ? '└─ ' : '';
+                
+                // Check if this property should be disabled due to parent being unchecked
+                const isDisabled = isChildDisabledByParent(prop, componentProps, propertyUsedStates);
                 
                 return (
                   <div key={prop.name} style={{ fontFamily: 'monospace' }}>
@@ -124,7 +127,7 @@ function Plugin() {
                         {indent}{treeSymbol}
                       </span>
                       <div style={{ flex: 1 }}>
-                        <CheckboxComponent {...prop} disabled={false} />
+                        <CheckboxComponent {...prop} disabled={isDisabled} allProperties={componentProps} />
                       </div>
                     </div>
                     <VerticalSpace space="small" />
