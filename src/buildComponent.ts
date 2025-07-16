@@ -7,15 +7,60 @@ import {
 } from "./figma_functions/coreUtils";
 import { cachedComponentSet } from "./main";
 import { getEnabledProperties, isDependentProperty } from "./ui_utils";
+import { emit, on } from "@create-figma-plugin/utilities";
 
-export function buildUpdatedComponent(
+function isNodeValid(node: SceneNode): boolean {
+  try {
+    // Try to access a property that would fail if the node is invalid
+    const _ = node.id;
+    const __ = node.type;
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+export async function buildUpdatedComponent(
   buildData: Record<string, boolean>
-): void {
+): Promise<void> {
   const dataKeys = Object.keys(buildData);
   const propsToDisable = getEnabledProperties(buildData);
   const propKeys = Object.keys(propsToDisable);
 
-  const clonedComponentSet = cachedComponentSet?.clone();
+  // Check if cached component set is still valid
+  if (!cachedComponentSet || !isNodeValid(cachedComponentSet)) {
+    console.log("Cached component set is no longer valid. Attempting to refresh...");
+    figma.notify("Component set is stale. Refreshing...");
+    
+    // Try to refresh the component set
+    emit("REFRESH_COMPONENT_SET");
+    
+    // Wait for refresh response
+    const refreshResult = await new Promise<boolean>((resolve) => {
+      const unsubscribe = on("COMPONENT_SET_REFRESHED", (success: boolean) => {
+        unsubscribe();
+        resolve(success);
+      });
+    });
+    
+    if (!refreshResult || !cachedComponentSet) {
+      console.error("Failed to refresh component set. Please reselect the component.");
+      figma.notify("Failed to refresh component set. Please reselect the component from the dropdown.");
+      return;
+    }
+    
+    figma.notify("Component set refreshed successfully!");
+  }
+
+  let clonedComponentSet: ComponentSetNode;
+  try {
+    clonedComponentSet = cachedComponentSet.clone();
+  } catch (error) {
+    console.error("Failed to clone component set:", error);
+    figma.notify("Failed to clone component set. Please reselect the component from the dropdown.");
+    return;
+  }
+
   if (!clonedComponentSet) {
     console.error("No component set available to build");
     return;

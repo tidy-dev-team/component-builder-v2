@@ -6,11 +6,13 @@ import { buildUpdatedComponent } from "./buildComponent";
 
 export let cachedComponentSet: ComponentSetNode | null = null;
 let cachedComponentProps: ComponentPropertyInfo[] | null = null;
+let lastComponentKey: string | null = null;
 
 export default function () {
   on("GET_COMPONENT_SET_PROPERTIES", async (componentSetData) => {
     try {
       await getComponentSet(componentSetData.key);
+      lastComponentKey = componentSetData.key;
       emit("COMPONENT_SET_PROPERTIES", cachedComponentProps);
     } catch (error) {
       console.error("Failed to get component set properties:", error);
@@ -18,10 +20,24 @@ export default function () {
     }
   });
 
-  on("BUILD", (buildData: Record<string, boolean>) => {
+  on("REFRESH_COMPONENT_SET", async () => {
+    try {
+      if (lastComponentKey) {
+        await getComponentSet(lastComponentKey);
+        emit("COMPONENT_SET_REFRESHED", true);
+      } else {
+        emit("COMPONENT_SET_REFRESHED", false);
+      }
+    } catch (error) {
+      console.error("Failed to refresh component set:", error);
+      emit("COMPONENT_SET_REFRESHED", false);
+    }
+  });
+
+  on("BUILD", async (buildData: Record<string, boolean>) => {
     console.log("buildData :>> ", buildData);
     try {
-      buildUpdatedComponent(buildData);
+      await buildUpdatedComponent(buildData);
     } catch (error) {
       console.error("Failed to build component:", error);
     }
