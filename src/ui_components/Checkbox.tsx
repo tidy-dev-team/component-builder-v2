@@ -15,7 +15,8 @@ export function CheckboxComponent(
   const cleanName = getCleanName(prop);
 
   const handleChange = (value: boolean) => {
-    if (prop.allProperties) {
+    if (prop.allProperties && prop.type !== "VARIANT") {
+      // Only apply parent-child logic to non-variant properties
       const childProperties = findChildProperties(prop, prop.allProperties);
       
       setUsedStates((prev) => {
@@ -36,7 +37,7 @@ export function CheckboxComponent(
         return newStates;
       });
     } else {
-      // Normal behavior when no children
+      // Normal behavior for variants and properties without children
       setUsedStates((prev) => ({ ...prev, [prop.name]: value }));
     }
   };
