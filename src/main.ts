@@ -1,6 +1,6 @@
 import { on, emit, showUI } from "@create-figma-plugin/utilities";
 import { getComponentPropertyInfo } from "./figma_functions/coreUtils";
-import type { ComponentPropertyInfo } from "./types";
+import type { ComponentPropertyInfo, ComponentSetEventData, BuildEventData } from "./types";
 import { UI_DIMENSIONS } from "./constants";
 import { buildUpdatedComponent } from "./buildComponent";
 
@@ -9,7 +9,7 @@ let cachedComponentProps: ComponentPropertyInfo[] | null = null;
 let lastComponentKey: string | null = null;
 
 export default function () {
-  on("GET_COMPONENT_SET_PROPERTIES", async (componentSetData) => {
+  on("GET_COMPONENT_SET_PROPERTIES", async (componentSetData: ComponentSetEventData) => {
     try {
       await getComponentSet(componentSetData.key);
       lastComponentKey = componentSetData.key;
@@ -34,7 +34,7 @@ export default function () {
     }
   });
 
-  on("BUILD", async (buildData: Record<string, boolean>) => {
+  on("BUILD", async (buildData: BuildEventData) => {
     console.log("buildData :>> ", buildData);
     try {
       await buildUpdatedComponent(buildData);

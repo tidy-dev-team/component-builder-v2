@@ -12,7 +12,7 @@ import {
   selectedComponentPropertiesAtom,
   propertyUsedStatesAtom,
 } from "./state/atoms";
-import { ComponentPropertyInfo } from "./types";
+import { ComponentPropertyInfo, PropertyUsedStates } from "./types";
 import { renderAllProperties } from "./ui_elements";
 
 function Plugin() {
@@ -52,7 +52,7 @@ function Plugin() {
             }
             return acc;
           },
-          {} as Record<string, boolean>
+          {} as PropertyUsedStates
         );
         setPropertyUsedStates(initialUsedStates);
       }

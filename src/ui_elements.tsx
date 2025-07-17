@@ -1,6 +1,6 @@
 import { VerticalSpace } from "@create-figma-plugin/ui";
 import { h, Fragment } from "preact";
-import { ComponentPropertyInfo } from "./types";
+import { ComponentPropertyInfo, PropertyUsedStates } from "./types";
 import { CheckboxComponent } from "./ui_components/Checkbox";
 import { shouldBeHidden, isChildDisabledByParent } from "./ui_utils";
 
@@ -28,7 +28,7 @@ function sortPropertiesByPath(
 function renderVariantProperties(
   variantProps: ComponentPropertyInfo[],
   componentProps: ComponentPropertyInfo[],
-  propertyUsedStates: Record<string, boolean>
+  propertyUsedStates: PropertyUsedStates
 ) {
   if (variantProps.length === 0) return null;
 
@@ -95,7 +95,7 @@ function renderVariantProperties(
 function renderOtherProperties(
   otherProps: ComponentPropertyInfo[],
   componentProps: ComponentPropertyInfo[],
-  propertyUsedStates: Record<string, boolean>
+  propertyUsedStates: PropertyUsedStates
 ) {
   return otherProps
     .filter((prop) => !shouldBeHidden(prop))
@@ -140,7 +140,7 @@ function renderOtherProperties(
 }
 export function renderAllProperties(
   componentProps: ComponentPropertyInfo[],
-  propertyUsedStates: Record<string, boolean>
+  propertyUsedStates: PropertyUsedStates
 ) {
   const variantProps = componentProps.filter((prop) => prop.type === "VARIANT");
   const otherProps = componentProps.filter((prop) => prop.type !== "VARIANT");

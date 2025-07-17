@@ -3,14 +3,9 @@ import { Checkbox } from "@create-figma-plugin/ui";
 import { useAtom } from "jotai";
 import { propertyUsedStatesAtom } from "../state/atoms";
 import { getCleanName, findChildProperties } from "../ui_utils";
-import { ComponentPropertyInfo } from "../types";
+import { CheckboxComponentProps } from "../types";
 
-export function CheckboxComponent(
-  prop: ComponentPropertyInfo & { 
-    disabled: boolean;
-    allProperties?: ComponentPropertyInfo[];
-  }
-) {
+export function CheckboxComponent(prop: CheckboxComponentProps) {
   const [usedStates, setUsedStates] = useAtom(propertyUsedStatesAtom);
   const cleanName = getCleanName(prop);
 

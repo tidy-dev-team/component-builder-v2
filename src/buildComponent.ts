@@ -8,6 +8,7 @@ import {
 import { cachedComponentSet } from "./main";
 import { getEnabledProperties, isDependentProperty } from "./ui_utils";
 import { emit, on } from "@create-figma-plugin/utilities";
+import { BuildEventData } from "./types";
 
 function isNodeValid(node: SceneNode): boolean {
   try {
@@ -21,7 +22,7 @@ function isNodeValid(node: SceneNode): boolean {
 }
 
 export async function buildUpdatedComponent(
-  buildData: Record<string, boolean>
+  buildData: BuildEventData
 ): Promise<void> {
   const dataKeys = Object.keys(buildData);
   const propsToDisable = getEnabledProperties(buildData);

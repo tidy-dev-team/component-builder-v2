@@ -14,13 +14,14 @@ export function getElementsWithComponentProperty(
   return matchedNodes;
 }
 
+import { ComponentPropertyReferences } from "../types/figma";
+
 function getNodesWithPropertyReference(
   variant: SceneNode,
   propertyName: string
 ): SceneNode[] {
   return (variant as ComponentNode).findAll((node: SceneNode) => {
-    const refs: Record<string, string> | undefined = (node as any)
-      .componentPropertyReferences;
+    const refs = node.componentPropertyReferences;
     if (!refs) return false;
     return Object.values(refs).includes(propertyName);
   });

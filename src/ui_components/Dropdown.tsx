@@ -2,11 +2,7 @@ import { h, JSX } from "preact";
 import { useAtom } from "jotai";
 import { Dropdown, DropdownOption } from "@create-figma-plugin/ui";
 import { selectedComponentAtom } from "../state/atoms";
-import { ComponentData } from "../types";
-
-interface DropdownComponentProps {
-  components: ComponentData;
-}
+import { DropdownComponentProps } from "../types";
 
 export function DropdownComponent({ components }: DropdownComponentProps) {
   const componentNames = Object.keys(components);

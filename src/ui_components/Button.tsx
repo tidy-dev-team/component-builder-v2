@@ -1,9 +1,6 @@
 import { Button } from "@create-figma-plugin/ui";
 import { h, JSX } from "preact";
-
-interface ButtonComponentProps {
-  callback: () => void;
-}
+import { ButtonComponentProps } from "../types";
 
 export function ButtonComponent({
   callback,

@@ -7,13 +7,15 @@ function getComponentPropertyName(
   );
 }
 
+import { PropertyReferenceField, ComponentPropertyReferences } from '../types/figma';
+
 function setComponentPropertyReference(
   node: SceneNode,
-  property: string,
+  property: PropertyReferenceField,
   propName: string
 ) {
-  const references = { ...(node.componentPropertyReferences ?? {}) };
-  (references as any)[property] = propName;
+  const references: ComponentPropertyReferences = { ...(node.componentPropertyReferences ?? {}) };
+  references[property] = propName;
   node.componentPropertyReferences = references;
 }
 

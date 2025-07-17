@@ -1,4 +1,4 @@
-import { ComponentPropertyInfo } from "./types";
+import { ComponentPropertyInfo, PropertyUsedStates } from "./types";
 import { PROPERTY_PREFIXES, HIDDEN_PROPERTIES } from "./constants";
 
 export function getCleanName(prop: ComponentPropertyInfo): string {
@@ -18,7 +18,7 @@ export function getCleanName(prop: ComponentPropertyInfo): string {
 }
 
 export function shouldBeHidden(prop: ComponentPropertyInfo): boolean {
-  if (HIDDEN_PROPERTIES.includes(prop.name as any)) {
+  if (HIDDEN_PROPERTIES.includes(prop.name as typeof HIDDEN_PROPERTIES[number])) {
     return true;
   }
 
@@ -27,8 +27,8 @@ export function shouldBeHidden(prop: ComponentPropertyInfo): boolean {
 }
 
 export function getEnabledProperties(
-  properties: Record<string, boolean>
-): Record<string, boolean> {
+  properties: PropertyUsedStates
+): PropertyUsedStates {
   return Object.fromEntries(
     Object.entries(properties).filter(([_, isEnabled]) => !isEnabled)
   );
@@ -71,7 +71,7 @@ export function findChildProperties(
 export function isChildDisabledByParent(
   property: ComponentPropertyInfo,
   allProperties: ComponentPropertyInfo[],
-  usedStates: Record<string, boolean>
+  usedStates: PropertyUsedStates
 ): boolean {
   const propertyPath = property.path || [];
   
