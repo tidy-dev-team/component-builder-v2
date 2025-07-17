@@ -36,59 +36,80 @@ function renderVariantProperties(
     <Fragment>
       <div
         style={{
-          fontSize: "11px",
+          fontSize: "12px",
           fontWeight: "600",
-          color: "#666",
-          marginBottom: "8px",
+          color: "#374151",
+          marginBottom: "12px",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
         }}
       >
+        <span style={{ 
+          color: "#7C3AED",
+          fontSize: "14px",
+        }}>
+          ⚡
+        </span>
         Variants
       </div>
-      {variantProps
-        .filter((prop) => !shouldBeHidden(prop))
-        .map((prop) => {
-          return (
-            <div key={prop.name}>
-              <CheckboxComponent
-                {...prop}
-                disabled={false}
-                allProperties={componentProps}
-              />
-              <VerticalSpace space="small" />
-              {/* Show variant options as sub-properties */}
-              {prop.variantOptions && prop.variantOptions.length > 0 && (
-                <div style={{ marginLeft: "20px" }}>
-                  {prop.variantOptions.map((option) => {
-                    const variantOptionKey = `${prop.name}#${option}`;
-                    const variantOptionProp: ComponentPropertyInfo = {
-                      name: variantOptionKey,
-                      type: prop.type,
-                      defaultValue: option,
-                      path: prop.path,
-                    };
-                    return (
-                      <div key={variantOptionKey}>
-                        <CheckboxComponent
-                          {...variantOptionProp}
-                          disabled={!propertyUsedStates[prop.name]}
-                          allProperties={componentProps}
-                        />
-                        <VerticalSpace space="small" />
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      <div
-        style={{
-          height: "1px",
-          backgroundColor: "#e0e0e0",
-          margin: "12px 0",
-        }}
-      />
+      <div style={{
+        background: "#fafbfc",
+        border: "1px solid #e8eaed",
+        borderRadius: "8px",
+        padding: "12px",
+        marginBottom: "16px",
+      }}>
+        {variantProps
+          .filter((prop) => !shouldBeHidden(prop))
+          .map((prop, index) => {
+            return (
+              <div key={prop.name}>
+                <CheckboxComponent
+                  {...prop}
+                  disabled={false}
+                  allProperties={componentProps}
+                />
+                <VerticalSpace space="small" />
+                {/* Show variant options as sub-properties */}
+                {prop.variantOptions && prop.variantOptions.length > 0 && (
+                  <div style={{ 
+                    marginLeft: "20px",
+                    paddingLeft: "12px",
+                    borderLeft: "2px solid #e8eaed",
+                  }}>
+                    {prop.variantOptions.map((option) => {
+                      const variantOptionKey = `${prop.name}#${option}`;
+                      const variantOptionProp: ComponentPropertyInfo = {
+                        name: variantOptionKey,
+                        type: prop.type,
+                        defaultValue: option,
+                        path: prop.path,
+                      };
+                      return (
+                        <div key={variantOptionKey}>
+                          <CheckboxComponent
+                            {...variantOptionProp}
+                            disabled={!propertyUsedStates[prop.name]}
+                            allProperties={componentProps}
+                          />
+                          <VerticalSpace space="small" />
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {index < variantProps.filter((p) => !shouldBeHidden(p)).length - 1 && (
+                  <div style={{
+                    height: "1px",
+                    backgroundColor: "#e8eaed",
+                    margin: "8px 0",
+                  }} />
+                )}
+              </div>
+            );
+          })}
+      </div>
     </Fragment>
   );
 }
@@ -97,46 +118,85 @@ function renderOtherProperties(
   componentProps: ComponentPropertyInfo[],
   propertyUsedStates: PropertyUsedStates
 ) {
-  return otherProps
-    .filter((prop) => !shouldBeHidden(prop))
-    .map((prop) => {
-      const depth = prop.path ? prop.path.length : 0;
-      const indent = "    ".repeat(Math.max(0, depth - 1)); // First level (depth 1) = 0 spaces, then 4 spaces per level
-      const treeSymbol = depth > 0 ? "└─ " : "";
+  if (otherProps.length === 0) return null;
 
-      // Check if this property should be disabled due to parent being unchecked
-      const isDisabled = isChildDisabledByParent(
-        prop,
-        componentProps,
-        propertyUsedStates
-      );
+  return (
+    <Fragment>
+      <div
+        style={{
+          fontSize: "12px",
+          fontWeight: "600",
+          color: "#374151",
+          marginBottom: "12px",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+        }}
+      >
+        <span style={{ 
+          color: "#059669",
+          fontSize: "14px",
+        }}>
+          ⚙️
+        </span>
+        Properties
+      </div>
+      <div style={{
+        background: "#fafbfc",
+        border: "1px solid #e8eaed",
+        borderRadius: "8px",
+        padding: "12px",
+      }}>
+        {otherProps
+          .filter((prop) => !shouldBeHidden(prop))
+          .map((prop, index) => {
+            const depth = prop.path ? prop.path.length : 0;
+            const indent = "    ".repeat(Math.max(0, depth - 1));
+            const treeSymbol = depth > 0 ? "└─ " : "";
 
-      return (
-        <div key={prop.name} style={{ fontFamily: "monospace" }}>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <span
-              style={{
-                color: "#999",
-                fontSize: "11px",
-                marginRight: "4px",
-                whiteSpace: "pre", // Preserve spaces
-              }}
-            >
-              {indent}
-              {treeSymbol}
-            </span>
-            <div style={{ flex: 1 }}>
-              <CheckboxComponent
-                {...prop}
-                disabled={isDisabled}
-                allProperties={componentProps}
-              />
-            </div>
-          </div>
-          <VerticalSpace space="small" />
-        </div>
-      );
-    });
+            // Check if this property should be disabled due to parent being unchecked
+            const isDisabled = isChildDisabledByParent(
+              prop,
+              componentProps,
+              propertyUsedStates
+            );
+
+            return (
+              <div key={prop.name}>
+                <div style={{ 
+                  display: "flex", 
+                  alignItems: "center",
+                  padding: "2px 0",
+                  borderRadius: "4px",
+                  transition: "background-color 0.15s ease",
+                }}>
+                  <span
+                    style={{
+                      color: "#9ca3af",
+                      fontSize: "11px",
+                      marginRight: "6px",
+                      whiteSpace: "pre",
+                      fontFamily: "SF Mono, Monaco, monospace",
+                    }}
+                  >
+                    {indent}
+                    {treeSymbol}
+                  </span>
+                  <div style={{ flex: 1 }}>
+                    <CheckboxComponent
+                      {...prop}
+                      disabled={isDisabled}
+                      allProperties={componentProps}
+                    />
+                  </div>
+                </div>
+                <VerticalSpace space="small" />
+              </div>
+            );
+          })}
+      </div>
+    </Fragment>
+  );
 }
 export function renderAllProperties(
   componentProps: ComponentPropertyInfo[],
@@ -152,7 +212,11 @@ export function renderAllProperties(
   const sortedOtherProps = sortPropertiesByPath(otherProps);
 
   return (
-    <Fragment>
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      gap: "8px",
+    }}>
       {renderVariantProperties(
         variantProps,
         componentProps,
@@ -163,6 +227,6 @@ export function renderAllProperties(
         componentProps,
         propertyUsedStates
       )}
-    </Fragment>
+    </div>
   );
 }
