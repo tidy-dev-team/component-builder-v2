@@ -3,6 +3,7 @@ import { getComponentPropertyInfo } from "./figma_functions/coreUtils";
 import type { ComponentPropertyInfo, ComponentSetEventData, BuildEventData } from "./types";
 import { UI_DIMENSIONS } from "./constants";
 import { buildUpdatedComponent } from "./buildComponent";
+import { errorService, ErrorCode, errorRecovery } from "./errors";
 
 export let cachedComponentSet: ComponentSetNode | null = null;
 let cachedComponentProps: ComponentPropertyInfo[] | null = null;
@@ -11,25 +12,53 @@ let lastComponentKey: string | null = null;
 export default function () {
   on("GET_COMPONENT_SET_PROPERTIES", async (componentSetData: ComponentSetEventData) => {
     try {
-      await getComponentSet(componentSetData.key);
+      await errorService.handleAsyncError(
+        () => getComponentSet(componentSetData.key),
+        { 
+          operation: 'GET_COMPONENT_SET_PROPERTIES',
+          componentKey: componentSetData.key 
+        }
+      );
       lastComponentKey = componentSetData.key;
       emit("COMPONENT_SET_PROPERTIES", cachedComponentProps);
     } catch (error) {
-      console.error("Failed to get component set properties:", error);
-      emit("COMPONENT_SET_PROPERTIES", []);
+      const propGateError = errorService.handleError(error, {
+        operation: 'GET_COMPONENT_SET_PROPERTIES',
+        componentKey: componentSetData.key,
+      });
+      
+      // Attempt recovery
+      const recovered = await errorRecovery.attemptRecovery(propGateError);
+      if (!recovered) {
+        emit("COMPONENT_SET_PROPERTIES", []);
+      }
     }
   });
 
   on("REFRESH_COMPONENT_SET", async () => {
     try {
-      if (lastComponentKey) {
-        await getComponentSet(lastComponentKey);
-        emit("COMPONENT_SET_REFRESHED", true);
-      } else {
-        emit("COMPONENT_SET_REFRESHED", false);
+      if (!lastComponentKey) {
+        const error = errorService.createComponentSetError(
+          ErrorCode.COMPONENT_SET_NOT_FOUND,
+          "No component key available for refresh",
+          { operation: 'REFRESH_COMPONENT_SET' }
+        );
+        throw error;
       }
+
+      await errorService.handleAsyncError(
+        () => getComponentSet(lastComponentKey!),
+        { 
+          operation: 'REFRESH_COMPONENT_SET',
+          componentKey: lastComponentKey 
+        }
+      );
+      emit("COMPONENT_SET_REFRESHED", true);
     } catch (error) {
-      console.error("Failed to refresh component set:", error);
+      errorService.handleError(error, {
+        operation: 'REFRESH_COMPONENT_SET',
+        componentKey: lastComponentKey,
+      });
       emit("COMPONENT_SET_REFRESHED", false);
     }
   });
@@ -37,9 +66,18 @@ export default function () {
   on("BUILD", async (buildData: BuildEventData) => {
     console.log("buildData :>> ", buildData);
     try {
-      await buildUpdatedComponent(buildData);
+      await errorService.handleAsyncError(
+        () => buildUpdatedComponent(buildData),
+        { 
+          operation: 'BUILD',
+          propertiesCount: Object.keys(buildData).length 
+        }
+      );
     } catch (error) {
-      console.error("Failed to build component:", error);
+      errorService.handleError(error, {
+        operation: 'BUILD',
+        propertiesCount: Object.keys(buildData).length,
+      });
     }
   });
 
@@ -50,6 +88,34 @@ export default function () {
 }
 
 async function getComponentSet(key: string): Promise<void> {
-  cachedComponentSet = await figma.importComponentSetByKeyAsync(key);
-  cachedComponentProps = getComponentPropertyInfo(cachedComponentSet);
+  if (!key) {
+    throw errorService.createComponentSetError(
+      ErrorCode.COMPONENT_SET_NOT_FOUND,
+      "Component key is required",
+      { componentKey: key }
+    );
+  }
+
+  try {
+    cachedComponentSet = await figma.importComponentSetByKeyAsync(key);
+    
+    if (!cachedComponentSet) {
+      throw errorService.createComponentSetError(
+        ErrorCode.COMPONENT_SET_NOT_FOUND,
+        `Component set not found for key: ${key}`,
+        { componentKey: key }
+      );
+    }
+
+    cachedComponentProps = getComponentPropertyInfo(cachedComponentSet);
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('not found')) {
+      throw errorService.createComponentSetError(
+        ErrorCode.COMPONENT_SET_NOT_FOUND,
+        `Component set not found for key: ${key}`,
+        { componentKey: key }
+      );
+    }
+    throw error;
+  }
 }

@@ -1,4 +1,6 @@
 import { ComponentPropertyInfo } from "../types";
+import { ComponentPropertyReferences } from "../types/figma";
+import { errorService, ErrorCode } from "../errors";
 
 export function getElementsWithComponentProperty(
   componentSet: ComponentSetNode,
@@ -6,15 +8,21 @@ export function getElementsWithComponentProperty(
 ): SceneNode[] {
   const matchedNodes: SceneNode[] = [];
 
-  for (const variant of componentSet.children) {
-    const nodes = getNodesWithPropertyReference(variant, propertyName);
-    matchedNodes.push(...nodes);
+  try {
+    for (const variant of componentSet.children) {
+      const nodes = getNodesWithPropertyReference(variant, propertyName);
+      matchedNodes.push(...nodes);
+    }
+  } catch (error) {
+    errorService.handleError(error, {
+      operation: 'GET_ELEMENTS_WITH_PROPERTY',
+      propertyName,
+      componentSetName: componentSet.name,
+    });
   }
 
   return matchedNodes;
 }
-
-import { ComponentPropertyReferences } from "../types/figma";
 
 function getNodesWithPropertyReference(
   variant: SceneNode,

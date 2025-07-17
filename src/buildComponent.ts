@@ -9,6 +9,7 @@ import { cachedComponentSet } from "./main";
 import { getEnabledProperties, isDependentProperty } from "./ui_utils";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { BuildEventData } from "./types";
+import { errorService, ErrorCode, errorRecovery } from "./errors";
 
 function isNodeValid(node: SceneNode): boolean {
   try {
@@ -30,8 +31,11 @@ export async function buildUpdatedComponent(
 
   // Check if cached component set is still valid
   if (!cachedComponentSet || !isNodeValid(cachedComponentSet)) {
-    console.log("Cached component set is no longer valid. Attempting to refresh...");
-    figma.notify("Component set is stale. Refreshing...");
+    const staleError = errorService.createComponentSetError(
+      ErrorCode.COMPONENT_SET_STALE,
+      "Cached component set is no longer valid",
+      { operation: 'BUILD_COMPONENT' }
+    );
     
     // Try to refresh the component set
     emit("REFRESH_COMPONENT_SET");
@@ -45,9 +49,11 @@ export async function buildUpdatedComponent(
     });
     
     if (!refreshResult || !cachedComponentSet) {
-      console.error("Failed to refresh component set. Please reselect the component.");
-      figma.notify("Failed to refresh component set. Please reselect the component from the dropdown.");
-      return;
+      throw errorService.createComponentSetError(
+        ErrorCode.COMPONENT_SET_REFRESH_FAILED,
+        "Failed to refresh component set",
+        { operation: 'BUILD_COMPONENT' }
+      );
     }
     
     figma.notify("Component set refreshed successfully!");
@@ -57,14 +63,18 @@ export async function buildUpdatedComponent(
   try {
     clonedComponentSet = cachedComponentSet.clone();
   } catch (error) {
-    console.error("Failed to clone component set:", error);
-    figma.notify("Failed to clone component set. Please reselect the component from the dropdown.");
-    return;
+    throw errorService.createBuildError(
+      "Failed to clone component set",
+      { operation: 'BUILD_COMPONENT' },
+      error instanceof Error ? error : undefined
+    );
   }
 
   if (!clonedComponentSet) {
-    console.error("No component set available to build");
-    return;
+    throw errorService.createBuildError(
+      "No component set available to build",
+      { operation: 'BUILD_COMPONENT' }
+    );
   }
 
   // Group variant options by their parent property
@@ -98,13 +108,17 @@ export async function buildUpdatedComponent(
       
       if (isVariantPropDisabled) {
         // Variant property is disabled, keep only default
-        deleteVariantsExcept(clonedComponentSet, variantProp);
-        if (clonedComponentSet.componentPropertyDefinitions[variantProp]) {
-          try {
+        try {
+          deleteVariantsExcept(clonedComponentSet, variantProp);
+          if (clonedComponentSet.componentPropertyDefinitions[variantProp]) {
             clonedComponentSet.deleteComponentProperty(variantProp);
-          } catch (deleteError) {
-            console.error(`Failed to delete component property "${variantProp}":`, deleteError);
           }
+        } catch (deleteError) {
+          errorService.handleError(deleteError, {
+            operation: 'DELETE_VARIANT_PROPERTY',
+            variantProp,
+            context: 'disabled_variant_property',
+          });
         }
       } else if (variantOptionsToKeep[variantProp] && variantOptionsToKeep[variantProp].length > 0) {
         // Variant property is enabled, but some options might be disabled
@@ -116,57 +130,104 @@ export async function buildUpdatedComponent(
           // Some options are disabled, remove variants for disabled options
           if (enabledOptions.length === 1) {
             // Only one variant option remains, delete all other variants and remove the property
-            deleteVariantsExcept(clonedComponentSet, variantProp, enabledOptions[0]);
-            if (clonedComponentSet.componentPropertyDefinitions[variantProp]) {
-              try {
+            try {
+              deleteVariantsExcept(clonedComponentSet, variantProp, enabledOptions[0]);
+              if (clonedComponentSet.componentPropertyDefinitions[variantProp]) {
                 clonedComponentSet.deleteComponentProperty(variantProp);
-              } catch (deleteError) {
-                console.error(`Failed to delete component property "${variantProp}":`, deleteError);
               }
+            } catch (deleteError) {
+              errorService.handleError(deleteError, {
+                operation: 'DELETE_VARIANT_PROPERTY',
+                variantProp,
+                enabledOptions,
+                context: 'single_variant_option',
+              });
             }
           } else {
             // Multiple variants remain, just remove the unwanted ones
-            deleteVariantsWithValues(clonedComponentSet, variantProp, enabledOptions);
+            try {
+              deleteVariantsWithValues(clonedComponentSet, variantProp, enabledOptions);
+            } catch (deleteError) {
+              errorService.handleError(deleteError, {
+                operation: 'DELETE_VARIANT_VALUES',
+                variantProp,
+                enabledOptions,
+                context: 'multiple_variant_options',
+              });
+            }
           }
         }
         // If all options are enabled, do nothing (keep all variants)
       }
     } catch (error) {
-      console.error(`Failed to process variant property "${variantProp}":`, error);
-      figma.notify(`Warning: Could not process variant property "${variantProp}"`);
+      errorService.handleError(error, {
+        operation: 'PROCESS_VARIANT_PROPERTY',
+        variantProp,
+      });
     }
   }
 
   // Handle non-variant properties
   for (const propKey of propKeys) {
-    const propertyType = getComponentPropertyType(clonedComponentSet, propKey);
-    if (propertyType !== "VARIANT") {
-      const propertyName = propKey.split("#")[0];
-      const foundElements = getElementsWithComponentProperty(
-        clonedComponentSet,
-        propKey
-      );
+    try {
+      const propertyType = getComponentPropertyType(clonedComponentSet, propKey);
+      if (propertyType !== "VARIANT") {
+        const propertyName = propKey.split("#")[0];
+        const foundElements = getElementsWithComponentProperty(
+          clonedComponentSet,
+          propKey
+        );
 
-      if (foundElements.length > 0) {
-        if (clonedComponentSet.componentPropertyDefinitions[propKey]) {
-          clonedComponentSet.deleteComponentProperty(propKey);
+        if (foundElements.length > 0) {
+          try {
+            if (clonedComponentSet.componentPropertyDefinitions[propKey]) {
+              clonedComponentSet.deleteComponentProperty(propKey);
+            }
+            foundElements.forEach((element) => element.remove());
+          } catch (deleteError) {
+            errorService.handleError(deleteError, {
+              operation: 'DELETE_PROPERTY_ELEMENTS',
+              propertyName: propKey,
+              elementsCount: foundElements.length,
+            });
+          }
         }
-        foundElements.forEach((element) => element.remove());
-      }
 
-      const dependentProp = dataKeys.find((property) =>
-        isDependentProperty(property, propertyName)
-      );
+        const dependentProp = dataKeys.find((property) =>
+          isDependentProperty(property, propertyName)
+        );
 
-      if (
-        dependentProp &&
-        clonedComponentSet.componentPropertyDefinitions[dependentProp]
-      ) {
-        clonedComponentSet.deleteComponentProperty(dependentProp);
+        if (
+          dependentProp &&
+          clonedComponentSet.componentPropertyDefinitions[dependentProp]
+        ) {
+          try {
+            clonedComponentSet.deleteComponentProperty(dependentProp);
+          } catch (deleteError) {
+            errorService.handleError(deleteError, {
+              operation: 'DELETE_DEPENDENT_PROPERTY',
+              propertyName: dependentProp,
+              parentProperty: propertyName,
+            });
+          }
+        }
       }
+    } catch (error) {
+      errorService.handleError(error, {
+        operation: 'PROCESS_NON_VARIANT_PROPERTY',
+        propertyName: propKey,
+      });
     }
   }
 
-  figma.currentPage.appendChild(clonedComponentSet);
-  figma.viewport.scrollAndZoomIntoView([clonedComponentSet]);
+  try {
+    figma.currentPage.appendChild(clonedComponentSet);
+    figma.viewport.scrollAndZoomIntoView([clonedComponentSet]);
+  } catch (error) {
+    throw errorService.createBuildError(
+      "Failed to add component to canvas",
+      { operation: 'ADD_TO_CANVAS' },
+      error instanceof Error ? error : undefined
+    );
+  }
 }
