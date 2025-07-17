@@ -9,11 +9,20 @@
     "@create-figma-plugin/build": "^4.0.1",
     "@create-figma-plugin/tsconfig": "^4.0.1",
     "@figma/plugin-typings": "^1.114.0",
-    "typescript": ">=4"
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/preact": "^3.2.4",
+    "@testing-library/user-event": "^14.6.1",
+    "@vitest/ui": "^3.2.4",
+    "jsdom": "^26.1.0",
+    "typescript": ">=4",
+    "vitest": "^3.2.4"
   },
   "scripts": {
     "build": "build-figma-plugin --typecheck --minify",
-    "watch": "build-figma-plugin --typecheck --watch"
+    "watch": "build-figma-plugin --typecheck --watch",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run"
   },
   "figma-plugin": {
     "editorType": [
