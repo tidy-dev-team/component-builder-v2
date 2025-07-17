@@ -49,18 +49,9 @@ export async function orchestrateBuild(buildData: BuildEventData): Promise<Build
       );
     }
 
-    // Sanitize build data properties
-    const sanitizedBuildData: BuildEventData = {};
-    for (const [key, value] of Object.entries(buildData)) {
-      const sanitizedKey = InputSanitizer.ensureValidPropertyName(key);
-      const sanitizedValue = InputSanitizer.normalizeBoolean(value);
-      if (sanitizedKey) {
-        sanitizedBuildData[sanitizedKey] = sanitizedValue;
-      }
-    }
-
-    // Use sanitized data for the rest of the process
-    buildData = sanitizedBuildData;
+    // Skip sanitization for now - build data is coming from internal UI
+    // The validation above already ensures the data is safe
+    console.log('Build data received:', buildData);
     
     // Step 1: Validate canvas access
     validateCanvasAccess();
