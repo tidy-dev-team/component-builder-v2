@@ -3,7 +3,7 @@ import { getEnabledProperties } from "../ui_utils";
 import { validateAndRefreshComponent, cloneComponentSet } from "./componentValidator";
 import { processVariantProperties } from "./variantProcessor";
 import { processNonVariantProperties } from "./propertyProcessor";
-import { renderToCanvas, validateCanvasAccess, getCanvasInfo } from "./canvasRenderer";
+import { renderToCanvas, validateCanvasAccess, getCanvasInfo } from "../figma_components";
 import { errorService, ErrorCode } from "../errors";
 import { InputValidator, InputSanitizer, formatValidationErrors } from "../validation";
 

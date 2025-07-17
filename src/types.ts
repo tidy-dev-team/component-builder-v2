@@ -3,6 +3,7 @@ export interface ComponentData {
     name: string;
     key: string;
     type: "componentSet" | "component";
+    properties?: ComponentProperty[];
   };
 }
 
@@ -16,6 +17,21 @@ export interface ComponentPropertyInfo {
     [field in "value"]?: VariableAlias;
   };
   path?: number[];
+}
+
+// Component property for UI
+export interface ComponentProperty {
+  name: string;
+  displayName: string;
+  value: string | boolean;
+  used: boolean;
+  dependentProperty?: DependentProperty;
+}
+
+export interface DependentProperty {
+  kind: "text" | "instance swap";
+  name: string;
+  value: string;
 }
 
 // Event handler types
