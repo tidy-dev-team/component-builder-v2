@@ -179,6 +179,18 @@ export class InputValidator {
       ]);
     }
     
+    // Check for security issues first (before sanitization)
+    if (!validateAgainstSecurity(name)) {
+      return createValidationResult(false, [
+        createValidationError(
+          ValidationErrorCode.INVALID_FORMAT,
+          'Component name contains invalid characters or is too long',
+          'componentName',
+          name
+        )
+      ]);
+    }
+    
     const sanitized = InputSanitizer.sanitizeComponentName(name);
     
     if (!sanitized || !figmaValidationRules.isValidComponentName(sanitized)) {
@@ -204,6 +216,18 @@ export class InputValidator {
         createValidationError(
           ValidationErrorCode.INVALID_TYPE,
           'Property name must be a string',
+          'propertyName',
+          name
+        )
+      ]);
+    }
+    
+    // Check for security issues first (before sanitization)
+    if (!validateAgainstSecurity(name)) {
+      return createValidationResult(false, [
+        createValidationError(
+          ValidationErrorCode.INVALID_PROPERTY_NAME,
+          'Property name contains invalid characters or is too long',
           'propertyName',
           name
         )

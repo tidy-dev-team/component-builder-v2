@@ -49,8 +49,9 @@ describe('InputValidator', () => {
     it('should reject names with invalid characters', () => {
       const invalidName = 'Button<script>alert(1)</script>';
       const result = InputValidator.validateComponentName(invalidName);
-      // After sanitization, this should be clean, so we need to test differently
-      expect(result.valid).toBe(true); // Sanitization makes it valid
+      // Security validation should catch this first and reject it
+      expect(result.valid).toBe(false);
+      expect(result.errors[0].code).toBe(ValidationErrorCode.INVALID_FORMAT);
       
       // Test with a truly invalid name that can't be sanitized
       const trulyInvalidName = 'Button\x00NullByte';
@@ -89,8 +90,9 @@ describe('InputValidator', () => {
     it('should reject names with invalid characters', () => {
       const invalidName = 'prop<script>';
       const result = InputValidator.validatePropertyName(invalidName);
-      // After sanitization, this should be clean, so we need to test differently
-      expect(result.valid).toBe(true); // Sanitization makes it valid
+      // Security validation should catch this first and reject it
+      expect(result.valid).toBe(false);
+      expect(result.errors[0].code).toBe(ValidationErrorCode.INVALID_PROPERTY_NAME);
       
       // Test with a truly invalid name that can't be sanitized
       const trulyInvalidName = 'prop\x00NullByte';
@@ -146,8 +148,9 @@ describe('InputValidator', () => {
         'validProp': false,
       };
       const result = InputValidator.validateBuildEventData(invalidData);
-      // After sanitization, this should be clean, so we need to test differently
-      expect(result.valid).toBe(true); // Sanitization makes it valid
+      // Security validation should catch this first and reject it
+      expect(result.valid).toBe(false);
+      expect(result.errors.some(e => e.code === ValidationErrorCode.INVALID_PROPERTY_NAME)).toBe(true);
       
       // Test with a truly invalid name that can't be sanitized
       const trulyInvalidData = {

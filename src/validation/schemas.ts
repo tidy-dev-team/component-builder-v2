@@ -119,8 +119,8 @@ export const checkboxStateSchema: ValidationRule = {
 
 // Security validation rules
 export const securityRules = {
-  // Check for potential XSS patterns
-  xssPattern: /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/i,
+  // Check for potential XSS patterns (script tags and event handlers)
+  xssPattern: /(<script[^>]*>.*?<\/script>|<[^>]*\bon\w+\s*=|javascript:|<script|<\/script>)/i,
   
   // Check for SQL injection patterns
   sqlInjectionPattern: /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\b)|(;|--|\|\|)/i,
@@ -157,7 +157,7 @@ export function validateAgainstSecurity(input: string): boolean {
 // Custom validation rules for Figma-specific data
 export const figmaValidationRules = {
   isValidComponentKey: (key: string): boolean => {
-    return /^[a-f0-9]{40}$/i.test(key);
+    return /^[a-f0-9]{40}$/.test(key);
   },
   
   isValidPropertyName: (name: string): boolean => {
