@@ -4,6 +4,7 @@ import type { ComponentPropertyInfo, ComponentSetEventData, BuildEventData } fro
 import { UI_DIMENSIONS } from "./constants";
 import { buildUpdatedComponent } from "./buildComponent";
 import { errorService, ErrorCode, errorRecovery } from "./errors";
+import { InputValidator, formatValidationErrors } from "./validation";
 
 export let cachedComponentSet: ComponentSetNode | null = null;
 let cachedComponentProps: ComponentPropertyInfo[] | null = null;
@@ -12,6 +13,17 @@ let lastComponentKey: string | null = null;
 export default function () {
   on("GET_COMPONENT_SET_PROPERTIES", async (componentSetData: ComponentSetEventData) => {
     try {
+      // Validate input data
+      const validationResult = InputValidator.validateComponentSetEventData(componentSetData);
+      if (!validationResult.valid) {
+        const errorMessage = formatValidationErrors(validationResult.errors);
+        throw errorService.createValidationError(
+          ErrorCode.INVALID_INPUT,
+          errorMessage,
+          { componentSetData, validationErrors: validationResult.errors }
+        );
+      }
+
       await errorService.handleAsyncError(
         () => getComponentSet(componentSetData.key),
         { 
@@ -66,6 +78,17 @@ export default function () {
   on("BUILD", async (buildData: BuildEventData) => {
     console.log("buildData :>> ", buildData);
     try {
+      // Validate build data
+      const validationResult = InputValidator.validateBuildEventData(buildData);
+      if (!validationResult.valid) {
+        const errorMessage = formatValidationErrors(validationResult.errors);
+        throw errorService.createValidationError(
+          ErrorCode.INVALID_INPUT,
+          errorMessage,
+          { buildData, validationErrors: validationResult.errors }
+        );
+      }
+
       await errorService.handleAsyncError(
         () => buildUpdatedComponent(buildData),
         { 
@@ -88,6 +111,17 @@ export default function () {
 }
 
 async function getComponentSet(key: string): Promise<void> {
+  // Validate and sanitize the component key
+  const keyValidationResult = InputValidator.validateComponentKey(key);
+  if (!keyValidationResult.valid) {
+    const errorMessage = formatValidationErrors(keyValidationResult.errors);
+    throw errorService.createValidationError(
+      ErrorCode.INVALID_INPUT,
+      errorMessage,
+      { componentKey: key, validationErrors: keyValidationResult.errors }
+    );
+  }
+
   if (!key) {
     throw errorService.createComponentSetError(
       ErrorCode.COMPONENT_SET_NOT_FOUND,

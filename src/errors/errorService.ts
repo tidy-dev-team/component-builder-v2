@@ -114,9 +114,9 @@ export class ErrorService {
     });
   }
 
-  public createValidationError(message: string, context?: ErrorContext): PropGateError {
+  public createValidationError(code: ErrorCode | string, message: string, context?: ErrorContext): PropGateError {
     return createError({
-      code: ErrorCode.VALIDATION_ERROR,
+      code: typeof code === 'string' ? ErrorCode.VALIDATION_ERROR : code,
       message,
       severity: ErrorSeverity.LOW,
       context,

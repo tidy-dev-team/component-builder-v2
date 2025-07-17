@@ -14,4 +14,7 @@ export default defineConfig({
       'react-dom': 'preact/compat',
     },
   },
+  esbuild: {
+    target: 'es2020',
+  },
 });

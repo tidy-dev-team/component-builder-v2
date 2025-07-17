@@ -31,6 +31,7 @@ export enum ErrorCode {
   // General Errors
   UNKNOWN_ERROR = 'UNKNOWN_ERROR',
   VALIDATION_ERROR = 'VALIDATION_ERROR',
+  INVALID_INPUT = 'INVALID_INPUT',
 }
 
 export enum ErrorSeverity {

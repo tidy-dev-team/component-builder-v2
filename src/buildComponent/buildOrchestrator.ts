@@ -4,7 +4,8 @@ import { validateAndRefreshComponent, cloneComponentSet } from "./componentValid
 import { processVariantProperties } from "./variantProcessor";
 import { processNonVariantProperties } from "./propertyProcessor";
 import { renderToCanvas, validateCanvasAccess, getCanvasInfo } from "./canvasRenderer";
-import { errorService } from "../errors";
+import { errorService, ErrorCode } from "../errors";
+import { InputValidator, InputSanitizer, formatValidationErrors } from "../validation";
 
 export interface BuildResult {
   success: boolean;
@@ -37,16 +38,40 @@ export async function orchestrateBuild(buildData: BuildEventData): Promise<Build
   };
 
   try {
+    // Step 0: Validate and sanitize build data
+    const inputValidationResult = InputValidator.validateBuildEventData(buildData);
+    if (!inputValidationResult.valid) {
+      const errorMessage = formatValidationErrors(inputValidationResult.errors);
+      throw errorService.createValidationError(
+        ErrorCode.INVALID_INPUT,
+        errorMessage,
+        { buildData, validationErrors: inputValidationResult.errors }
+      );
+    }
+
+    // Sanitize build data properties
+    const sanitizedBuildData: BuildEventData = {};
+    for (const [key, value] of Object.entries(buildData)) {
+      const sanitizedKey = InputSanitizer.ensureValidPropertyName(key);
+      const sanitizedValue = InputSanitizer.normalizeBoolean(value);
+      if (sanitizedKey) {
+        sanitizedBuildData[sanitizedKey] = sanitizedValue;
+      }
+    }
+
+    // Use sanitized data for the rest of the process
+    buildData = sanitizedBuildData;
+    
     // Step 1: Validate canvas access
     validateCanvasAccess();
     const canvasInfo = getCanvasInfo();
     
     // Step 2: Validate and refresh component if needed
-    const validationResult = await validateAndRefreshComponent();
-    result.stats.wasComponentRefreshed = validationResult.wasRefreshed;
+    const componentValidationResult = await validateAndRefreshComponent();
+    result.stats.wasComponentRefreshed = componentValidationResult.wasRefreshed;
     
     // Step 3: Clone the component set
-    const clonedComponentSet = cloneComponentSet(validationResult.componentSet);
+    const clonedComponentSet = cloneComponentSet(componentValidationResult.componentSet);
     
     // Step 4: Process variant properties
     const variantResult = processVariantProperties({
@@ -145,6 +170,7 @@ function createSuccessMessage(stats: BuildResult['stats']): string {
 export function validateBuildData(buildData: BuildEventData): void {
   if (!buildData || typeof buildData !== 'object') {
     throw errorService.createValidationError(
+      ErrorCode.INVALID_INPUT,
       'Build data must be a valid object',
       { buildData: typeof buildData }
     );
@@ -153,6 +179,7 @@ export function validateBuildData(buildData: BuildEventData): void {
   const keys = Object.keys(buildData);
   if (keys.length === 0) {
     throw errorService.createValidationError(
+      ErrorCode.INVALID_INPUT,
       'Build data cannot be empty',
       { buildData }
     );
@@ -162,6 +189,7 @@ export function validateBuildData(buildData: BuildEventData): void {
   for (const [key, value] of Object.entries(buildData)) {
     if (typeof value !== 'boolean') {
       throw errorService.createValidationError(
+        ErrorCode.INVALID_INPUT,
         `Build data property "${key}" must be a boolean, got ${typeof value}`,
         { key, value, buildData }
       );
