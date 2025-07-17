@@ -6,6 +6,6 @@ export const PROPERTY_PREFIXES = {
 export const HIDDEN_PROPERTIES = ["state", "selection type"] as const;
 
 export const UI_DIMENSIONS = {
-  HEIGHT: 600,
+  HEIGHT: 800,
   WIDTH: 320,
 } as const;
