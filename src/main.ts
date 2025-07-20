@@ -1,51 +1,64 @@
 import { on, emit, showUI } from "@create-figma-plugin/utilities";
 import { getComponentPropertyInfo } from "./figma_functions/coreUtils";
-import type { ComponentPropertyInfo, ComponentSetEventData, BuildEventData } from "./types";
+import type {
+  ComponentPropertyInfo,
+  ComponentSetEventData,
+  BuildEventData,
+} from "./types";
 import { UI_DIMENSIONS } from "./constants";
 import { buildUpdatedComponent } from "./buildComponent";
 import { errorService, ErrorCode, errorRecovery } from "./errors";
 import { InputValidator, formatValidationErrors } from "./validation";
+import { findExposedInstances } from "./figma_functions/utils";
 
 export let cachedComponentSet: ComponentSetNode | null = null;
 let cachedComponentProps: ComponentPropertyInfo[] | null = null;
 let lastComponentKey: string | null = null;
+let nestedInstances: { name: string; id: string; key: string }[] | null = null;
 
 export default function () {
-  on("GET_COMPONENT_SET_PROPERTIES", async (componentSetData: ComponentSetEventData) => {
-    try {
-      // Validate input data
-      const validationResult = InputValidator.validateComponentSetEventData(componentSetData);
-      if (!validationResult.valid) {
-        const errorMessage = formatValidationErrors(validationResult.errors);
-        throw errorService.createValidationError(
-          ErrorCode.INVALID_INPUT,
-          errorMessage,
-          { componentSetData, validationErrors: validationResult.errors }
-        );
-      }
-
-      await errorService.handleAsyncError(
-        () => getComponentSet(componentSetData.key),
-        { 
-          operation: 'GET_COMPONENT_SET_PROPERTIES',
-          componentKey: componentSetData.key 
+  on(
+    "GET_COMPONENT_SET_PROPERTIES",
+    async (componentSetData: ComponentSetEventData) => {
+      try {
+        // Validate input data
+        const validationResult =
+          InputValidator.validateComponentSetEventData(componentSetData);
+        if (!validationResult.valid) {
+          const errorMessage = formatValidationErrors(validationResult.errors);
+          throw errorService.createValidationError(
+            ErrorCode.INVALID_INPUT,
+            errorMessage,
+            { componentSetData, validationErrors: validationResult.errors }
+          );
         }
-      );
-      lastComponentKey = componentSetData.key;
-      emit("COMPONENT_SET_PROPERTIES", cachedComponentProps);
-    } catch (error) {
-      const propGateError = errorService.handleError(error, {
-        operation: 'GET_COMPONENT_SET_PROPERTIES',
-        componentKey: componentSetData.key,
-      });
-      
-      // Attempt recovery
-      const recovered = await errorRecovery.attemptRecovery(propGateError);
-      if (!recovered) {
-        emit("COMPONENT_SET_PROPERTIES", []);
+
+        await errorService.handleAsyncError(
+          () => getComponentSet(componentSetData.key),
+          {
+            operation: "GET_COMPONENT_SET_PROPERTIES",
+            componentKey: componentSetData.key,
+          }
+        );
+        lastComponentKey = componentSetData.key;
+        emit("COMPONENT_SET_PROPERTIES", {
+          cachedComponentProps,
+          nestedInstances,
+        });
+      } catch (error) {
+        const propGateError = errorService.handleError(error, {
+          operation: "GET_COMPONENT_SET_PROPERTIES",
+          componentKey: componentSetData.key,
+        });
+
+        // Attempt recovery
+        const recovered = await errorRecovery.attemptRecovery(propGateError);
+        if (!recovered) {
+          emit("COMPONENT_SET_PROPERTIES", []);
+        }
       }
     }
-  });
+  );
 
   on("REFRESH_COMPONENT_SET", async () => {
     try {
@@ -53,22 +66,22 @@ export default function () {
         const error = errorService.createComponentSetError(
           ErrorCode.COMPONENT_SET_NOT_FOUND,
           "No component key available for refresh",
-          { operation: 'REFRESH_COMPONENT_SET' }
+          { operation: "REFRESH_COMPONENT_SET" }
         );
         throw error;
       }
 
       await errorService.handleAsyncError(
         () => getComponentSet(lastComponentKey!),
-        { 
-          operation: 'REFRESH_COMPONENT_SET',
-          componentKey: lastComponentKey 
+        {
+          operation: "REFRESH_COMPONENT_SET",
+          componentKey: lastComponentKey,
         }
       );
       emit("COMPONENT_SET_REFRESHED", true);
     } catch (error) {
       errorService.handleError(error, {
-        operation: 'REFRESH_COMPONENT_SET',
+        operation: "REFRESH_COMPONENT_SET",
         componentKey: lastComponentKey,
       });
       emit("COMPONENT_SET_REFRESHED", false);
@@ -91,14 +104,14 @@ export default function () {
 
       await errorService.handleAsyncError(
         () => buildUpdatedComponent(buildData),
-        { 
-          operation: 'BUILD',
-          propertiesCount: Object.keys(buildData).length 
+        {
+          operation: "BUILD",
+          propertiesCount: Object.keys(buildData).length,
         }
       );
     } catch (error) {
       errorService.handleError(error, {
-        operation: 'BUILD',
+        operation: "BUILD",
         propertiesCount: Object.keys(buildData).length,
       });
     }
@@ -132,7 +145,7 @@ async function getComponentSet(key: string): Promise<void> {
 
   try {
     cachedComponentSet = await figma.importComponentSetByKeyAsync(key);
-    
+
     if (!cachedComponentSet) {
       throw errorService.createComponentSetError(
         ErrorCode.COMPONENT_SET_NOT_FOUND,
@@ -142,8 +155,9 @@ async function getComponentSet(key: string): Promise<void> {
     }
 
     cachedComponentProps = getComponentPropertyInfo(cachedComponentSet);
+    nestedInstances = findExposedInstances(cachedComponentSet.defaultVariant);
   } catch (error) {
-    if (error instanceof Error && error.message.includes('not found')) {
+    if (error instanceof Error && error.message.includes("not found")) {
       throw errorService.createComponentSetError(
         ErrorCode.COMPONENT_SET_NOT_FOUND,
         `Component set not found for key: ${key}`,

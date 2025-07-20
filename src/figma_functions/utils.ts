@@ -7,14 +7,19 @@ function getComponentPropertyName(
   );
 }
 
-import { PropertyReferenceField, ComponentPropertyReferences } from '../types/figma';
+import {
+  PropertyReferenceField,
+  ComponentPropertyReferences,
+} from "../types/figma";
 
 function setComponentPropertyReference(
   node: SceneNode,
   property: PropertyReferenceField,
   propName: string
 ) {
-  const references: ComponentPropertyReferences = { ...(node.componentPropertyReferences ?? {}) };
+  const references: ComponentPropertyReferences = {
+    ...(node.componentPropertyReferences ?? {}),
+  };
   references[property] = propName;
   node.componentPropertyReferences = references;
 }
@@ -43,4 +48,21 @@ export function addNewBooleanProperty(
   if (objName) {
     setComponentPropertyReference(node, "visible", objName);
   }
+}
+
+export function findExposedInstances(node: ComponentNode) {
+  const exposedInstances: Array<{ name: string; id: string; key: string }> = [];
+
+  node.findAll((child) => {
+    if (child.type === "INSTANCE" && child.isExposedInstance) {
+      exposedInstances.push({
+        name: child.name,
+        id: child.id,
+        key: child.mainComponent?.key || "",
+      });
+    }
+    return false; // Continue searching through all nodes
+  });
+
+  return exposedInstances;
 }

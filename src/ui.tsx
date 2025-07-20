@@ -91,19 +91,26 @@ function Plugin() {
   useEffect(() => {
     const unsubscribe = on(
       "COMPONENT_SET_PROPERTIES",
-      (data: ComponentPropertyInfo[]) => {
-        console.log("data with path :>> ", data);
-        setComponentProps(data);
-        const initialUsedStates = data.reduce((acc, prop) => {
-          acc[prop.name] = true;
-          // Initialize variant options states
-          if (prop.type === "VARIANT" && prop.variantOptions) {
-            prop.variantOptions.forEach((option) => {
-              acc[`${prop.name}#${option}`] = true;
-            });
-          }
-          return acc;
-        }, {} as PropertyUsedStates);
+      ({ cachedComponentProps, nestedInstances }) => {
+        console.log(
+          "data with path :>> ",
+          cachedComponentProps,
+          nestedInstances
+        );
+        setComponentProps(cachedComponentProps);
+        const initialUsedStates = cachedComponentProps.reduce(
+          (acc: any, prop: any) => {
+            acc[prop.name] = true;
+            // Initialize variant options states
+            if (prop.type === "VARIANT" && prop.variantOptions) {
+              prop.variantOptions.forEach((option: any) => {
+                acc[`${prop.name}#${option}`] = true;
+              });
+            }
+            return acc;
+          },
+          {} as PropertyUsedStates
+        );
         setPropertyUsedStates(initialUsedStates);
       }
     );
