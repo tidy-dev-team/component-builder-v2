@@ -76,6 +76,7 @@ function Plugin() {
   const [propertyUsedStates, setPropertyUsedStates] = useAtom(
     propertyUsedStatesAtom
   );
+  const [nestedInstances, setNestedInstances] = useState<{ name: string; id: string; key: string }[]>([]);
 
   function handleButtonClick() {
     console.log("propertyUsedStates :>> ", propertyUsedStates);
@@ -98,6 +99,7 @@ function Plugin() {
           nestedInstances
         );
         setComponentProps(cachedComponentProps);
+        setNestedInstances(nestedInstances || []);
         const initialUsedStates = cachedComponentProps.reduce(
           (acc: any, prop: any) => {
             acc[prop.name] = true;
@@ -135,7 +137,7 @@ function Plugin() {
       {/* Content */}
       <div style={styles.content}>
         {selectedComponent && componentProps.length > 0 ? (
-          renderAllProperties(componentProps, propertyUsedStates)
+          renderAllProperties(componentProps, propertyUsedStates, nestedInstances)
         ) : (
           <div style={styles.emptyState}>
             <div style={styles.emptyStateIcon}>⚡</div>

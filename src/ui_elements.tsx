@@ -198,9 +198,76 @@ function renderOtherProperties(
     </Fragment>
   );
 }
+function renderNestedComponents(
+  nestedInstances: { name: string; id: string; key: string }[]
+) {
+  if (nestedInstances.length === 0) return null;
+
+  return (
+    <Fragment>
+      <div
+        style={{
+          fontSize: "12px",
+          fontWeight: "600",
+          color: "#374151",
+          marginBottom: "12px",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+        }}
+      >
+        <span style={{ 
+          color: "#DC2626",
+          fontSize: "14px",
+        }}>
+          🔗
+        </span>
+        Nested Components
+      </div>
+      <div style={{
+        background: "#fafbfc",
+        border: "1px solid #e8eaed",
+        borderRadius: "8px",
+        padding: "12px",
+      }}>
+        {nestedInstances.map((instance, index) => (
+          <div key={instance.id}>
+            <div style={{
+              padding: "8px 12px",
+              background: "#ffffff",
+              border: "1px solid #e5e7eb",
+              borderRadius: "6px",
+              fontSize: "11px",
+              fontFamily: "SF Mono, Monaco, monospace",
+              color: "#374151",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}>
+              <span style={{
+                color: "#6b7280",
+                fontSize: "12px",
+              }}>
+                •
+              </span>
+              {instance.name}
+            </div>
+            {index < nestedInstances.length - 1 && (
+              <div style={{
+                height: "8px",
+              }} />
+            )}
+          </div>
+        ))}
+      </div>
+    </Fragment>
+  );
+}
+
 export function renderAllProperties(
   componentProps: ComponentPropertyInfo[],
-  propertyUsedStates: PropertyUsedStates
+  propertyUsedStates: PropertyUsedStates,
+  nestedInstances?: { name: string; id: string; key: string }[]
 ) {
   const variantProps = componentProps.filter((prop) => prop.type === "VARIANT");
   const otherProps = componentProps.filter((prop) => prop.type !== "VARIANT");
@@ -227,6 +294,7 @@ export function renderAllProperties(
         componentProps,
         propertyUsedStates
       )}
+      {nestedInstances && renderNestedComponents(nestedInstances)}
     </div>
   );
 }
