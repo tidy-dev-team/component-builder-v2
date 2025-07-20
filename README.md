@@ -1,198 +1,78 @@
-# Component Builder Test (CBT)
+# Component Builder v2
 
-A Figma plugin for building custom components with configurable properties. This plugin allows designers to select component types, configure their properties through an intuitive UI, and generate them directly on the Figma canvas.
-
-## Status: In Development 🚧
-
-**Current Implementation:** UI Configuration Phase
-- ✅ Component selection dropdown
-- ✅ Property configuration with checkboxes
-- ✅ Property usage tracking (`used` property)
-- ✅ Dependency mapping with visual indicators
-- ✅ State management with Jotai
-- ⏳ Canvas rendering (planned)
-
-**Next Phase:** Canvas Generation
-- Build selected components on Figma canvas based on UI configurations
-- Apply property values and variants using API-ready camelCase names
-- Position and style components automatically
+A Figma plugin for dynamically building component variants from a component set based on a selected subset of its properties.
 
 ## Features
 
-### Currently Available
-- **Component Selection**: Choose from available component templates via dropdown
-- **Property Configuration**: Toggle component properties using intuitive checkboxes
-- **Usage Tracking**: Control which properties are "used" through checkbox interactions
-- **Dependency Visualization**: Visual indicators showing property dependencies (✏️, 🔁)
-- **State Management**: Persistent property states across component selections
-- **Type Safety**: Full TypeScript support with proper interfaces
-- **API-Ready Names**: CamelCase property names for Figma plugin API integration
+-   **Inspect Component Sets**: Select a component set in Figma to view all its properties.
+-   **Dynamic Variant Creation**: Choose which properties to include in a new component variant.
+-   **Property Management**:
+    -   Handles various property types including `VARIANT`, `TEXT`, and `INSTANCE_SWAP`.
+    -   Intelligently manages dependent properties.
+    -   Filters out internal or hidden properties from the UI.
+-   **Robust Error Handling**: Graceful error handling and recovery for common Figma API issues.
+-   **Input Validation**: Ensures data passed between the UI and the plugin backend is valid.
 
-### Planned Features
-- **Canvas Rendering**: Generate actual Figma components based on selections
-- **Property Application**: Apply configured values to generated components using dependency mapping
-- **Variant Support**: Handle component variants and states
-- **Batch Generation**: Create multiple component instances
+## How It Works
 
-## Architecture
+The plugin consists of a UI (likely built with Preact, as inferred from `vitest.config.ts`) and a backend that runs in Figma's main thread.
 
-Built with modern web technologies:
-- **Framework**: [Preact](https://preactjs.com/) for lightweight UI components
-- **State Management**: [Jotai](https://jotai.org/) for atomic state management
-- **Build System**: [Create Figma Plugin](https://yuanqing.github.io/create-figma-plugin/)
-- **Language**: TypeScript for type safety
-- **UI Components**: Figma's official UI library
+1.  **Selection**: The user selects a component set in Figma.
+2.  **Property Fetching**: The UI sends a `GET_COMPONENT_SET_PROPERTIES` event with the component set key to the backend.
+3.  **Backend Processing**:
+    -   The `main.ts` file receives the event.
+    -   It uses `figma.importComponentSetByKeyAsync` to get the component set node.
+    -   `getComponentPropertyInfo` is called to extract and process all component properties.
+    -   The properties are sent back to the UI via a `COMPONENT_SET_PROPERTIES` event.
+4.  **User Interaction**:
+    -   The UI displays the properties, allowing the user to enable or disable them.
+    -   Helper functions in `ui_utils.ts` are used to determine property visibility and clean up names for display.
+5.  **Building the Component**:
+    -   The user clicks a "Build" button, which triggers a `BUILD` event with the state of all properties.
+    -   `buildUpdatedComponent` function is invoked with the user's selection.
+    -   This function constructs a new component variant with only the selected properties.
 
-### Project Structure
-```
-src/
-├── main.ts              # Plugin main thread (Figma API)
-├── ui.tsx              # UI thread entry point
-├── types.ts            # TypeScript interfaces
-├── componentData.ts    # Component registry
-├── state/
-│   └── atoms.ts        # Jotai state atoms
-├── componentData/
-│   └── checkboxData.ts # Checkbox component definition
-└── ui components/
-    ├── Button.tsx      # Build button component
-    ├── Checkbox.tsx    # Property checkbox component
-    └── Dropdown.tsx    # Component selector dropdown
-```
+## Project Structure
 
-## Development Guide
+-   `src/main.ts`: The main plugin entry point. Handles communication with the UI and orchestrates the main logic.
+-   `src/buildComponent.ts`: Entry point for the component building logic.
+-   `src/figma_functions/coreUtils.ts`: Contains core logic for interacting with the Figma API, like `getComponentPropertyInfo`.
+-   `src/ui_utils.ts`: Utility functions for processing property data for the UI.
+-   `src/types.ts`: Contains all TypeScript type definitions for the project.
+-   `src/constants.ts`: Defines shared constants like property prefixes and UI dimensions.
+-   `src/errors.ts`: A dedicated service for error handling and recovery.
+-   `src/validation.ts`: Implements input validation logic.
 
-*This plugin is built with [Create Figma Plugin](https://yuanqing.github.io/create-figma-plugin/).*
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org) – v18 or higher
-- [Figma desktop app](https://figma.com/downloads/)
+## Development
 
 ### Setup
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+Install dependencies:
 
-### Development Workflow
+```bash
+npm install
+```
 
-**Build the plugin:**
+### Building the plugin
+
+Run the build command:
+
 ```bash
 npm run build
 ```
 
-**Watch for changes during development:**
+Then, load the `manifest.json` in Figma's desktop app to install the plugin locally.
+
+### Testing
+
+This project uses Vitest for unit testing.
+
+-   **Environment**: `jsdom`
+-   **Setup**: Test setup is configured in `src/test/setup.ts`.
+-   **Framework**: Uses Preact for component testing, with aliases for `react` and `react-dom` to `preact/compat`.
+
+To run tests:
+
 ```bash
-npm run watch
+npm test
 ```
-
-This generates:
-- `manifest.json` - Plugin manifest file
-- `build/` - Compiled JavaScript bundles
-
-### Install in Figma
-
-1. Open Figma desktop app
-2. Open any Figma document
-3. Search for "Import plugin from manifest…" in Quick Actions
-4. Select the generated `manifest.json` file
-
-### Debugging
-
-- Use `console.log` statements in your code
-- Open developer console: Search "Open Console" in Quick Actions
-- Check both main thread and UI thread consoles
-
-## Usage
-
-1. **Select Component**: Choose a component type from the dropdown
-2. **Configure Properties**: Toggle checkboxes to mark properties as "used" or "unused"
-3. **Build Component**: Click "Build on canvas" (currently logs configuration to console)
-
-### Currently Supported Components
-
-- **Checkbox**: Configurable size, label, count, description, icon, and indeterminate state
-
-## Contributing
-
-### Adding New Components
-
-1. Create component data in `src/componentData/` following the pattern in `checkboxData.ts`
-2. Register component in `src/componentData.ts`
-3. Component will automatically appear in the dropdown
-
-### Component Data Structure
-```typescript
-interface ComponentProperty {
-  name: string              // camelCase API name (e.g., "isIndeterminate")
-  displayName: string       // UI display name (e.g., "Is Indeterminate")
-  value: string | boolean   // Default value
-  used: boolean            // Whether property is used by default
-  dependentProperty?: string // Dependency indicator (e.g., "✏️ isIndeterminate")
-  variants?: string[]      // Available variants
-}
-```
-
-### Property Types
-- **name**: CamelCase identifier used for Figma API calls
-- **displayName**: Human-readable label shown in UI
-- **used**: Boolean indicating if property should be applied to component
-- **dependentProperty**: Visual indicator showing dependency relationships:
-  - `✏️ propertyName` - Editable/configurable property
-  - `🔁 propertyName` - Reactive/dependent property
-
-## Roadmap
-
-### Phase 1: UI Foundation ✅
-- [x] Component selection interface
-- [x] Property configuration system
-- [x] Usage tracking with checkboxes
-- [x] Dependency mapping system
-- [x] State management optimization
-- [x] Type safety improvements
-
-### Phase 2: Canvas Integration (Next)
-- [ ] Implement canvas component generation using Figma API
-- [ ] Apply property values to generated components using camelCase names
-- [ ] Handle component variants and states
-- [ ] Utilize dependency mapping for property relationships
-- [ ] Add positioning and layout logic
-
-### Phase 3: Enhanced Features (Future)
-- [ ] Custom component templates
-- [ ] Batch component generation
-- [ ] Export/import configurations
-- [ ] Advanced styling options
-- [ ] Property validation and constraints
-
-## Technical Details
-
-### State Management
-Uses Jotai atoms for efficient state management:
-- `selectedComponentAtom`: Currently selected component
-- `selectedComponentPropertiesAtom`: Properties of selected component
-- `propertyUsedStatesAtom`: Current checkbox (used) states
-- `updatedComponentPropertiesAtom`: Computed final component data with applied states
-
-### Property System
-- **Dual Naming**: Each property has both `name` (API) and `displayName` (UI)
-- **Usage Tracking**: `used` boolean controls whether property is applied
-- **Dependency Mapping**: `dependentProperty` shows relationships between properties
-- **Type Safety**: Full TypeScript interfaces prevent runtime errors
-
-### Performance Optimizations
-- Atomic state updates prevent unnecessary re-renders
-- Efficient object spread operations instead of deep cloning
-- Optimized dependency arrays in React hooks
-- Conditional rendering for unused properties
-
-## Resources
-
-- [Create Figma Plugin Documentation](https://yuanqing.github.io/create-figma-plugin/)
-- [Figma Plugin API Documentation](https://figma.com/plugin-docs/)
-- [Figma Plugin Samples](https://github.com/figma/plugin-samples)
-- [Jotai Documentation](https://jotai.org/)
-- [Preact Documentation](https://preactjs.com/)
