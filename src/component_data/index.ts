@@ -8,9 +8,9 @@ export const componentRegistry: ComponentData = {
     key: "e978573d54b4b61133aaa9fb1287eef36df0e1ed",
     type: "componentSet",
   },
-  IconButton: {
-    name: "IconButton",
-    key: "37a61a1f231653e5fe0d8fb5afeb561f1dfe3807",
+  Input: {
+    name: "Input",
+    key: "3fa0112d53708a35080dfd22530ebf3dbbbcdf4d",
     type: "componentSet",
   },
   Badge: {

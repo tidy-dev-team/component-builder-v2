@@ -56,11 +56,14 @@ export function CheckboxComponent(prop: CheckboxComponentProps) {
   };
 
   return (
-    <Checkbox
-      onValueChange={handleChange}
-      value={usedStates[prop.name] ?? true}
-      disabled={prop.disabled}
-    >
+    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+      <Checkbox
+        onValueChange={handleChange}
+        value={usedStates[prop.name] ?? true}
+        disabled={prop.disabled}
+      >
+        <span style={{ display: "none" }}></span>
+      </Checkbox>
       <span
         style={{
           fontSize: "12px",
@@ -71,6 +74,6 @@ export function CheckboxComponent(prop: CheckboxComponentProps) {
       >
         {cleanName}
       </span>
-    </Checkbox>
+    </div>
   );
 }

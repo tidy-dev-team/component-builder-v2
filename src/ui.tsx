@@ -22,7 +22,8 @@ const styles = {
     display: "flex",
     flexDirection: "column" as const,
     background: "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)",
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   },
   header: {
     padding: "16px 0 12px 0",
@@ -93,19 +94,16 @@ function Plugin() {
       (data: ComponentPropertyInfo[]) => {
         console.log("data with path :>> ", data);
         setComponentProps(data);
-        const initialUsedStates = data.reduce(
-          (acc, prop) => {
-            acc[prop.name] = true;
-            // Initialize variant options states
-            if (prop.type === "VARIANT" && prop.variantOptions) {
-              prop.variantOptions.forEach((option) => {
-                acc[`${prop.name}#${option}`] = true;
-              });
-            }
-            return acc;
-          },
-          {} as PropertyUsedStates
-        );
+        const initialUsedStates = data.reduce((acc, prop) => {
+          acc[prop.name] = true;
+          // Initialize variant options states
+          if (prop.type === "VARIANT" && prop.variantOptions) {
+            prop.variantOptions.forEach((option) => {
+              acc[`${prop.name}#${option}`] = true;
+            });
+          }
+          return acc;
+        }, {} as PropertyUsedStates);
         setPropertyUsedStates(initialUsedStates);
       }
     );
@@ -135,8 +133,8 @@ function Plugin() {
           <div style={styles.emptyState}>
             <div style={styles.emptyStateIcon}>⚡</div>
             <div style={styles.emptyStateText}>
-              {selectedComponent 
-                ? "Loading component properties..." 
+              {selectedComponent
+                ? "Loading component properties..."
                 : "Choose a component to get started"}
             </div>
           </div>
@@ -145,8 +143,8 @@ function Plugin() {
 
       {/* Footer */}
       <div style={styles.footer}>
-        <ButtonComponent 
-          callback={handleButtonClick} 
+        <ButtonComponent
+          callback={handleButtonClick}
           disabled={!selectedComponent || componentProps.length === 0}
         />
       </div>

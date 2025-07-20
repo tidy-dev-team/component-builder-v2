@@ -31,6 +31,7 @@
     "id": "component-builder-test-v2",
     "name": "PropGate",
     "main": "src/main.ts",
-    "ui": "src/ui.tsx"
+    "ui": "src/ui.tsx",
+    "enablePrivatePluginApi": true
   }
 }
