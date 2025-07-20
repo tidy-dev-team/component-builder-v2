@@ -45,21 +45,25 @@ function renderVariantProperties(
           gap: "8px",
         }}
       >
-        <span style={{ 
-          color: "#7C3AED",
-          fontSize: "14px",
-        }}>
+        <span
+          style={{
+            color: "#7C3AED",
+            fontSize: "14px",
+          }}
+        >
           ⚡
         </span>
         Variants
       </div>
-      <div style={{
-        background: "#fafbfc",
-        border: "1px solid #e8eaed",
-        borderRadius: "8px",
-        padding: "12px",
-        marginBottom: "16px",
-      }}>
+      <div
+        style={{
+          background: "#fafbfc",
+          border: "1px solid #e8eaed",
+          borderRadius: "8px",
+          padding: "12px",
+          marginBottom: "16px",
+        }}
+      >
         {variantProps
           .filter((prop) => !shouldBeHidden(prop))
           .map((prop, index) => {
@@ -73,11 +77,13 @@ function renderVariantProperties(
                 <VerticalSpace space="small" />
                 {/* Show variant options as sub-properties */}
                 {prop.variantOptions && prop.variantOptions.length > 0 && (
-                  <div style={{ 
-                    marginLeft: "20px",
-                    paddingLeft: "12px",
-                    borderLeft: "2px solid #e8eaed",
-                  }}>
+                  <div
+                    style={{
+                      marginLeft: "20px",
+                      paddingLeft: "12px",
+                      borderLeft: "2px solid #e8eaed",
+                    }}
+                  >
                     {prop.variantOptions.map((option) => {
                       const variantOptionKey = `${prop.name}#${option}`;
                       const variantOptionProp: ComponentPropertyInfo = {
@@ -99,12 +105,15 @@ function renderVariantProperties(
                     })}
                   </div>
                 )}
-                {index < variantProps.filter((p) => !shouldBeHidden(p)).length - 1 && (
-                  <div style={{
-                    height: "1px",
-                    backgroundColor: "#e8eaed",
-                    margin: "8px 0",
-                  }} />
+                {index <
+                  variantProps.filter((p) => !shouldBeHidden(p)).length - 1 && (
+                  <div
+                    style={{
+                      height: "1px",
+                      backgroundColor: "#e8eaed",
+                      margin: "8px 0",
+                    }}
+                  />
                 )}
               </div>
             );
@@ -133,20 +142,24 @@ function renderOtherProperties(
           gap: "8px",
         }}
       >
-        <span style={{ 
-          color: "#059669",
-          fontSize: "14px",
-        }}>
+        <span
+          style={{
+            color: "#059669",
+            fontSize: "14px",
+          }}
+        >
           ⚙️
         </span>
         Properties
       </div>
-      <div style={{
-        background: "#fafbfc",
-        border: "1px solid #e8eaed",
-        borderRadius: "8px",
-        padding: "12px",
-      }}>
+      <div
+        style={{
+          background: "#fafbfc",
+          border: "1px solid #e8eaed",
+          borderRadius: "8px",
+          padding: "12px",
+        }}
+      >
         {otherProps
           .filter((prop) => !shouldBeHidden(prop))
           .map((prop, index) => {
@@ -163,13 +176,15 @@ function renderOtherProperties(
 
             return (
               <div key={prop.name}>
-                <div style={{ 
-                  display: "flex", 
-                  alignItems: "center",
-                  padding: "2px 0",
-                  borderRadius: "4px",
-                  transition: "background-color 0.15s ease",
-                }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "2px 0",
+                    borderRadius: "4px",
+                    transition: "background-color 0.15s ease",
+                  }}
+                >
                   <span
                     style={{
                       color: "#9ca3af",
@@ -211,51 +226,62 @@ function renderNestedComponents(
           fontWeight: "600",
           color: "#374151",
           marginBottom: "12px",
+          marginTop: "12px",
           display: "flex",
           alignItems: "center",
           gap: "8px",
         }}
       >
-        <span style={{ 
-          color: "#DC2626",
-          fontSize: "14px",
-        }}>
+        <span
+          style={{
+            color: "#DC2626",
+            fontSize: "14px",
+          }}
+        >
           🔗
         </span>
         Nested Components
       </div>
-      <div style={{
-        background: "#fafbfc",
-        border: "1px solid #e8eaed",
-        borderRadius: "8px",
-        padding: "12px",
-      }}>
+      <div
+        style={{
+          background: "#fafbfc",
+          border: "1px solid #e8eaed",
+          borderRadius: "8px",
+          padding: "12px",
+        }}
+      >
         {nestedInstances.map((instance, index) => (
           <div key={instance.id}>
-            <div style={{
-              padding: "8px 12px",
-              background: "#ffffff",
-              border: "1px solid #e5e7eb",
-              borderRadius: "6px",
-              fontSize: "11px",
-              fontFamily: "SF Mono, Monaco, monospace",
-              color: "#374151",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}>
-              <span style={{
-                color: "#6b7280",
-                fontSize: "12px",
-              }}>
+            <div
+              style={{
+                padding: "8px 12px",
+                background: "#ffffff",
+                border: "1px solid #e5e7eb",
+                borderRadius: "6px",
+                fontSize: "11px",
+                fontFamily: "SF Mono, Monaco, monospace",
+                color: "#374151",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <span
+                style={{
+                  color: "#6b7280",
+                  fontSize: "12px",
+                }}
+              >
                 •
               </span>
               {instance.name}
             </div>
             {index < nestedInstances.length - 1 && (
-              <div style={{
-                height: "8px",
-              }} />
+              <div
+                style={{
+                  height: "8px",
+                }}
+              />
             )}
           </div>
         ))}
@@ -279,11 +305,13 @@ export function renderAllProperties(
   const sortedOtherProps = sortPropertiesByPath(otherProps);
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      gap: "8px",
-    }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
+      }}
+    >
       {renderVariantProperties(
         variantProps,
         componentProps,
