@@ -8,11 +8,6 @@ export const componentRegistry: ComponentData = {
     key: "e978573d54b4b61133aaa9fb1287eef36df0e1ed",
     type: "componentSet",
   },
-  Input: {
-    name: "Input",
-    key: "3fa0112d53708a35080dfd22530ebf3dbbbcdf4d",
-    type: "componentSet",
-  },
   Badge: {
     name: "Badge",
     key: "383eda2f42660613057a870cde686c7e8b076904",
@@ -21,6 +16,26 @@ export const componentRegistry: ComponentData = {
   CheckboxTest: {
     name: "Checkbox for test",
     key: "d921cc1b6daeca95638113d222cca11a2f117273",
+    type: "componentSet",
+  },
+  CheckboxIcon: {
+    name: "Checkbox (icon)",
+    key: "0e360b2a80465d5bcbe6c218222fb5896351ed97",
+    type: "componentSet",
+  },
+  CheckboxItemIcon: {
+    name: "Checkbox item (icon)",
+    key: "0a0e2be0f6ece4620ef8d28b39ee6995656393b2",
+    type: "componentSet",
+  },
+  CheckboxVector: {
+    name: "Checkbox (customizable vector)",
+    key: "43e9aef5432cf48a3cf2b727a815872f717ba211",
+    type: "componentSet",
+  },
+  CheckboxItemVector: {
+    name: "Checkbox item (customizable vector)",
+    key: "b07ff3f8009f606c7537098bfa932d1e916206ac",
     type: "componentSet",
   },
   RadioButtonsTest: {
