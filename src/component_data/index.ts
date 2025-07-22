@@ -13,7 +13,12 @@ export const componentRegistry: ComponentData = {
     key: "383eda2f42660613057a870cde686c7e8b076904",
     type: "componentSet",
   },
-  CheckboxTest: {
+  Buttons: {
+    name: "Buttons",
+    key: "1a45acec266bbb1bd1338744453eb9e33aa2af53",
+    type: "componentSet",
+  },
+  iwuckboxTest: {
     name: "Checkbox for test",
     key: "d921cc1b6daeca95638113d222cca11a2f117273",
     type: "componentSet",
