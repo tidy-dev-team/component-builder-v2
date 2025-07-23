@@ -15,13 +15,35 @@ export function getElementsWithComponentProperty(
     }
   } catch (error) {
     errorService.handleError(error, {
-      operation: 'GET_ELEMENTS_WITH_PROPERTY',
+      operation: "GET_ELEMENTS_WITH_PROPERTY",
       propertyName,
       componentSetName: componentSet.name,
     });
   }
 
   return matchedNodes;
+}
+
+export function hasProperty(
+  componentSet: ComponentSetNode,
+  propertyName: string
+): boolean {
+  try {
+    for (const variant of componentSet.children) {
+      const nodes = getNodesWithPropertyReference(variant, propertyName);
+      if (nodes.length > 0) {
+        return true;
+      }
+    }
+  } catch (error) {
+    errorService.handleError(error, {
+      operation: "HAS_PROPERTY",
+      propertyName,
+      componentSetName: componentSet.name,
+    });
+  }
+
+  return false;
 }
 
 function getNodesWithPropertyReference(
@@ -217,4 +239,14 @@ export function getComponentPropertyInfo(
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export function removeEmptyProps(node: ComponentSetNode): void {
+  const props = node.componentPropertyDefinitions;
+
+  for (const [key, property] of Object.entries(props)) {
+    if (property.type !== "VARIANT" && !hasProperty(node, key)) {
+      node.deleteComponentProperty(key);
+    }
+  }
 }
