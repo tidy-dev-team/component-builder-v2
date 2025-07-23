@@ -18,6 +18,7 @@ import {
   formatValidationErrors,
 } from "../validation";
 import { removeEmptyProps } from "../figma_functions/coreUtils";
+import { removeAllVariables } from "../figma_functions/varUtils";
 
 export interface BuildResult {
   success: boolean;
@@ -113,6 +114,9 @@ export async function orchestrateBuild(
 
     // remove empty props
     removeEmptyProps(clonedComponentSet);
+
+    // remove all variable bindings, leaving only resolved values
+    removeAllVariables(clonedComponentSet);
 
     result.componentSet = renderResult.componentSet;
     result.stats.errorsCount = result.errors.length;
