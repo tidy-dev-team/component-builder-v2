@@ -10,13 +10,14 @@ import { buildUpdatedComponent } from "./buildComponent";
 import { errorService, ErrorCode, errorRecovery } from "./errors";
 import { InputValidator, formatValidationErrors } from "./validation";
 import { findExposedInstances } from "./figma_functions/utils";
+import { createVariables } from "./figma_functions/varUtils";
 
 export let cachedComponentSet: ComponentSetNode | null = null;
 let cachedComponentProps: ComponentPropertyInfo[] | null = null;
 let lastComponentKey: string | null = null;
 let nestedInstances: { name: string; id: string; key: string }[] | null = null;
 
-export default function () {
+export default async function () {
   on(
     "GET_COMPONENT_SET_PROPERTIES",
     async (componentSetData: ComponentSetEventData) => {
@@ -116,6 +117,14 @@ export default function () {
       });
     }
   });
+
+  // Initialize design system variables on plugin startup
+  try {
+    await createVariables();
+  } catch (error) {
+    console.error("Failed to initialize design system variables:", error);
+    // Don't block plugin startup if variable creation fails
+  }
 
   showUI({
     height: UI_DIMENSIONS.HEIGHT,

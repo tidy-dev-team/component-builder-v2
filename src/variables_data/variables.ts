@@ -1,5 +1,34 @@
-export const variablesData = {
+// Types for variable definitions
+export interface VariableValue {
+  mode: string;
+  value: number | string | { type: "VARIABLE_ALIAS"; id: string };
+  isAlias: boolean;
+  referencedVariableId: string | null;
+}
+
+export interface Variable {
+  id: string;
+  name: string;
+  type: VariableResolvedDataType;
+  values: VariableValue[];
+}
+
+export interface VariableCategory {
+  collectionName: string;
+  prefix: string;
+  global: Variable[];
+  semantic: Variable[];
+}
+
+export interface VariablesData {
+  [categoryName: string]: VariableCategory;
+}
+
+// Variable definitions organized by category
+export const variablesData: VariablesData = {
   radius: {
+    collectionName: "border",
+    prefix: "radius",
     global: [
       {
         id: "VariableID:36:27",
@@ -277,3 +306,22 @@ export const variablesData = {
     ],
   },
 };
+
+// Helper functions for working with variables data
+export function getVariableCategoryNames(): string[] {
+  return Object.keys(variablesData);
+}
+
+export function getVariableCategory(categoryName: string): VariableCategory | null {
+  return variablesData[categoryName] || null;
+}
+
+export function getAllVariables(): Variable[] {
+  const allVariables: Variable[] = [];
+  
+  for (const category of Object.values(variablesData)) {
+    allVariables.push(...category.global, ...category.semantic);
+  }
+  
+  return allVariables;
+}
