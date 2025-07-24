@@ -257,20 +257,28 @@ export async function getVariables(categoryName?: string) {
 }
 
 export function removeAllVariables(node: ComponentNode | ComponentSetNode) {
-  console.log(`Removing all variables from ${node.type}: ${node.name}`);
+  console.log(
+    `[DEBUG] removeAllVariables called for ${node.type}: ${node.name}`
+  );
+  console.log(`[DEBUG] Node children count:`, node.children?.length || 0);
 
   if (node.type === "COMPONENT_SET") {
     // Process all children (variants) in the component set
+    console.log(
+      `[DEBUG] Processing component set with ${node.children.length} children`
+    );
     for (const child of node.children) {
       if (child.type === "COMPONENT") {
+        console.log(`[DEBUG] Processing component variant: ${child.name}`);
         removeVariablesFromComponent(child);
       }
     }
   } else if (node.type === "COMPONENT") {
+    console.log(`[DEBUG] Processing single component: ${node.name}`);
     removeVariablesFromComponent(node);
   }
 
-  console.log(`Variable removal complete for: ${node.name}`);
+  console.log(`[DEBUG] Variable removal complete for: ${node.name}`);
 }
 
 function removeVariablesFromComponent(component: ComponentNode) {
@@ -288,6 +296,130 @@ function processNodeChildren(node: SceneNode) {
     for (const child of node.children) {
       removeVariablesFromNode(child);
       processNodeChildren(child);
+    }
+  }
+}
+
+export async function applySemanticBorderRadiusVariables(node: ComponentNode | ComponentSetNode) {
+  console.log(`Applying semantic border radius variables to: ${node.name}`);
+  
+  // Get the radius variables from Figma
+  const radiusVariables = await getVariablesFromFigma("radius");
+  if (!radiusVariables) {
+    console.warn("No radius variables found");
+    return;
+  }
+
+  // Since we're calling with "radius" category, it returns { global: Variable[], semantic: Variable[] }
+  const variableData = radiusVariables as { global: VariableData[]; semantic: VariableData[] };
+  
+  if (!variableData.semantic || variableData.semantic.length === 0) {
+    console.warn("No semantic radius variables found");
+    return;
+  }
+
+  if (!variableData.global || variableData.global.length === 0) {
+    console.warn("No global radius variables found");
+    return;
+  }
+
+  // Create mapping of radius values to semantic variables
+  const valueToSemanticVariable = new Map<number, VariableData>();
+  
+  for (const semanticVar of variableData.semantic) {
+    // Get the global variable this semantic variable references
+    const referencedId = semanticVar.values[0].referencedVariableId;
+    if (referencedId) {
+      const globalVar = variableData.global.find((g: VariableData) => g.id === referencedId);
+      if (globalVar && typeof globalVar.values[0].value === 'number') {
+        valueToSemanticVariable.set(globalVar.values[0].value as number, semanticVar);
+      }
+    }
+  }
+
+  if (node.type === "COMPONENT_SET") {
+    for (const child of node.children) {
+      if (child.type === "COMPONENT") {
+        await applySemanticVariablesToComponent(child, valueToSemanticVariable);
+      }
+    }
+  } else if (node.type === "COMPONENT") {
+    await applySemanticVariablesToComponent(node, valueToSemanticVariable);
+  }
+
+  console.log(`Semantic border radius variables applied to: ${node.name}`);
+}
+
+async function applySemanticVariablesToComponent(
+  component: ComponentNode, 
+  valueToSemanticVariable: Map<number, VariableData>
+) {
+  console.log(`Processing component: ${component.name}`);
+
+  // Apply to component itself
+  await applySemanticVariablesToNode(component, valueToSemanticVariable);
+
+  // Recursively process all children
+  await processNodeChildrenForVariables(component, valueToSemanticVariable);
+}
+
+async function processNodeChildrenForVariables(
+  node: SceneNode, 
+  valueToSemanticVariable: Map<number, VariableData>
+) {
+  if ("children" in node && node.children) {
+    for (const child of node.children) {
+      await applySemanticVariablesToNode(child, valueToSemanticVariable);
+      await processNodeChildrenForVariables(child, valueToSemanticVariable);
+    }
+  }
+}
+
+async function applySemanticVariablesToNode(
+  node: SceneNode, 
+  valueToSemanticVariable: Map<number, VariableData>
+) {
+  // Check if node has border radius properties
+  if ("cornerRadius" in node) {
+    const cornerRadius = node.cornerRadius;
+    
+    if (typeof cornerRadius === "number") {
+      // Single corner radius value
+      const semanticVar = valueToSemanticVariable.get(cornerRadius);
+      if (semanticVar) {
+        try {
+          const figmaVariable = await figma.variables.getVariableByIdAsync(semanticVar.id);
+          if (figmaVariable) {
+            (node as any).setBoundVariable("cornerRadius", figmaVariable);
+            console.log(`Applied ${semanticVar.name} to ${node.name} (radius: ${cornerRadius})`);
+          }
+        } catch (error) {
+          console.error(`Failed to apply variable ${semanticVar.name} to ${node.name}:`, error);
+        }
+      }
+    } else if (typeof cornerRadius === "object" && cornerRadius !== figma.mixed) {
+      // Individual corner radii
+      const corners = ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius"] as const;
+      
+      for (const corner of corners) {
+        if (corner in node) {
+          const radiusValue = (node as any)[corner];
+          if (typeof radiusValue === "number") {
+            const semanticVar = valueToSemanticVariable.get(radiusValue);
+            if (semanticVar) {
+              try {
+                const figmaVariable = await figma.variables.getVariableByIdAsync(semanticVar.id);
+                if (figmaVariable) {
+                  (node as any).setBoundVariable(corner, figmaVariable);
+                  console.log(`Applied ${semanticVar.name} to ${node.name} ${corner} (radius: ${radiusValue})`);
+                }
+              } catch (error) {
+                console.error(`Failed to apply variable ${semanticVar.name} to ${node.name} ${corner}:`, error);
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

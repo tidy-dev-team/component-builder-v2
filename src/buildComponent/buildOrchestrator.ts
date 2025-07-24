@@ -18,7 +18,10 @@ import {
   formatValidationErrors,
 } from "../validation";
 import { removeEmptyProps } from "../figma_functions/coreUtils";
-import { removeAllVariables } from "../figma_functions/varUtils";
+import {
+  applySemanticBorderRadiusVariables,
+  removeAllVariables,
+} from "../figma_functions/varUtils";
 
 export interface BuildResult {
   success: boolean;
@@ -116,7 +119,9 @@ export async function orchestrateBuild(
     removeEmptyProps(clonedComponentSet);
 
     // remove all variable bindings, leaving only resolved values
-    removeAllVariables(clonedComponentSet);
+    // const components = clonedComponentSet.children;
+    // removeAllVariables(clonedComponentSet);
+    await applySemanticBorderRadiusVariables(clonedComponentSet);
 
     result.componentSet = renderResult.componentSet;
     result.stats.errorsCount = result.errors.length;

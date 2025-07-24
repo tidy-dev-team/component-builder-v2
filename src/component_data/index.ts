@@ -13,6 +13,11 @@ export const componentRegistry: ComponentData = {
     key: "383eda2f42660613057a870cde686c7e8b076904",
     type: "componentSet",
   },
+  Badge_for_test: {
+    name: "Badge with no vars",
+    key: "1d9a4bf4941c22c98eca03622830bef06376737a",
+    type: "componentSet",
+  },
   Buttons: {
     name: "Buttons",
     key: "1a45acec266bbb1bd1338744453eb9e33aa2af53",

@@ -11,6 +11,13 @@ global.figma = {
     scrollAndZoomIntoView: vi.fn(),
   },
   importComponentSetByKeyAsync: vi.fn(),
+  variables: {
+    getLocalVariableCollectionsAsync: vi.fn(),
+    getVariableByIdAsync: vi.fn(),
+    createVariableCollection: vi.fn(),
+    createVariable: vi.fn(),
+  },
+  mixed: Symbol('mixed'),
 } as any;
 
 // Mock create-figma-plugin utilities
