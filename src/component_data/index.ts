@@ -3,54 +3,68 @@ import { ComponentData } from "../types";
 // Simple component registry - just keys and basic info
 // Properties are discovered dynamically by the generic generator
 export const componentRegistry: ComponentData = {
+  // Avatars
   Avatar: {
     name: "Avatar",
     key: "e978573d54b4b61133aaa9fb1287eef36df0e1ed",
     type: "componentSet",
   },
+  Username: {
+    name: "Username",
+    key: "06dd30dbb923f224be343051b7b12028a58f7c2a",
+    type: "componentSet",
+  },
+  AvatarNumber: {
+    name: "Avatar Number",
+    key: "02be470b66ff4d2c85ada06efbe67317f8cc64f7",
+    type: "componentSet",
+  },
+  AvatarGroup: {
+    name: "Avatar Group",
+    key: "e5496c2a096678c5554623ba200b676372433be7",
+    type: "componentSet",
+  },
+  // Badges
   Badge: {
     name: "Badge",
     key: "383eda2f42660613057a870cde686c7e8b076904",
     type: "componentSet",
   },
-  Badge_for_test: {
-    name: "Badge with no vars",
-    key: "1d9a4bf4941c22c98eca03622830bef06376737a",
+  AssetBadge: {
+    name: "Asset Badge",
+    key: "16a4808ca941ac44a9b7cf20c9305578e8b1501a",
     type: "componentSet",
   },
+  TextBadge: {
+    name: "Text Badge",
+    key: "0d1e3c485d118955784334f1cd0bdf004b16b155",
+    type: "componentSet",
+  },
+  PillBadge: {
+    name: "Pill Badge",
+    key: "36a77f2b4ad268f7821d3976f21398c1a1900a98",
+    type: "componentSet",
+  },
+  //Breadcrumbs
+  Breadcrumbs: {
+    name: "Breadcrumbs",
+    key: "8563670cf1d3591bd4f3af9d0156cc0a7d99dd0b",
+    type: "componentSet",
+  },
+  // Buttons
   Buttons: {
     name: "Buttons",
     key: "1a45acec266bbb1bd1338744453eb9e33aa2af53",
     type: "componentSet",
   },
-  iwuckboxTest: {
-    name: "Checkbox for test",
-    key: "d921cc1b6daeca95638113d222cca11a2f117273",
+  ButtonIcon: {
+    name: "Button Icon",
+    key: "37a61a1f231653e5fe0d8fb5afeb561f1dfe3807",
     type: "componentSet",
   },
-  CheckboxIcon: {
-    name: "Checkbox (icon)",
-    key: "0e360b2a80465d5bcbe6c218222fb5896351ed97",
-    type: "componentSet",
-  },
-  CheckboxItemIcon: {
-    name: "Checkbox item (icon)",
-    key: "0a0e2be0f6ece4620ef8d28b39ee6995656393b2",
-    type: "componentSet",
-  },
-  CheckboxVector: {
-    name: "Checkbox (customizable vector)",
-    key: "43e9aef5432cf48a3cf2b727a815872f717ba211",
-    type: "componentSet",
-  },
-  CheckboxItemVector: {
-    name: "Checkbox item (customizable vector)",
-    key: "b07ff3f8009f606c7537098bfa932d1e916206ac",
-    type: "componentSet",
-  },
-  RadioButtonsTest: {
-    name: "Radio ButtonsTest",
-    key: "32ae1243ca038828b08e5c78f5fb332af3386134",
+  ButtonText: {
+    name: "Button Text",
+    key: "1484a29ce5e8cd702dc12913d2b79a464d269227",
     type: "componentSet",
   },
 };
