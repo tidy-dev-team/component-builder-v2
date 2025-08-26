@@ -67,6 +67,16 @@ export const componentRegistry: ComponentData = {
     key: "1484a29ce5e8cd702dc12913d2b79a464d269227",
     type: "componentSet",
   },
+  CheckboxIcon: {
+    name: "Checkbox (Icon)",
+    key: "0e360b2a80465d5bcbe6c218222fb5896351ed97",
+    type: "componentSet",
+  },
+  CheckboxItemIcon: {
+    name: "Checkbox Item (Icon)",
+    key: "0a0e2be0f6ece4620ef8d28b39ee6995656393b2",
+    type: "componentSet",
+  },
 };
 
 /**
