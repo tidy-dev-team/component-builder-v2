@@ -53,16 +53,34 @@ export function addNewBooleanProperty(
 export function findExposedInstances(node: ComponentNode) {
   const exposedInstances: Array<{ name: string; id: string; key: string }> = [];
 
-  node.findAll((child) => {
-    if (child.type === "INSTANCE" && child.isExposedInstance) {
-      exposedInstances.push({
-        name: child.name,
-        id: child.id,
-        key: child.mainComponent?.key || "",
-      });
+  try {
+    if (!node) {
+      console.error("Component node is null or undefined");
+      return exposedInstances;
     }
-    return false; // Continue searching through all nodes
-  });
+
+    if (!node.findAll) {
+      console.error("Component node does not have findAll method");
+      return exposedInstances;
+    }
+
+    node.findAll((child) => {
+      try {
+        if (child && child.type === "INSTANCE" && child.isExposedInstance) {
+          exposedInstances.push({
+            name: child.name || "Unnamed Instance",
+            id: child.id || "",
+            key: child.mainComponent?.key || "",
+          });
+        }
+      } catch (error) {
+        console.error("Error processing child node:", error);
+      }
+      return false; // Continue searching through all nodes
+    });
+  } catch (error) {
+    console.error("Error finding exposed instances:", error);
+  }
 
   return exposedInstances;
 }

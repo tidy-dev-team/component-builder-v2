@@ -3,7 +3,6 @@ import { ComponentData } from "../types";
 // Simple component registry - just keys and basic info
 // Properties are discovered dynamically by the generic generator
 export const componentRegistry: ComponentData = {
-  // Avatars
   Avatar: {
     name: "Avatar",
     key: "e978573d54b4b61133aaa9fb1287eef36df0e1ed",
@@ -24,7 +23,6 @@ export const componentRegistry: ComponentData = {
     key: "e5496c2a096678c5554623ba200b676372433be7",
     type: "componentSet",
   },
-  // Badges
   Badge: {
     name: "Badge",
     key: "383eda2f42660613057a870cde686c7e8b076904",
@@ -45,13 +43,11 @@ export const componentRegistry: ComponentData = {
     key: "36a77f2b4ad268f7821d3976f21398c1a1900a98",
     type: "componentSet",
   },
-  //Breadcrumbs
   Breadcrumbs: {
     name: "Breadcrumbs",
     key: "8563670cf1d3591bd4f3af9d0156cc0a7d99dd0b",
     type: "componentSet",
   },
-  // Buttons
   Buttons: {
     name: "Buttons",
     key: "1a45acec266bbb1bd1338744453eb9e33aa2af53",
@@ -77,12 +73,53 @@ export const componentRegistry: ComponentData = {
     key: "0a0e2be0f6ece4620ef8d28b39ee6995656393b2",
     type: "componentSet",
   },
+  CheckboxVector: {
+    name: "Checkbox (Vector)",
+    key: "43e9aef5432cf48a3cf2b727a815872f717ba211",
+    type: "componentSet"
+  },
+  CheckboxItemVector: {
+    name: "Checkbox Item (Vector)",
+    key: "b07ff3f8009f606c7537098bfa932d1e916206ac",
+    type: "componentSet"
+  },
+  Chips: {
+    name: "Chips",
+    key: "d785439063b42d9fbe449f3d19223cfa825a47bf",
+    type: "componentSet"
+  },
+  TextInputOutlined: {
+    name: "Text Input (Outlined)",
+    key: "3fa0112d53708a35080dfd22530ebf3dbbbcdf4d",
+    type: "componentSet"
+  },
+  TextInputContained: {
+    name: "Text Input (Contained)",
+    key: "46e44149a998ceae1bdbff378c85818e4ecd89e6",
+    type: "componentSet"
+  },
+  TextInputUnderlined: {
+    name: "Text Input (Underlined)",
+    key: "2ef5964e087304eaecb3887bb3b2441834450f21",
+    type: "componentSet"
+  },
+  SelectInputOutlined: {
+    name: "Select Input (Outlined)",
+    key: "bb1ce670f2e5eb30645a8381232c4ab166a56834",
+    type: "componentSet"
+  },
+  SelectInputContained: {
+    name: "Select Input (Contained)",
+    key: "0aeeec1c853b6245284581b97e9f7c04f63e1f60",
+    type: "componentSet"
+  },
+  SelectInputUnderlined: {
+    name: "Select Input (Underlined)",
+    key: "cbba2e72a7ad213bef170e4856c5cc6d25f61025",
+    type: "componentSet"
+  },
 };
 
-/**
- * Register a new component dynamically.
- * Just provide the name, key, and type - properties are auto-discovered.
- */
 export function registerComponent(
   componentName: string,
   componentData: ComponentData[string]
@@ -90,20 +127,14 @@ export function registerComponent(
   componentRegistry[componentName] = componentData;
 }
 
-/**
- * Get component data by name, with fallback for unknown components.
- * Properties are always discovered dynamically from Figma.
- */
 export function getComponentData(
   componentName: string,
   fallbackKey?: string
 ): ComponentData[string] | null {
-  // Return existing component data if available
   if (componentRegistry[componentName]) {
     return componentRegistry[componentName];
   }
 
-  // Create fallback component data for any component
   if (fallbackKey) {
     return {
       name: componentName,
@@ -115,9 +146,6 @@ export function getComponentData(
   return null;
 }
 
-/**
- * Check if a component is predefined in the registry
- */
 export function isKnownComponent(componentName: string): boolean {
   return componentName in componentRegistry;
 }

@@ -220,25 +220,62 @@ export function getPathToDefaultVariant(
 export function getComponentPropertyInfo(
   node: ComponentSetNode
 ): ComponentPropertyInfo[] {
-  const properties = node.componentPropertyDefinitions;
-  return Object.entries(properties)
-    .map(([name, definition]) => {
-      const nodeWithProps = getNodesWithPropertyReference(
-        node.defaultVariant,
-        name
-      );
-      const path =
-        nodeWithProps.length > 0
-          ? getPathToDefaultVariant(node, nodeWithProps[0])
-          : [];
+  try {
+    // Validate that the node has the required properties
+    if (!node) {
+      console.error("Component set node is null or undefined");
+      return [];
+    }
 
-      return {
-        name,
-        ...definition,
-        path,
-      };
-    })
-    .sort((a, b) => a.name.localeCompare(b.name));
+    if (!node.componentPropertyDefinitions) {
+      console.error("Component set does not have componentPropertyDefinitions");
+      return [];
+    }
+
+    if (!node.defaultVariant) {
+      console.error("Component set does not have defaultVariant");
+      return [];
+    }
+
+    const properties = node.componentPropertyDefinitions;
+
+    if (!properties || typeof properties !== 'object') {
+      console.error("Component property definitions are invalid");
+      return [];
+    }
+
+    return Object.entries(properties)
+      .map(([name, definition]) => {
+        try {
+          const nodeWithProps = getNodesWithPropertyReference(
+            node.defaultVariant,
+            name
+          );
+          const path =
+            nodeWithProps.length > 0
+              ? getPathToDefaultVariant(node, nodeWithProps[0])
+              : [];
+
+          return {
+            name,
+            ...definition,
+            path,
+          };
+        } catch (error) {
+          console.error(`Error processing property "${name}":`, error);
+          // Return a basic property definition without path if there's an error
+          return {
+            name,
+            ...definition,
+            path: [],
+          };
+        }
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  } catch (error) {
+    console.error("Error getting component property info:", error);
+    return [];
+  }
 }
 
 export function removeEmptyProps(node: ComponentSetNode): void {

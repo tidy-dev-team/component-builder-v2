@@ -98,22 +98,36 @@ function Plugin() {
           cachedComponentProps,
           nestedInstances
         );
-        setComponentProps(cachedComponentProps);
-        setNestedInstances(nestedInstances || []);
-        const initialUsedStates = cachedComponentProps.reduce(
-          (acc: any, prop: any) => {
-            acc[prop.name] = true;
-            // Initialize variant options states
-            if (prop.type === "VARIANT" && prop.variantOptions) {
-              prop.variantOptions.forEach((option: any) => {
-                acc[`${prop.name}#${option}`] = true;
-              });
-            }
-            return acc;
-          },
-          {} as PropertyUsedStates
-        );
-        setPropertyUsedStates(initialUsedStates);
+
+        // Handle undefined or null data gracefully
+        const safeComponentProps = cachedComponentProps || [];
+        const safeNestedInstances = nestedInstances || [];
+
+        setComponentProps(safeComponentProps);
+        setNestedInstances(safeNestedInstances);
+
+        // Only process if we have valid component props
+        if (safeComponentProps && Array.isArray(safeComponentProps)) {
+          const initialUsedStates = safeComponentProps.reduce(
+            (acc: any, prop: any) => {
+              if (prop && prop.name) {
+                acc[prop.name] = true;
+                // Initialize variant options states
+                if (prop.type === "VARIANT" && prop.variantOptions) {
+                  prop.variantOptions.forEach((option: any) => {
+                    acc[`${prop.name}#${option}`] = true;
+                  });
+                }
+              }
+              return acc;
+            },
+            {} as PropertyUsedStates
+          );
+          setPropertyUsedStates(initialUsedStates);
+        } else {
+          // Reset to empty state if no valid props
+          setPropertyUsedStates({});
+        }
       }
     );
     return unsubscribe;
@@ -139,14 +153,16 @@ function Plugin() {
         {selectedComponent && componentProps.length > 0 ? (
           renderAllProperties(componentProps, propertyUsedStates, nestedInstances)
         ) : (
-          <div style={styles.emptyState}>
-            <div style={styles.emptyStateIcon}>⚡</div>
-            <div style={styles.emptyStateText}>
-              {selectedComponent
-                ? "Loading component properties..."
-                : "Choose a component to get started"}
-            </div>
-          </div>
+           <div style={styles.emptyState}>
+             <div style={styles.emptyStateIcon}>⚡</div>
+             <div style={styles.emptyStateText}>
+               {selectedComponent
+                 ? componentProps === null
+                   ? "Error loading component properties. Please try selecting the component again."
+                   : "Loading component properties..."
+                 : "Choose a component to get started"}
+             </div>
+           </div>
         )}
       </div>
 
@@ -154,7 +170,7 @@ function Plugin() {
       <div style={styles.footer}>
         <ButtonComponent
           callback={handleButtonClick}
-          disabled={!selectedComponent || componentProps.length === 0}
+          disabled={!selectedComponent || !componentProps || componentProps.length === 0}
         />
       </div>
     </Container>

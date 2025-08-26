@@ -1,11 +1,1 @@
-{
-  "api": "1.0.0",
-  "editorType": [
-    "figma"
-  ],
-  "id": "component-builder-test-v2",
-  "name": "PropGate",
-  "main": "build/main.js",
-  "ui": "build/ui.js",
-  "enablePrivatePluginApi": true
-}
+{"api":"1.0.0","editorType":["figma"],"id":"component-builder-test-v2","name":"PropGate","main":"build/main.js","ui":"build/ui.js","enablePrivatePluginApi":true}

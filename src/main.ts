@@ -52,11 +52,11 @@ export default async function () {
           componentKey: componentSetData.key,
         });
 
-        // Attempt recovery
-        const recovered = await errorRecovery.attemptRecovery(propGateError);
-        if (!recovered) {
-          emit("COMPONENT_SET_PROPERTIES", []);
-        }
+         // Attempt recovery
+         const recovered = await errorRecovery.attemptRecovery(propGateError);
+         if (!recovered) {
+           emit("COMPONENT_SET_PROPERTIES", { cachedComponentProps: [], nestedInstances: [] });
+         }
       }
     }
   );
@@ -160,6 +160,32 @@ async function getComponentSet(key: string): Promise<void> {
         ErrorCode.COMPONENT_SET_NOT_FOUND,
         `Component set not found for key: ${key}`,
         { componentKey: key }
+      );
+    }
+
+    // Validate that this is actually a component set
+    if (cachedComponentSet.type !== "COMPONENT_SET") {
+      throw errorService.createComponentSetError(
+        ErrorCode.COMPONENT_SET_INVALID,
+        `The selected element is not a component set. Found type: ${cachedComponentSet.type}`,
+        { componentKey: key, componentType: cachedComponentSet.type }
+      );
+    }
+
+    // Validate that this is actually a component set with required properties
+    if (!cachedComponentSet.componentPropertyDefinitions) {
+      throw errorService.createComponentSetError(
+        ErrorCode.COMPONENT_SET_INVALID,
+        `Component set "${cachedComponentSet.name}" does not have component property definitions`,
+        { componentKey: key, componentName: cachedComponentSet.name }
+      );
+    }
+
+    if (!cachedComponentSet.defaultVariant) {
+      throw errorService.createComponentSetError(
+        ErrorCode.COMPONENT_SET_INVALID,
+        `Component set "${cachedComponentSet.name}" does not have a default variant`,
+        { componentKey: key, componentName: cachedComponentSet.name }
       );
     }
 
