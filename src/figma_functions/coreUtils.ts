@@ -217,6 +217,52 @@ export function getPathToDefaultVariant(
   return path.reverse();
 }
 
+export function getComponentPropertyInfoFromComponent(
+  node: ComponentNode
+): ComponentPropertyInfo[] {
+  try {
+    // Validate that the node has the required properties
+    if (!node) {
+      console.error("Component node is null or undefined");
+      return [];
+    }
+
+    // For regular components, we need to check if they have componentPropertyReferences
+    if (!node.componentPropertyReferences) {
+      console.log("Component does not have componentPropertyReferences");
+      return [];
+    }
+
+    const properties: ComponentPropertyInfo[] = [];
+    const refs = node.componentPropertyReferences;
+    
+    // Extract unique property names from all references
+    const propertyNames = new Set<string>();
+    Object.values(refs).forEach(propName => {
+      if (typeof propName === 'string') {
+        propertyNames.add(propName);
+      }
+    });
+
+    // Create property info for each unique property
+    propertyNames.forEach(propName => {
+      // For regular components, we don't have property definitions like component sets
+      // So we create basic property info
+      properties.push({
+        name: propName,
+        type: "TEXT", // Default to text type for regular components
+        defaultValue: "",
+        path: [], // Path calculation would be more complex for regular components
+      });
+    });
+
+    return properties.sort((a, b) => a.name.localeCompare(b.name));
+  } catch (error) {
+    console.error("Error getting component property info from component:", error);
+    return [];
+  }
+}
+
 export function getComponentPropertyInfo(
   node: ComponentSetNode
 ): ComponentPropertyInfo[] {
@@ -281,9 +327,51 @@ export function getComponentPropertyInfo(
 export function removeEmptyProps(node: ComponentSetNode): void {
   const props = node.componentPropertyDefinitions;
 
+  if (!props) {
+    return;
+  }
+
   for (const [key, property] of Object.entries(props)) {
     if (property.type !== "VARIANT" && !hasProperty(node, key)) {
       node.deleteComponentProperty(key);
     }
   }
+}
+
+export function getElementsWithComponentPropertyFromComponent(
+  component: ComponentNode,
+  propertyName: string
+): SceneNode[] {
+  const matchedNodes: SceneNode[] = [];
+
+  try {
+    const nodes = getNodesWithPropertyReference(component, propertyName);
+    matchedNodes.push(...nodes);
+  } catch (error) {
+    errorService.handleError(error, {
+      operation: "GET_ELEMENTS_WITH_PROPERTY",
+      propertyName,
+      componentName: component.name,
+    });
+  }
+
+  return matchedNodes;
+}
+
+export function hasPropertyInComponent(
+  component: ComponentNode,
+  propertyName: string
+): boolean {
+  try {
+    const nodes = getNodesWithPropertyReference(component, propertyName);
+    return nodes.length > 0;
+  } catch (error) {
+    errorService.handleError(error, {
+      operation: "HAS_PROPERTY",
+      propertyName,
+      componentName: component.name,
+    });
+  }
+
+  return false;
 }

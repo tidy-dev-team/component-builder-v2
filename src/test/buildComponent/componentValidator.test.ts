@@ -4,9 +4,13 @@ import { errorService } from '../../errors';
 
 // Mock the main module with a mutable reference
 const mockCachedComponentSet = { value: null as ComponentSetNode | null };
+const mockCachedComponent = { value: null as ComponentNode | null };
 vi.mock('../../main', () => ({
   get cachedComponentSet() {
     return mockCachedComponentSet.value;
+  },
+  get cachedComponent() {
+    return mockCachedComponent.value;
   },
 }));
 

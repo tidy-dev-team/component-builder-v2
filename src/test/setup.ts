@@ -11,6 +11,7 @@ global.figma = {
     scrollAndZoomIntoView: vi.fn(),
   },
   importComponentSetByKeyAsync: vi.fn(),
+  importComponentByKeyAsync: vi.fn(),
   variables: {
     getLocalVariableCollectionsAsync: vi.fn(),
     getVariableByIdAsync: vi.fn(),

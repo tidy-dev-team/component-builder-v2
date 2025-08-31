@@ -3,6 +3,7 @@ import { getEnabledProperties } from "../ui_utils";
 import {
   validateAndRefreshComponent,
   cloneComponentSet,
+  cloneComponent,
 } from "./componentValidator";
 import { processVariantProperties } from "./variantProcessor";
 import { processNonVariantProperties } from "./propertyProcessor";
@@ -26,6 +27,7 @@ import {
 export interface BuildResult {
   success: boolean;
   componentSet?: ComponentSetNode;
+  component?: ComponentNode;
   stats: {
     variantsProcessed: number;
     variantsSkipped: number;
@@ -80,58 +82,83 @@ export async function orchestrateBuild(
     const componentValidationResult = await validateAndRefreshComponent();
     result.stats.wasComponentRefreshed = componentValidationResult.wasRefreshed;
 
-    // Step 3: Clone the component set
-    const clonedComponentSet = cloneComponentSet(
-      componentValidationResult.componentSet
-    );
+    // Step 3: Clone the component (set or regular)
+    let clonedComponentSet: ComponentSetNode | undefined;
+    let clonedComponent: ComponentNode | undefined;
+    
+    if (componentValidationResult.componentSet) {
+      clonedComponentSet = cloneComponentSet(componentValidationResult.componentSet);
+    } else if (componentValidationResult.component) {
+      clonedComponent = cloneComponent(componentValidationResult.component);
+    } else {
+      throw errorService.createBuildError(
+        "No valid component or component set found",
+        { operation: 'ORCHESTRATE_BUILD' }
+      );
+    }
 
-    // Step 4: Process variant properties
-    const variantResult = processVariantProperties({
-      buildData,
-      componentSet: clonedComponentSet,
-    });
+    // Step 4: Process variant properties (only for component sets)
+    if (clonedComponentSet) {
+      const variantResult = processVariantProperties({
+        buildData,
+        componentSet: clonedComponentSet,
+      });
 
-    result.stats.variantsProcessed = variantResult.processedVariants.length;
-    result.stats.variantsSkipped = variantResult.skippedVariants.length;
-    result.errors.push(...variantResult.errors);
+      result.stats.variantsProcessed = variantResult.processedVariants.length;
+      result.stats.variantsSkipped = variantResult.skippedVariants.length;
+      result.errors.push(...variantResult.errors);
 
-    // Step 5: Process non-variant properties
-    const propsToDisable = getEnabledProperties(buildData);
-    const propertyResult = processNonVariantProperties({
-      buildData,
-      componentSet: clonedComponentSet,
-      disabledProperties: propsToDisable,
-    });
+      // Step 5: Process non-variant properties
+      const propsToDisable = getEnabledProperties(buildData);
+      const propertyResult = processNonVariantProperties({
+        buildData,
+        componentSet: clonedComponentSet,
+        disabledProperties: propsToDisable,
+      });
 
-    result.stats.propertiesProcessed =
-      propertyResult.processedProperties.length;
-    result.stats.propertiesSkipped = propertyResult.skippedProperties.length;
-    result.stats.elementsDeleted = propertyResult.deletedElements;
-    result.errors.push(...propertyResult.errors);
+      result.stats.propertiesProcessed =
+        propertyResult.processedProperties.length;
+      result.stats.propertiesSkipped = propertyResult.skippedProperties.length;
+      result.stats.elementsDeleted = propertyResult.deletedElements;
+      result.errors.push(...propertyResult.errors);
 
-    // Step 6: Render to canvas
-    const renderResult = renderToCanvas({
-      componentSet: clonedComponentSet,
-      focusViewport: true,
-    });
+      // Step 6: Render to canvas
+      const renderResult = renderToCanvas({
+        componentSet: clonedComponentSet,
+        focusViewport: true,
+      });
 
-    // remove empty props
-    removeEmptyProps(clonedComponentSet);
+      // remove empty props
+      removeEmptyProps(clonedComponentSet);
 
-    // remove all variable bindings, leaving only resolved values
-    // const components = clonedComponentSet.children;
-    // removeAllVariables(clonedComponentSet);
-    await applySemanticBorderRadiusVariables(clonedComponentSet);
+      // remove all variable bindings, leaving only resolved values
+      // const components = clonedComponentSet.children;
+      // removeAllVariables(clonedComponentSet);
+      await applySemanticBorderRadiusVariables(clonedComponentSet);
 
-    result.componentSet = renderResult.componentSet;
+      result.componentSet = renderResult.componentSet;
+    } else if (clonedComponent) {
+      // For regular components, we handle them differently
+      // No variant processing needed, just render to canvas
+      const renderResult = renderToCanvas({
+        component: clonedComponent,
+        focusViewport: true,
+      });
+
+      result.component = renderResult.component;
+      
+      // Apply semantic variables to regular component too
+      await applySemanticBorderRadiusVariables(clonedComponent);
+    }
     result.stats.errorsCount = result.errors.length;
     result.success = true;
 
     // Log success with statistics
+    const componentName = clonedComponentSet?.name || clonedComponent?.name || 'Unknown';
     console.log("Build completed successfully:", {
       stats: result.stats,
       canvasInfo,
-      componentName: clonedComponentSet.name,
+      componentName,
     });
 
     // Show success notification

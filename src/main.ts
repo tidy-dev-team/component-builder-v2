@@ -1,5 +1,5 @@
 import { on, emit, showUI } from "@create-figma-plugin/utilities";
-import { getComponentPropertyInfo } from "./figma_functions/coreUtils";
+import { getComponentPropertyInfo, getComponentPropertyInfoFromComponent } from "./figma_functions/coreUtils";
 import type {
   ComponentPropertyInfo,
   ComponentSetEventData,
@@ -13,6 +13,7 @@ import { findExposedInstances } from "./figma_functions/utils";
 import { createVariables } from "./figma_functions/varUtils";
 
 export let cachedComponentSet: ComponentSetNode | null = null;
+export let cachedComponent: ComponentNode | null = null;
 let cachedComponentProps: ComponentPropertyInfo[] | null = null;
 let lastComponentKey: string | null = null;
 let nestedInstances: { name: string; id: string; key: string }[] | null = null;
@@ -153,49 +154,70 @@ async function getComponentSet(key: string): Promise<void> {
   }
 
   try {
-    cachedComponentSet = await figma.importComponentSetByKeyAsync(key);
+    // Reset both cached values
+    cachedComponentSet = null;
+    cachedComponent = null;
 
-    if (!cachedComponentSet) {
+    // Try importing as component set first
+    try {
+      cachedComponentSet = await figma.importComponentSetByKeyAsync(key);
+      
+      if (cachedComponentSet && cachedComponentSet.type === "COMPONENT_SET") {
+        // Validate component set properties
+        if (!cachedComponentSet.componentPropertyDefinitions) {
+          throw errorService.createComponentSetError(
+            ErrorCode.COMPONENT_SET_INVALID,
+            `Component set "${cachedComponentSet.name}" does not have component property definitions`,
+            { componentKey: key, componentName: cachedComponentSet.name }
+          );
+        }
+
+        if (!cachedComponentSet.defaultVariant) {
+          throw errorService.createComponentSetError(
+            ErrorCode.COMPONENT_SET_INVALID,
+            `Component set "${cachedComponentSet.name}" does not have a default variant`,
+            { componentKey: key, componentName: cachedComponentSet.name }
+          );
+        }
+
+        cachedComponentProps = getComponentPropertyInfo(cachedComponentSet);
+        nestedInstances = findExposedInstances(cachedComponentSet.defaultVariant);
+        return;
+      }
+    } catch (error) {
+      // If component set import fails, try importing as regular component
+      console.log("Component set import failed, trying regular component...");
+    }
+
+    // Try importing as regular component
+    cachedComponent = await figma.importComponentByKeyAsync(key);
+
+    if (!cachedComponent) {
       throw errorService.createComponentSetError(
         ErrorCode.COMPONENT_SET_NOT_FOUND,
-        `Component set not found for key: ${key}`,
+        `Component or component set not found for key: ${key}`,
         { componentKey: key }
       );
     }
 
-    // Validate that this is actually a component set
-    if (cachedComponentSet.type !== "COMPONENT_SET") {
+    // Validate that this is actually a component
+    if (cachedComponent.type !== "COMPONENT") {
       throw errorService.createComponentSetError(
         ErrorCode.COMPONENT_SET_INVALID,
-        `The selected element is not a component set. Found type: ${cachedComponentSet.type}`,
-        { componentKey: key, componentType: cachedComponentSet.type }
+        `The selected element is not a component or component set. Found type: ${cachedComponent.type}`,
+        { componentKey: key, componentType: cachedComponent.type }
       );
     }
 
-    // Validate that this is actually a component set with required properties
-    if (!cachedComponentSet.componentPropertyDefinitions) {
-      throw errorService.createComponentSetError(
-        ErrorCode.COMPONENT_SET_INVALID,
-        `Component set "${cachedComponentSet.name}" does not have component property definitions`,
-        { componentKey: key, componentName: cachedComponentSet.name }
-      );
-    }
-
-    if (!cachedComponentSet.defaultVariant) {
-      throw errorService.createComponentSetError(
-        ErrorCode.COMPONENT_SET_INVALID,
-        `Component set "${cachedComponentSet.name}" does not have a default variant`,
-        { componentKey: key, componentName: cachedComponentSet.name }
-      );
-    }
-
-    cachedComponentProps = getComponentPropertyInfo(cachedComponentSet);
-    nestedInstances = findExposedInstances(cachedComponentSet.defaultVariant);
+    // For regular components, we get properties differently
+    cachedComponentProps = getComponentPropertyInfoFromComponent(cachedComponent);
+    nestedInstances = findExposedInstances(cachedComponent);
+    
   } catch (error) {
     if (error instanceof Error && error.message.includes("not found")) {
       throw errorService.createComponentSetError(
         ErrorCode.COMPONENT_SET_NOT_FOUND,
-        `Component set not found for key: ${key}`,
+        `Component or component set not found for key: ${key}`,
         { componentKey: key }
       );
     }
