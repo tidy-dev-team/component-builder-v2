@@ -141,6 +141,10 @@ export const componentRegistry: ComponentData = {
   "Search (with label and helper text) Underlined": {
     key: "c03b44ca74712283b95b30126a6512b2bb6e060a",
   },
+  "Tabs / Outling Tab Bar": {
+    key: "ad5a3f707653e91485fee7dea28e908ef701a8b9",
+    type: "component",
+  },
 };
 
 export function registerComponent(
