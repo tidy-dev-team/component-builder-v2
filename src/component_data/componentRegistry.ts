@@ -97,22 +97,22 @@ export const componentRegistry: ComponentData = {
   "Numeric Input (Buttons) Underlined": {
     key: "c16a73a74fc69dcbd69b8207f268f998a7ff69af",
   },
-  "Numeric Input (Stepper 1)": {
+  "Numeric Input / Stepper 1": {
     key: "0c7481e296b1aa2fd6a9ee723e862b1fb1bb0879",
   },
-  "Numeric Input (Stepper 2)": {
+  "Numeric Input / Stepper 2": {
     key: "920d6e95c1ffe44c033a66901f5328e088b31f36",
   },
-  "Radio Button (Icon)": {
+  "Radio Button / Icon": {
     key: "d03856624a6be9ba50ce2bd04fc6df292ba35426",
   },
-  "Radio Button Item (Icon)": {
+  "Radio Button Item / Icon": {
     key: "67b1272ac6d5fedbf7cba7f4e99224e463abe392",
   },
-  "Radio Button (Vector)": {
+  "Radio Button / Vector": {
     key: "217f967a6f658672c005979c9bc388811c3eeeb4",
   },
-  "Radio Button Item (Vector)": {
+  "Radio Button Item / Vector": {
     key: "7f58a9fa0837ad52cf63ae52b08ed7de88c359bd",
   },
   Link: {
@@ -121,13 +121,13 @@ export const componentRegistry: ComponentData = {
   Slider: {
     key: "634edb92fa517ba797c48d12666af58dd4f72b1c",
   },
-  "Search (simple) Outlined": {
+  "Search / Simple / Outlined": {
     key: "d1cbee420e90c775a15a3eee0e9e61bd32db4850",
   },
-  "Search (simple) Contained": {
+  "Search / Simple / Contained": {
     key: "76fee6a0f51aa738a7463096bc84059c1ea9dd1b",
   },
-  "Search (simple) Underlined": {
+  "Search / Simple / Underlined": {
     key: "6555c6b1e3c06e769073ca627dc9259540b1c36e",
   },
   "Search / Label and helper text / Outlined": {
