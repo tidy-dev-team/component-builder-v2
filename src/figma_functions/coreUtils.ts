@@ -227,35 +227,77 @@ export function getComponentPropertyInfoFromComponent(
       return [];
     }
 
-    // For regular components, we need to check if they have componentPropertyReferences
-    if (!node.componentPropertyReferences) {
-      console.log("Component does not have componentPropertyReferences");
-      return [];
+    console.log(`Getting properties for regular component: ${node.name}`);
+    const properties: ComponentPropertyInfo[] = [];
+
+    // Check if the component has componentPropertyDefinitions (like component sets)
+    // This is the main case for your component
+    if (node.componentPropertyDefinitions && Object.keys(node.componentPropertyDefinitions).length > 0) {
+      console.log("Component has componentPropertyDefinitions:", Object.keys(node.componentPropertyDefinitions));
+      
+      Object.entries(node.componentPropertyDefinitions).forEach(([propName, propDef]) => {
+        properties.push({
+          name: propName,
+          type: propDef.type,
+          defaultValue: propDef.defaultValue,
+          preferredValues: propDef.preferredValues,
+          variantOptions: propDef.variantOptions,
+          boundVariables: propDef.boundVariables,
+          path: [], // For regular components, we'll keep path empty for now
+        });
+      });
     }
 
-    const properties: ComponentPropertyInfo[] = [];
-    const refs = node.componentPropertyReferences;
-    
-    // Extract unique property names from all references
-    const propertyNames = new Set<string>();
-    Object.values(refs).forEach(propName => {
-      if (typeof propName === 'string') {
-        propertyNames.add(propName);
-      }
-    });
-
-    // Create property info for each unique property
-    propertyNames.forEach(propName => {
-      // For regular components, we don't have property definitions like component sets
-      // So we create basic property info
-      properties.push({
-        name: propName,
-        type: "TEXT", // Default to text type for regular components
-        defaultValue: "",
-        path: [], // Path calculation would be more complex for regular components
+    // For regular components, check for componentPropertyReferences
+    if (node.componentPropertyReferences && Object.keys(node.componentPropertyReferences).length > 0) {
+      console.log("Component has componentPropertyReferences:", Object.keys(node.componentPropertyReferences));
+      const refs = node.componentPropertyReferences;
+      
+      // Extract unique property names from all references
+      const propertyNames = new Set<string>();
+      Object.values(refs).forEach(propName => {
+        if (typeof propName === 'string') {
+          propertyNames.add(propName);
+        }
       });
-    });
 
+      // Create property info for each unique property (avoid duplicates)
+      propertyNames.forEach(propName => {
+        if (!properties.some(p => p.name === propName)) {
+          properties.push({
+            name: propName,
+            type: "TEXT", // Default to text type for regular components
+            defaultValue: "",
+            path: [],
+          });
+        }
+      });
+    }
+
+    // Also check if the component has componentProperties (legacy/different case)
+    if ((node as any).componentProperties && Object.keys((node as any).componentProperties).length > 0) {
+      console.log("Component has componentProperties:", Object.keys((node as any).componentProperties));
+      
+      Object.entries((node as any).componentProperties).forEach(([propName, propDef]: [string, any]) => {
+        // Avoid duplicates
+        if (!properties.some(p => p.name === propName)) {
+          properties.push({
+            name: propName,
+            type: propDef.type || "TEXT",
+            defaultValue: propDef.defaultValue || "",
+            path: [],
+          });
+        }
+      });
+    }
+
+    // If no properties found, log it
+    if (properties.length === 0) {
+      console.log(`No exposed properties found for component: ${node.name}`);
+      console.log("Regular component imported successfully, but has no exposed properties");
+    }
+
+    console.log(`Found ${properties.length} properties for component:`, properties.map(p => p.name));
     return properties.sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
     console.error("Error getting component property info from component:", error);

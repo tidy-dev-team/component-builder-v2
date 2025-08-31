@@ -43,6 +43,7 @@ export default async function () {
           }
         );
         lastComponentKey = componentSetData.key;
+        console.log(`Emitting properties to UI: ${cachedComponentProps?.length || 0} properties, ${nestedInstances?.length || 0} nested instances`);
         emit("COMPONENT_SET_PROPERTIES", {
           cachedComponentProps,
           nestedInstances,
@@ -182,6 +183,7 @@ async function getComponentSet(key: string): Promise<void> {
 
         cachedComponentProps = getComponentPropertyInfo(cachedComponentSet);
         nestedInstances = findExposedInstances(cachedComponentSet.defaultVariant);
+        console.log(`Component set imported successfully: ${cachedComponentSet.name}, properties: ${cachedComponentProps.length}`);
         return;
       }
     } catch (error) {
@@ -212,6 +214,7 @@ async function getComponentSet(key: string): Promise<void> {
     // For regular components, we get properties differently
     cachedComponentProps = getComponentPropertyInfoFromComponent(cachedComponent);
     nestedInstances = findExposedInstances(cachedComponent);
+    console.log(`Regular component imported successfully: ${cachedComponent.name}, properties: ${cachedComponentProps.length}`);
     
   } catch (error) {
     if (error instanceof Error && error.message.includes("not found")) {
