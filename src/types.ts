@@ -1,8 +1,8 @@
 export interface ComponentData {
   [componentName: string]: {
-    name: string;
     key: string;
-    type: "componentSet" | "component";
+    type?: "componentSet" | "component";
+    name?: string;
     properties?: ComponentProperty[];
   };
 }
