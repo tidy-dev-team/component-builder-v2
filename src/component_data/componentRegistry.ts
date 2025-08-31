@@ -187,4 +187,7 @@ export const componentRegistry: ComponentData = {
   "Toggle / Toggle item": {
     key: "83bc1f0e7c89e5499a5ea80b96713bc64691ea87",
   },
+  "Banner / Contained": {
+    key: "4051ed5436e3160aa971fb070c97a0cd59d688d4",
+  },
 };
