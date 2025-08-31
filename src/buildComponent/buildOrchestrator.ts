@@ -6,7 +6,7 @@ import {
   cloneComponent,
 } from "./componentValidator";
 import { processVariantProperties } from "./variantProcessor";
-import { processNonVariantProperties } from "./propertyProcessor";
+import { processNonVariantProperties, processComponentProperties } from "./propertyProcessor";
 import {
   renderToCanvas,
   validateCanvasAccess,
@@ -138,8 +138,20 @@ export async function orchestrateBuild(
 
       result.componentSet = renderResult.componentSet;
     } else if (clonedComponent) {
-      // For regular components, we handle them differently
-      // No variant processing needed, just render to canvas
+      // For regular components, process properties based on user selections
+      const propsToDisable = getEnabledProperties(buildData);
+      const componentPropertyResult = processComponentProperties({
+        buildData,
+        component: clonedComponent,
+        disabledProperties: propsToDisable,
+      });
+
+      result.stats.propertiesProcessed = componentPropertyResult.processedProperties.length;
+      result.stats.propertiesSkipped = componentPropertyResult.skippedProperties.length;
+      result.stats.elementsDeleted = componentPropertyResult.deletedElements;
+      result.errors.push(...componentPropertyResult.errors);
+
+      // Render to canvas
       const renderResult = renderToCanvas({
         component: clonedComponent,
         focusViewport: true,

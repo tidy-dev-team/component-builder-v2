@@ -1,4 +1,4 @@
-import { getComponentPropertyType, getElementsWithComponentProperty } from "../figma_functions/coreUtils";
+import { getComponentPropertyType, getElementsWithComponentProperty, getElementsWithComponentPropertyFromComponent, hasPropertyInComponent } from "../figma_functions/coreUtils";
 import { isDependentProperty } from "../ui_utils";
 import { errorService } from "../errors";
 import { BuildEventData, PropertyUsedStates } from "../types";
@@ -134,6 +134,105 @@ export function getPropertyElementCount(componentSet: ComponentSetNode, property
       propertyName,
     });
     return 0;
+  }
+}
+
+// Regular component property processing
+export interface ComponentPropertyProcessingOptions {
+  buildData: BuildEventData;
+  component: ComponentNode;
+  disabledProperties: PropertyUsedStates;
+}
+
+export function processComponentProperties(options: ComponentPropertyProcessingOptions): PropertyProcessingResult {
+  const { buildData, component, disabledProperties } = options;
+  const result: PropertyProcessingResult = {
+    processedProperties: [],
+    skippedProperties: [],
+    deletedElements: 0,
+    errors: [],
+  };
+
+  const propKeys = Object.keys(disabledProperties);
+
+  // Process properties that are disabled (unchecked in UI)
+  for (const propKey of propKeys) {
+    if (!buildData[propKey]) { // Property is disabled (checkbox unchecked)
+      try {
+        const processResult = processComponentProperty(component, propKey);
+        
+        if (processResult.success) {
+          result.processedProperties.push(propKey);
+          result.deletedElements += processResult.deletedElements;
+        } else {
+          result.skippedProperties.push(propKey);
+          result.errors.push(processResult.error || `Failed to process ${propKey}`);
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        result.errors.push(`Failed to process property "${propKey}": ${errorMessage}`);
+        result.skippedProperties.push(propKey);
+        
+        errorService.handleError(error, {
+          operation: 'PROCESS_COMPONENT_PROPERTY',
+          propertyName: propKey,
+          componentName: component.name,
+        });
+      }
+    } else {
+      // Property is enabled, so we keep it
+      result.skippedProperties.push(propKey);
+    }
+  }
+
+  return result;
+}
+
+function processComponentProperty(
+  component: ComponentNode,
+  propKey: string
+): PropertyProcessResult {
+  try {
+    const propertyName = propKey.split("#")[0];
+    const foundElements = getElementsWithComponentPropertyFromComponent(component, propKey);
+    let deletedElements = 0;
+
+    console.log(`Processing component property: ${propKey}, found ${foundElements.length} elements`);
+
+    // Delete property definition if it exists
+    if (component.componentPropertyDefinitions && component.componentPropertyDefinitions[propKey]) {
+      try {
+        component.deleteComponentProperty(propKey);
+        console.log(`Deleted component property definition: ${propKey}`);
+      } catch (deleteError) {
+        console.warn(`Could not delete property definition for ${propKey}:`, deleteError);
+        // Continue even if we can't delete the property definition
+      }
+    }
+
+    // Remove elements that were using this property
+    if (foundElements.length > 0) {
+      try {
+        foundElements.forEach((element) => element.remove());
+        deletedElements = foundElements.length;
+        console.log(`Removed ${deletedElements} elements for property: ${propKey}`);
+      } catch (deleteError) {
+        errorService.handleError(deleteError, {
+          operation: 'DELETE_COMPONENT_PROPERTY_ELEMENTS',
+          propertyName: propKey,
+          elementsCount: foundElements.length,
+        });
+        throw deleteError;
+      }
+    }
+
+    return { success: true, deletedElements };
+  } catch (error) {
+    return {
+      success: false,
+      deletedElements: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
   }
 }
 
