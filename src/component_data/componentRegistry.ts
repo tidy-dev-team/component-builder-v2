@@ -130,13 +130,13 @@ export const componentRegistry: ComponentData = {
   "Search (simple) Underlined": {
     key: "6555c6b1e3c06e769073ca627dc9259540b1c36e",
   },
-  "Search (with label and helper text) Outlined": {
+  "Search / Label and helper text / Outlined": {
     key: "d17ab929f45a9a7fc16af3445762aa4b1ae0a995",
   },
-  "Search (with label and helper text) Contained": {
+  "Search / Label and helper text / Contained": {
     key: "c1cacd1f947a8218f0d3339ef2211861f712d2a8",
   },
-  "Search (with label and helper text) Underlined": {
+  "Search / Label and helper text / Underlined": {
     key: "c03b44ca74712283b95b30126a6512b2bb6e060a",
   },
   "Tabs / Outline Tab Bar": {
@@ -165,5 +165,26 @@ export const componentRegistry: ComponentData = {
   },
   "Tabs / Anatomy / Outlined tabs": {
     key: "8980d2beaaabc9c4afaca42bc99a00b8631bce20",
+  },
+  Tooltip: {
+    key: "f6ee011c5c55ec82079db4ae04cd80cb408daa05",
+  },
+  "Tooltip / Outlined": {
+    key: "8dbe59d0fbd67af83c2f1eceb19b13e0e53e8acb",
+  },
+  "Toggle / Icon on knob": {
+    key: "bbe9c3a1d79cbcb7c35b2471d9bc10ca0a42d10e",
+  },
+  "Toggle / Icon on body": {
+    key: "35e62944ba32040d4f3e90dd9639801da1e105c8",
+  },
+  "Toggle / Text on body": {
+    key: "5d5898062c6a69ee15036293dfc731fedf5b3da5",
+  },
+  "Toggle / Larger knob": {
+    key: "6a7c4232f96ecd7dc34a2a1248ecaed9d06d39e2",
+  },
+  "Toggle / Toggle item": {
+    key: "83bc1f0e7c89e5499a5ea80b96713bc64691ea87",
   },
 };
