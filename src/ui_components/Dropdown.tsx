@@ -31,25 +31,45 @@ const dropdownStyles = {
 
 export function DropdownComponent({ components }: DropdownComponentProps) {
   const componentNames = Object.keys(components);
-  const dropdownOptions = componentNames.map(
-    (name): DropdownOption => ({ value: name })
+
+  // Create dropdown options with separators based on componentRegistry entries
+  const dropdownOptions = componentNames.reduce(
+    (acc: DropdownOption[], name) => {
+      const component = components[name];
+
+      // Check if this is a separator entry
+      if (component.type === "separator") {
+        // Add a visual separator (empty header creates a line)
+        acc.push({ header: "―――――" }); // or you can use an empty header: { header: "" }
+        return acc;
+      }
+
+      // Add regular component option
+      acc.push({ value: name });
+      return acc;
+    },
+    []
   );
+
   const [value, setValue] = useAtom(selectedComponentAtom);
 
   function handleChange(event: JSX.TargetedEvent<HTMLInputElement>) {
     const rawValue = event.currentTarget.value;
-    
+
     // Sanitize the input value
     const sanitizedValue = InputSanitizer.sanitizeUserInput(rawValue);
-    
+
     // Validate the selection
-    const validationResult = InputValidator.validateDropdownSelection(sanitizedValue, componentNames);
-    
+    const validationResult = InputValidator.validateDropdownSelection(
+      sanitizedValue,
+      componentNames
+    );
+
     if (validationResult.valid) {
       setValue(sanitizedValue);
     } else {
       // Log validation errors for debugging
-      console.warn('Dropdown validation failed:', validationResult.errors);
+      console.warn("Dropdown validation failed:", validationResult.errors);
       // Reset to empty to force user to make a valid selection
       setValue("");
     }
@@ -57,9 +77,7 @@ export function DropdownComponent({ components }: DropdownComponentProps) {
 
   return (
     <div style={dropdownStyles.wrapper}>
-      <label style={dropdownStyles.label}>
-        Component
-      </label>
+      <label style={dropdownStyles.label}>Component</label>
       <div style={dropdownStyles.container}>
         <Dropdown
           onChange={handleChange}
