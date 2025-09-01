@@ -40,7 +40,7 @@ export function DropdownComponent({ components }: DropdownComponentProps) {
       // Check if this is a separator entry
       if (component.type === "separator") {
         // Add a visual separator (empty header creates a line)
-        acc.push({ header: "―――――" }); // or you can use an empty header: { header: "" }
+        acc.push({ header: "――――――――――――――――――" }); // or you can use an empty header: { header: "" }
         return acc;
       }
 
