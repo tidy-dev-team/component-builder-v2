@@ -8,3 +8,5 @@ export const selectedComponentPropertiesAtom = atom<ComponentPropertyInfo[]>(
 );
 
 export const propertyUsedStatesAtom = atom<PropertyUsedStates>({});
+
+export const isLoadingComponentAtom = atom<boolean>(false);

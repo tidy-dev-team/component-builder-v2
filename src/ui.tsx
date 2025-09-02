@@ -11,6 +11,7 @@ import {
   selectedComponentAtom,
   selectedComponentPropertiesAtom,
   propertyUsedStatesAtom,
+  isLoadingComponentAtom,
 } from "./state/atoms";
 import { ComponentPropertyInfo, PropertyUsedStates } from "./types";
 import { renderAllProperties } from "./ui_elements";
@@ -66,6 +67,18 @@ const styles = {
     fontSize: "12px",
     lineHeight: "1.5",
   },
+  loadingState: {
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "center",
+    justifyContent: "center",
+    height: "200px",
+    color: "#6b7280",
+  },
+  loadingText: {
+    fontSize: "12px",
+    color: "#6b7280",
+  },
 };
 
 function Plugin() {
@@ -76,6 +89,7 @@ function Plugin() {
   const [propertyUsedStates, setPropertyUsedStates] = useAtom(
     propertyUsedStatesAtom
   );
+  const [isLoadingComponent, setIsLoadingComponent] = useAtom(isLoadingComponentAtom);
   const [nestedInstances, setNestedInstances] = useState<{ name: string; id: string; key: string }[]>([]);
 
   function handleButtonClick() {
@@ -85,9 +99,12 @@ function Plugin() {
 
   useEffect(() => {
     if (selectedComponent) {
+      setIsLoadingComponent(true);
+      setComponentProps([]);
+      setPropertyUsedStates({});
       emit("GET_COMPONENT_SET_PROPERTIES", components[selectedComponent]);
     }
-  }, [selectedComponent]);
+  }, [selectedComponent, setIsLoadingComponent, setComponentProps, setPropertyUsedStates]);
 
   useEffect(() => {
     const unsubscribe = on(
@@ -128,10 +145,13 @@ function Plugin() {
           // Reset to empty state if no valid props
           setPropertyUsedStates({});
         }
+
+        // Set loading to false once we have received the component data
+        setIsLoadingComponent(false);
       }
     );
     return unsubscribe;
-  }, [setComponentProps, setPropertyUsedStates]);
+  }, [setComponentProps, setPropertyUsedStates, setIsLoadingComponent]);
 
   return (
     <Container space="medium" style={styles.container}>
@@ -150,7 +170,11 @@ function Plugin() {
 
       {/* Content */}
       <div style={styles.content}>
-        {selectedComponent && componentProps.length > 0 ? (
+        {isLoadingComponent ? (
+          <div style={styles.loadingState}>
+            <div style={styles.loadingText}>Loading...</div>
+          </div>
+        ) : selectedComponent && componentProps.length > 0 ? (
           renderAllProperties(componentProps, propertyUsedStates, nestedInstances)
         ) : (
            <div style={styles.emptyState}>
