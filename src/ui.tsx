@@ -16,6 +16,49 @@ import {
 import { ComponentPropertyInfo, PropertyUsedStates } from "./types";
 import { renderAllProperties } from "./ui_elements";
 
+// Animated Loading Component
+function AnimatedLoading() {
+  const letters = "Loading...".split("");
+  
+  const letterStyle = (index: number) => ({
+    display: "inline-block",
+    fontSize: "12px",
+    color: "#9ca3af", // Base lighter gray
+    animation: `wave 1.5s ease-in-out ${index * 0.1}s infinite`,
+    animationFillMode: "both" as const,
+  });
+
+  // Inject keyframes into document head if not already present
+  useEffect(() => {
+    const styleId = "wave-animation";
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement("style");
+      style.id = styleId;
+      style.textContent = `
+        @keyframes wave {
+          0%, 100% {
+            color: #d1d5db;
+          }
+          50% {
+            color: #374151;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }, []);
+
+  return (
+    <div>
+      {letters.map((letter, index) => (
+        <span key={index} style={letterStyle(index)}>
+          {letter === " " ? "\u00A0" : letter}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 // Sleek UI styles
 const styles = {
   container: {
@@ -172,7 +215,7 @@ function Plugin() {
       <div style={styles.content}>
         {isLoadingComponent ? (
           <div style={styles.loadingState}>
-            <div style={styles.loadingText}>Loading...</div>
+            <AnimatedLoading />
           </div>
         ) : selectedComponent && componentProps.length > 0 ? (
           renderAllProperties(componentProps, propertyUsedStates, nestedInstances)
