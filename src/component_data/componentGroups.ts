@@ -18,7 +18,7 @@ export const componentGroups = [
 
   // Navigation & Buttons
   [
-    ["Breadcrumbs", "8563670cf1d3591bd4f3af9d0156cc0a7d99dd0b"],
+    ["Breadcrumbs 🟡", "8563670cf1d3591bd4f3af9d0156cc0a7d99dd0b"],
     ["Buttons", "1a45acec266bbb1bd1338744453eb9e33aa2af53"],
     ["Button Icon", "37a61a1f231653e5fe0d8fb5afeb561f1dfe3807"],
     ["Button Text", "1484a29ce5e8cd702dc12913d2b79a464d269227"],
@@ -38,9 +38,9 @@ export const componentGroups = [
     ["Text Input Outlined", "3fa0112d53708a35080dfd22530ebf3dbbbcdf4d"],
     ["Text Input Contained", "46e44149a998ceae1bdbff378c85818e4ecd89e6"],
     ["Text Input Underlined", "2ef5964e087304eaecb3887bb3b2441834450f21"],
-    ["Select Input Outlined", "bb1ce670f2e5eb30645a8381232c4ab166a56834"],
-    ["Select Input Contained", "0aeeec1c853b6245284581b97e9f7c04f63e1f60"],
-    ["Select Input Underlined", "cbba2e72a7ad213bef170e4856c5cc6d25f61025"],
+    ["Select Input Outlined 🔴", "bb1ce670f2e5eb30645a8381232c4ab166a56834"],
+    ["Select Input Contained 🔴", "0aeeec1c853b6245284581b97e9f7c04f63e1f60"],
+    ["Select Input Underlined 🔴", "cbba2e72a7ad213bef170e4856c5cc6d25f61025"],
     ["Text Area Outlined", "cd98d2840dfb806c6d4565cf350241e5154b77e6"],
     ["Text Area Contained", "db19df1e8d74d68586027a3adedd40c52b242c26"],
     ["Text Area Underlined", "da1e71702ca3f2fa022054c190c88dfa36cb4d7e"],
@@ -84,7 +84,7 @@ export const componentGroups = [
   [["Link", "7c987b097108e85d6b25ab2037f58013b41648da"]],
 
   //Slider
-  [["Slider", "634edb92fa517ba797c48d12666af58dd4f72b1c"]],
+  [["Slider 🟡", "634edb92fa517ba797c48d12666af58dd4f72b1c"]],
   // Search
   [
     ["Search / Simple / Outlined", "d1cbee420e90c775a15a3eee0e9e61bd32db4850"],
@@ -130,7 +130,7 @@ export const componentGroups = [
       "component",
     ],
     [
-      "Tabs / Raised tab Bar",
+      "Tabs / Raised tab Bar 🔴",
       "d12428eb3ea9017202790ad1fe14056e7e6465c3",
       "component",
     ],
@@ -140,7 +140,7 @@ export const componentGroups = [
       "component",
     ],
     [
-      "Tabs / Anatomy / Outlined tabs",
+      "Tabs / Anatomy / Outlined tabs 🔴",
       "8980d2beaaabc9c4afaca42bc99a00b8631bce20",
     ],
   ],
@@ -162,6 +162,7 @@ export const componentGroups = [
 
   //Molecules
   [],
+
   //Banner
   [
     ["Banner / Contained", "4051ed5436e3160aa971fb070c97a0cd59d688d4"],
@@ -186,7 +187,7 @@ export const componentGroups = [
   [
     ["Pagination", "dff809ac67db6904c36d5b5fbdc77f6fa21a8488"],
     ["Pagination / Dots", "e9639f4d5177258881813e2d9d7d48268fd8d9c2"],
-    ["Pagination / Controls", "22a930fe7e44c1b7abe7797029387fe7e2355bd3"],
+    ["Pagination / Controls 🟡", "22a930fe7e44c1b7abe7797029387fe7e2355bd3"],
   ],
 
   //Progress Bar
@@ -205,5 +206,39 @@ export const componentGroups = [
     ["Toast / Contained", "cbd96e5937c39584cdc24c65e77124257b5ec973"],
     ["Toast / Outlined", "6c025d09de3ac9deae7298b907123a32f733e4ac"],
     ["Toast / Partial Stroke", "7c5b45911920818e6024cb8815a45829eb6fcce2"],
+  ],
+
+  //Organisms
+  [],
+
+  //Cards
+  [
+    ["Card / Empty", "51d884851eda63c5a84f5050a34e33b3932dc7ea"],
+    [
+      "Card / With Header and Footer",
+      "7d9e007b76f1f7f33164d2195da568a64a87f74a",
+    ],
+    ["Card / With Image", "e08ddcd5497b6fdaf55a9312be53e1d1a6126f18"],
+  ],
+  //Date picker
+  [
+    ["Date picker", "d2b86bf1c334770e5ca39e9b47959931cd6d02c8"],
+    ["Year picker", "a9df7c00beef7396876b3d3a5b69fa225f5819c9"],
+    ["Month picker", "c9056dd6639510566e205d2ac8b572f0e1511f84"],
+  ],
+
+  //Modal
+  [["Modal", "b15987de0b80d9a9961b1a581e82ab23ac991c8b"]],
+
+  //Progress Indicator
+  [
+    ["Progress Indicator / 1", "82110e30c92a62c2db92bf3b643f930b30298c57"],
+    ["Progress Indicator / 2", "abc98de5a5c3aa657061a367d38f45fa43d2d000"],
+  ],
+  //Table
+  [
+    ["Table grid", "fd48337e270dce4c2462adb1f29a8869ca6b9d86"],
+    ["Table columns", "c09bf6bf9d929ab656ad7aa4024a5823b32cb342"],
+    ["Table rows", "4320038ee1afde6d5ddbc58355a196d4e03cfd0b"],
   ],
 ];
