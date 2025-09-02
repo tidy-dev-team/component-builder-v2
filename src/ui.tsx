@@ -16,48 +16,6 @@ import {
 import { ComponentPropertyInfo, PropertyUsedStates } from "./types";
 import { renderAllProperties } from "./ui_elements";
 
-// Animated Loading Component
-function AnimatedLoading() {
-  const letters = "Loading...".split("");
-  
-  const letterStyle = (index: number) => ({
-    display: "inline-block",
-    fontSize: "12px",
-    color: "#9ca3af", // Base lighter gray
-    animation: `wave 1.5s ease-in-out ${index * 0.1}s infinite`,
-    animationFillMode: "both" as const,
-  });
-
-  // Inject keyframes into document head if not already present
-  useEffect(() => {
-    const styleId = "wave-animation";
-    if (!document.getElementById(styleId)) {
-      const style = document.createElement("style");
-      style.id = styleId;
-      style.textContent = `
-        @keyframes wave {
-          0%, 100% {
-            color: #d1d5db;
-          }
-          50% {
-            color: #374151;
-          }
-        }
-      `;
-      document.head.appendChild(style);
-    }
-  }, []);
-
-  return (
-    <div>
-      {letters.map((letter, index) => (
-        <span key={index} style={letterStyle(index)}>
-          {letter === " " ? "\u00A0" : letter}
-        </span>
-      ))}
-    </div>
-  );
-}
 
 // Sleek UI styles
 const styles = {
@@ -132,8 +90,12 @@ function Plugin() {
   const [propertyUsedStates, setPropertyUsedStates] = useAtom(
     propertyUsedStatesAtom
   );
-  const [isLoadingComponent, setIsLoadingComponent] = useAtom(isLoadingComponentAtom);
-  const [nestedInstances, setNestedInstances] = useState<{ name: string; id: string; key: string }[]>([]);
+  const [isLoadingComponent, setIsLoadingComponent] = useAtom(
+    isLoadingComponentAtom
+  );
+  const [nestedInstances, setNestedInstances] = useState<
+    { name: string; id: string; key: string }[]
+  >([]);
 
   function handleButtonClick() {
     console.log("propertyUsedStates :>> ", propertyUsedStates);
@@ -147,7 +109,12 @@ function Plugin() {
       setPropertyUsedStates({});
       emit("GET_COMPONENT_SET_PROPERTIES", components[selectedComponent]);
     }
-  }, [selectedComponent, setIsLoadingComponent, setComponentProps, setPropertyUsedStates]);
+  }, [
+    selectedComponent,
+    setIsLoadingComponent,
+    setComponentProps,
+    setPropertyUsedStates,
+  ]);
 
   useEffect(() => {
     const unsubscribe = on(
@@ -189,8 +156,10 @@ function Plugin() {
           setPropertyUsedStates({});
         }
 
-        // Set loading to false once we have received the component data
-        setIsLoadingComponent(false);
+        // Add a small delay to ensure UI has time to render before hiding loading state
+        setTimeout(() => {
+          setIsLoadingComponent(false);
+        }, 100);
       }
     );
     return unsubscribe;
@@ -215,21 +184,25 @@ function Plugin() {
       <div style={styles.content}>
         {isLoadingComponent ? (
           <div style={styles.loadingState}>
-            <AnimatedLoading />
+            <div style={styles.loadingText}>Loading...</div>
           </div>
         ) : selectedComponent && componentProps.length > 0 ? (
-          renderAllProperties(componentProps, propertyUsedStates, nestedInstances)
+          renderAllProperties(
+            componentProps,
+            propertyUsedStates,
+            nestedInstances
+          )
         ) : (
-           <div style={styles.emptyState}>
-             <div style={styles.emptyStateIcon}>⚡</div>
-             <div style={styles.emptyStateText}>
-               {selectedComponent
-                 ? componentProps === null
-                   ? "Error loading component properties. Please try selecting the component again."
-                   : "Loading component properties..."
-                 : "Choose a component to get started"}
-             </div>
-           </div>
+          <div style={styles.emptyState}>
+            <div style={styles.emptyStateIcon}>⚡</div>
+            <div style={styles.emptyStateText}>
+              {selectedComponent
+                ? componentProps === null
+                  ? "Error loading component properties. Please try selecting the component again."
+                  : "Loading component properties..."
+                : "Choose a component to get started"}
+            </div>
+          </div>
         )}
       </div>
 
@@ -237,7 +210,9 @@ function Plugin() {
       <div style={styles.footer}>
         <ButtonComponent
           callback={handleButtonClick}
-          disabled={!selectedComponent || !componentProps || componentProps.length === 0}
+          disabled={
+            !selectedComponent || !componentProps || componentProps.length === 0
+          }
         />
       </div>
     </Container>
