@@ -130,7 +130,7 @@ export const componentGroups = [
       "component",
     ],
     [
-      "Tabs / Raised tab Bar 🔴",
+      "Tabs / Raised tab Bar",
       "d12428eb3ea9017202790ad1fe14056e7e6465c3",
       "component",
     ],
