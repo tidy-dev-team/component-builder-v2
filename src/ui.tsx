@@ -130,19 +130,47 @@ function Plugin() {
         const safeComponentProps = cachedComponentProps || [];
         const safeNestedInstances = nestedInstances || [];
 
+        // First, set the component props
         setComponentProps(safeComponentProps);
         setNestedInstances(safeNestedInstances);
 
         // Only process if we have valid component props
         if (safeComponentProps && Array.isArray(safeComponentProps)) {
-          const initialUsedStates = safeComponentProps.reduce(
+          console.log('🔍 Processing component props:', safeComponentProps.length, 'properties');
+
+          // Filter out invalid properties and validate names
+          const validProps = safeComponentProps.filter((prop: any, index: number) => {
+            if (!prop || typeof prop !== 'object') {
+              console.warn(`❌ Property ${index}: Invalid property object:`, prop);
+              return false;
+            }
+            if (!prop.name || typeof prop.name !== 'string' || prop.name.trim() === '') {
+              console.warn(`❌ Property ${index}: Missing valid name:`, prop);
+              return false;
+            }
+            console.log(`✅ Property ${index}: Valid - ${prop.name} (${prop.type})`);
+            return true;
+          });
+
+          console.log('📋 Valid properties after filtering:', validProps.length);
+
+          const initialUsedStates = validProps.reduce(
             (acc: any, prop: any) => {
               if (prop && prop.name) {
                 acc[prop.name] = true;
+                console.log(`🔄 Initializing state for: ${prop.name} = true`);
+
                 // Initialize variant options states
                 if (prop.type === "VARIANT" && prop.variantOptions) {
+                  console.log(`🎯 Processing variant options for ${prop.name}:`, prop.variantOptions);
                   prop.variantOptions.forEach((option: any) => {
-                    acc[`${prop.name}#${option}`] = true;
+                    if (typeof option === 'string' && option.trim() !== '') {
+                      const variantKey = `${prop.name}#${option}`;
+                      acc[variantKey] = true;
+                      console.log(`🔄 Initializing variant state: ${variantKey} = true`);
+                    } else {
+                      console.warn(`⚠️ Skipping invalid variant option:`, option);
+                    }
                   });
                 }
               }
@@ -150,9 +178,11 @@ function Plugin() {
             },
             {} as PropertyUsedStates
           );
+
+          console.log('🎯 Final initialUsedStates:', Object.keys(initialUsedStates));
           setPropertyUsedStates(initialUsedStates);
         } else {
-          // Reset to empty state if no valid props
+          console.log('🧹 Resetting property used states to empty');
           setPropertyUsedStates({});
         }
 

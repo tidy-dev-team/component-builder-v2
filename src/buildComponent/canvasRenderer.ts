@@ -15,26 +15,31 @@ export interface CanvasRenderResult {
 
 export function renderToCanvas(options: CanvasRenderOptions): CanvasRenderResult {
   const { componentSet, component, focusViewport = true } = options;
-  
+
   if (!componentSet && !component) {
     throw errorService.createBuildError(
       "Either componentSet or component must be provided",
       { operation: 'RENDER_TO_CANVAS' }
     );
   }
-  
+
   try {
     const nodeToRender = componentSet || component!;
     const nodeName = nodeToRender.name;
-    
+
     // Add component to current page
     figma.currentPage.appendChild(nodeToRender);
-    
+
+    // Calculate and set the position based on the new logic
+    const canvasInfo = getCanvasInfo();
+    const position = calculateComponentPosition(nodeToRender, canvasInfo.viewportCenter);
+    setComponentPosition(nodeToRender, position);
+
     // Focus viewport on the new component
     if (focusViewport) {
       figma.viewport.scrollAndZoomIntoView([nodeToRender]);
     }
-    
+
     return {
       success: true,
       componentSet,
@@ -43,16 +48,16 @@ export function renderToCanvas(options: CanvasRenderOptions): CanvasRenderResult
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const nodeName = componentSet?.name || component?.name || 'Unknown';
-    
+
     errorService.handleError(error, {
       operation: 'RENDER_TO_CANVAS',
       componentName: nodeName,
       focusViewport,
     });
-    
+
     throw errorService.createBuildError(
       "Failed to add component to canvas",
-      { 
+      {
         operation: 'ADD_TO_CANVAS',
         componentName: nodeName,
         focusViewport,

@@ -236,15 +236,23 @@ export function getComponentPropertyInfoFromComponent(
       console.log("Component has componentPropertyDefinitions:", Object.keys(node.componentPropertyDefinitions));
       
       Object.entries(node.componentPropertyDefinitions).forEach(([propName, propDef]) => {
-        properties.push({
-          name: propName,
-          type: propDef.type,
-          defaultValue: propDef.defaultValue,
-          preferredValues: propDef.preferredValues,
-          variantOptions: propDef.variantOptions,
-          boundVariables: propDef.boundVariables,
-          path: [], // For regular components, we'll keep path empty for now
-        });
+        console.log(`🔍 Processing component property: ${propName}`, propDef);
+        // Validate property name
+        if (typeof propName === 'string' && propName.trim() !== '') {
+          const property = {
+            name: propName,
+            type: propDef.type,
+            defaultValue: propDef.defaultValue,
+            preferredValues: propDef.preferredValues,
+            variantOptions: propDef.variantOptions,
+            boundVariables: propDef.boundVariables,
+            path: [], // For regular components, we'll keep path empty for now
+          };
+          properties.push(property);
+          console.log(`✅ Added component property: ${propName} (${propDef.type})`);
+        } else {
+          console.warn('❌ Skipping property with invalid name:', propName);
+        }
       });
     }
 
@@ -263,13 +271,15 @@ export function getComponentPropertyInfoFromComponent(
 
       // Create property info for each unique property (avoid duplicates)
       propertyNames.forEach(propName => {
-        if (!properties.some(p => p.name === propName)) {
+        if (typeof propName === 'string' && propName.trim() !== '' && !properties.some(p => p.name === propName)) {
           properties.push({
             name: propName,
             type: "TEXT", // Default to text type for regular components
             defaultValue: "",
             path: [],
           });
+        } else if (typeof propName !== 'string' || propName.trim() === '') {
+          console.warn('Skipping property reference with invalid name:', propName);
         }
       });
     }
@@ -332,7 +342,19 @@ export function getComponentPropertyInfo(
       return [];
     }
 
+    console.log('🔍 Processing component set properties:', Object.keys(properties));
+
     return Object.entries(properties)
+      .filter(([name, definition]) => {
+        console.log(`🔍 Processing component set property: ${name}`, definition);
+        // Validate property name
+        if (typeof name !== 'string' || name.trim() === '') {
+          console.warn('❌ Skipping component set property with invalid name:', name);
+          return false;
+        }
+        console.log(`✅ Component set property valid: ${name} (${definition.type})`);
+        return true;
+      })
       .map(([name, definition]) => {
         try {
           const nodeWithProps = getNodesWithPropertyReference(

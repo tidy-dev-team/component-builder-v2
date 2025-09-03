@@ -32,7 +32,6 @@ export const componentGroups = [
     ["Checkbox Item Vector", "b07ff3f8009f606c7537098bfa932d1e916206ac"],
     ["Chips", "d785439063b42d9fbe449f3d19223cfa825a47bf"],
   ],
-
   // Inputs
   [
     ["Text Input Outlined", "3fa0112d53708a35080dfd22530ebf3dbbbcdf4d"],
@@ -84,7 +83,14 @@ export const componentGroups = [
   [["Link", "7c987b097108e85d6b25ab2037f58013b41648da"]],
 
   //Slider
-  [["Slider 🟡", "634edb92fa517ba797c48d12666af58dd4f72b1c"]],
+  [
+    ["Slider / Basic", "dd1c2930460d9e768df6faffb9c9ba43417e5484"],
+    ["Slider / With Values", "f4e49f772d47b1af49984231de90d8a542b375ca"],
+    [
+      "Slider / With Values and Marks",
+      "9e2e9be8c6a24798eaa859437c4ff892c3bd0727",
+    ],
+  ],
   // Search
   [
     ["Search / Simple / Outlined", "d1cbee420e90c775a15a3eee0e9e61bd32db4850"],
