@@ -210,9 +210,7 @@ function Plugin() {
       <div style={styles.footer}>
         <ButtonComponent
           callback={handleButtonClick}
-          disabled={
-            !selectedComponent || !componentProps || componentProps.length === 0
-          }
+          disabled={!selectedComponent || isLoadingComponent}
         />
       </div>
     </Container>

@@ -16,9 +16,6 @@ import { orchestrateBuild, validateBuildData } from './buildOrchestrator';
 import { BuildEventData } from '../types';
 
 export async function buildUpdatedComponent(buildData: BuildEventData): Promise<void> {
-  // Validate input data
-  validateBuildData(buildData);
-  
-  // Orchestrate the build process
+  // Orchestrate the build process (validation is handled internally)
   await orchestrateBuild(buildData);
 }
