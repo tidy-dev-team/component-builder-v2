@@ -61,3 +61,24 @@ export interface CheckboxComponentProps extends ComponentPropertyInfo {
   disabled?: boolean;
   allProperties: ComponentPropertyInfo[];
 }
+
+// Event handler interfaces for Create Figma Plugin
+export interface BuildHandler {
+  name: 'BUILD';
+  handler: (buildData: BuildEventData) => void;
+}
+
+export interface ComponentSetHandler {
+  name: 'GET_COMPONENT_SET_PROPERTIES';
+  handler: (data: ComponentSetEventData) => void;
+}
+
+export interface RefreshHandler {
+  name: 'REFRESH_COMPONENT_SET';
+  handler: () => void;
+}
+
+export interface CloseHandler {
+  name: 'CLOSE';
+  handler: () => void;
+}

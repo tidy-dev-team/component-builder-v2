@@ -120,6 +120,10 @@ export default async function () {
     }
   });
 
+  on("CLOSE", () => {
+    figma.closePlugin();
+  });
+
   // Initialize design system variables on plugin startup
   try {
     await createVariables();
