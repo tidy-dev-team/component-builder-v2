@@ -103,11 +103,18 @@ function Plugin() {
   }
 
   useEffect(() => {
+    console.log("🎯 Setting up useEffect for selectedComponent:", selectedComponent);
     if (selectedComponent) {
+      console.log("🚀 Selected component changed, triggering data load...");
       setIsLoadingComponent(true);
       setComponentProps([]);
       setPropertyUsedStates({});
-      emit("GET_COMPONENT_SET_PROPERTIES", components[selectedComponent]);
+      
+      const componentData = components[selectedComponent];
+      console.log("📤 Emitting GET_COMPONENT_SET_PROPERTIES with:", componentData);
+      emit("GET_COMPONENT_SET_PROPERTIES", componentData);
+    } else {
+      console.log("🧹 No component selected, clearing state");
     }
   }, [
     selectedComponent,
@@ -117,12 +124,17 @@ function Plugin() {
   ]);
 
   useEffect(() => {
+    console.log("🎧 Setting up COMPONENT_SET_PROPERTIES event listener...");
     const unsubscribe = on(
       "COMPONENT_SET_PROPERTIES",
-      ({ cachedComponentProps, nestedInstances }) => {
+      (data) => {
+        console.log("📨 Received COMPONENT_SET_PROPERTIES event with data:", data);
+        
+        const { cachedComponentProps, nestedInstances } = data;
         console.log(
-          "data with path :>> ",
+          "📋 Processing received data - Props:",
           cachedComponentProps,
+          "Instances:",
           nestedInstances
         );
 
