@@ -30,10 +30,14 @@ const dropdownStyles = {
 };
 
 export function DropdownComponent({ components }: DropdownComponentProps) {
-  const componentNames = Object.keys(components);
+  const componentNames = Object.keys(components).filter((name) => {
+    // Filter out separator entries from selectable component names
+    const component = components[name];
+    return component.type !== "separator";
+  });
 
   // Create dropdown options with separators based on componentRegistry entries
-  const dropdownOptions = componentNames.reduce(
+  const dropdownOptions = Object.keys(components).reduce(
     (acc: DropdownOption[], name) => {
       const component = components[name];
 
@@ -52,6 +56,14 @@ export function DropdownComponent({ components }: DropdownComponentProps) {
   );
 
   const [value, setValue] = useAtom(selectedComponentAtom);
+
+  console.log("🔍 Dropdown Debug Info:", {
+    componentNames: componentNames.length,
+    dropdownOptions: dropdownOptions.length,
+    currentValue: value,
+    hasEmptyValue: value === "",
+    isValidSelection: componentNames.includes(value),
+  });
 
   function handleChange(event: JSX.TargetedEvent<HTMLInputElement>) {
     const rawValue = event.currentTarget.value;
@@ -79,18 +91,29 @@ export function DropdownComponent({ components }: DropdownComponentProps) {
     <div style={dropdownStyles.wrapper}>
       <label style={dropdownStyles.label}>Component</label>
       <div style={dropdownStyles.container}>
-        <Dropdown
-          onChange={handleChange}
-          options={dropdownOptions}
-          value={value}
-          placeholder="Choose a component..."
-          style={{
-            border: "none",
-            borderRadius: "8px",
-            fontSize: "13px",
-            height: "36px",
-          }}
-        />
+        {(() => {
+          try {
+            return (
+              <Dropdown
+                onChange={handleChange}
+                options={dropdownOptions}
+                value={value || null} // Convert empty string to null for Figma UI
+                placeholder="Choose a component..."
+                style={{
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "13px",
+                  height: "36px",
+                }}
+              />
+            );
+          } catch (error) {
+            console.error("❌ Dropdown render error:", error);
+            console.log("Debug - Options:", dropdownOptions);
+            console.log("Debug - Value:", value);
+            return <div>Dropdown Error: {String(error)}</div>;
+          }
+        })()}
       </div>
     </div>
   );
