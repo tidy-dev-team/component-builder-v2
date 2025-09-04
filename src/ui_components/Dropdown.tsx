@@ -81,7 +81,7 @@ export function DropdownComponent({ components }: DropdownComponentProps) {
       setValue(sanitizedValue);
     } else {
       // Log validation errors for debugging
-      console.warn("Dropdown validation failed:", validationResult.errors);
+      console.log("Dropdown validation failed:", validationResult.errors);
       // Reset to empty to force user to make a valid selection
       setValue("");
     }

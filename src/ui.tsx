@@ -16,7 +16,6 @@ import {
 import { ComponentPropertyInfo, PropertyUsedStates } from "./types";
 import { renderAllProperties } from "./ui_elements";
 
-
 // Sleek UI styles
 const styles = {
   container: {
@@ -103,15 +102,21 @@ function Plugin() {
   }
 
   useEffect(() => {
-    console.log("🎯 Setting up useEffect for selectedComponent:", selectedComponent);
+    console.log(
+      "🎯 Setting up useEffect for selectedComponent:",
+      selectedComponent
+    );
     if (selectedComponent) {
       console.log("🚀 Selected component changed, triggering data load...");
       setIsLoadingComponent(true);
       setComponentProps([]);
       setPropertyUsedStates({});
-      
+
       const componentData = components[selectedComponent];
-      console.log("📤 Emitting GET_COMPONENT_SET_PROPERTIES with:", componentData);
+      console.log(
+        "📤 Emitting GET_COMPONENT_SET_PROPERTIES with:",
+        componentData
+      );
       emit("GET_COMPONENT_SET_PROPERTIES", componentData);
     } else {
       console.log("🧹 No component selected, clearing state");
@@ -125,85 +130,105 @@ function Plugin() {
 
   useEffect(() => {
     console.log("🎧 Setting up COMPONENT_SET_PROPERTIES event listener...");
-    const unsubscribe = on(
-      "COMPONENT_SET_PROPERTIES",
-      (data) => {
-        console.log("📨 Received COMPONENT_SET_PROPERTIES event with data:", data);
-        
-        const { cachedComponentProps, nestedInstances } = data;
+    const unsubscribe = on("COMPONENT_SET_PROPERTIES", (data) => {
+      console.log(
+        "📨 Received COMPONENT_SET_PROPERTIES event with data:",
+        data
+      );
+
+      const { cachedComponentProps, nestedInstances } = data;
+      console.log(
+        "📋 Processing received data - Props:",
+        cachedComponentProps,
+        "Instances:",
+        nestedInstances
+      );
+
+      // Handle undefined or null data gracefully
+      const safeComponentProps = cachedComponentProps || [];
+      const safeNestedInstances = nestedInstances || [];
+
+      // First, set the component props
+      setComponentProps(safeComponentProps);
+      setNestedInstances(safeNestedInstances);
+
+      // Only process if we have valid component props
+      if (safeComponentProps && Array.isArray(safeComponentProps)) {
         console.log(
-          "📋 Processing received data - Props:",
-          cachedComponentProps,
-          "Instances:",
-          nestedInstances
+          "🔍 Processing component props:",
+          safeComponentProps.length,
+          "properties"
         );
 
-        // Handle undefined or null data gracefully
-        const safeComponentProps = cachedComponentProps || [];
-        const safeNestedInstances = nestedInstances || [];
-
-        // First, set the component props
-        setComponentProps(safeComponentProps);
-        setNestedInstances(safeNestedInstances);
-
-        // Only process if we have valid component props
-        if (safeComponentProps && Array.isArray(safeComponentProps)) {
-          console.log('🔍 Processing component props:', safeComponentProps.length, 'properties');
-
-          // Filter out invalid properties and validate names
-          const validProps = safeComponentProps.filter((prop: any, index: number) => {
-            if (!prop || typeof prop !== 'object') {
-              console.warn(`❌ Property ${index}: Invalid property object:`, prop);
+        // Filter out invalid properties and validate names
+        const validProps = safeComponentProps.filter(
+          (prop: any, index: number) => {
+            if (!prop || typeof prop !== "object") {
+              console.log(
+                `❌ Property ${index}: Invalid property object:`,
+                prop
+              );
               return false;
             }
-            if (!prop.name || typeof prop.name !== 'string' || prop.name.trim() === '') {
-              console.warn(`❌ Property ${index}: Missing valid name:`, prop);
+            if (
+              !prop.name ||
+              typeof prop.name !== "string" ||
+              prop.name.trim() === ""
+            ) {
+              console.log(`❌ Property ${index}: Missing valid name:`, prop);
               return false;
             }
-            console.log(`✅ Property ${index}: Valid - ${prop.name} (${prop.type})`);
+            console.log(
+              `✅ Property ${index}: Valid - ${prop.name} (${prop.type})`
+            );
             return true;
-          });
+          }
+        );
 
-          console.log('📋 Valid properties after filtering:', validProps.length);
+        console.log("📋 Valid properties after filtering:", validProps.length);
 
-          const initialUsedStates = validProps.reduce(
-            (acc: any, prop: any) => {
-              if (prop && prop.name) {
-                acc[prop.name] = true;
-                console.log(`🔄 Initializing state for: ${prop.name} = true`);
+        const initialUsedStates = validProps.reduce((acc: any, prop: any) => {
+          if (prop && prop.name) {
+            acc[prop.name] = true;
+            console.log(`🔄 Initializing state for: ${prop.name} = true`);
 
-                // Initialize variant options states
-                if (prop.type === "VARIANT" && prop.variantOptions) {
-                  console.log(`🎯 Processing variant options for ${prop.name}:`, prop.variantOptions);
-                  prop.variantOptions.forEach((option: any) => {
-                    if (typeof option === 'string' && option.trim() !== '') {
-                      const variantKey = `${prop.name}#${option}`;
-                      acc[variantKey] = true;
-                      console.log(`🔄 Initializing variant state: ${variantKey} = true`);
-                    } else {
-                      console.warn(`⚠️ Skipping invalid variant option:`, option);
-                    }
-                  });
+            // Initialize variant options states
+            if (prop.type === "VARIANT" && prop.variantOptions) {
+              console.log(
+                `🎯 Processing variant options for ${prop.name}:`,
+                prop.variantOptions
+              );
+              prop.variantOptions.forEach((option: any) => {
+                if (typeof option === "string" && option.trim() !== "") {
+                  const variantKey = `${prop.name}#${option}`;
+                  acc[variantKey] = true;
+                  console.log(
+                    `🔄 Initializing variant state: ${variantKey} = true`
+                  );
+                } else {
+                  console.log(`⚠️ Skipping invalid variant option:`, option);
                 }
-              }
-              return acc;
-            },
-            {} as PropertyUsedStates
-          );
+              });
+            }
+          }
+          return acc;
+        }, {} as PropertyUsedStates);
 
-          console.log('🎯 Final initialUsedStates:', Object.keys(initialUsedStates));
-          setPropertyUsedStates(initialUsedStates);
-        } else {
-          console.log('🧹 Resetting property used states to empty');
-          setPropertyUsedStates({});
-        }
-
-        // Add a small delay to ensure UI has time to render before hiding loading state
-        setTimeout(() => {
-          setIsLoadingComponent(false);
-        }, 100);
+        console.log(
+          "🎯 Final initialUsedStates:",
+          Object.keys(initialUsedStates)
+        );
+        setPropertyUsedStates(initialUsedStates);
+      } else {
+        console.log("🧹 Resetting property used states to empty");
+        setPropertyUsedStates({});
       }
-    );
+
+      // Add a small delay to ensure UI has time to render before hiding loading state
+      setTimeout(() => {
+        setIsLoadingComponent(false);
+      }, 100);
+    });
     return unsubscribe;
   }, [setComponentProps, setPropertyUsedStates, setIsLoadingComponent]);
 

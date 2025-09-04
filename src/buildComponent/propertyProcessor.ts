@@ -1,4 +1,9 @@
-import { getComponentPropertyType, getElementsWithComponentProperty, getElementsWithComponentPropertyFromComponent, hasPropertyInComponent } from "../figma_functions/coreUtils";
+import {
+  getComponentPropertyType,
+  getElementsWithComponentProperty,
+  getElementsWithComponentPropertyFromComponent,
+  hasPropertyInComponent,
+} from "../figma_functions/coreUtils";
 import { isDependentProperty } from "../ui_utils";
 import { errorService } from "../errors";
 import { BuildEventData, PropertyUsedStates } from "../types";
@@ -16,7 +21,9 @@ export interface PropertyProcessingResult {
   errors: string[];
 }
 
-export function processNonVariantProperties(options: PropertyProcessingOptions): PropertyProcessingResult {
+export function processNonVariantProperties(
+  options: PropertyProcessingOptions
+): PropertyProcessingResult {
   const { buildData, componentSet, disabledProperties } = options;
   const result: PropertyProcessingResult = {
     processedProperties: [],
@@ -33,23 +40,32 @@ export function processNonVariantProperties(options: PropertyProcessingOptions):
     try {
       const propertyType = getComponentPropertyType(componentSet, propKey);
       if (propertyType !== "VARIANT") {
-        const processResult = processNonVariantProperty(componentSet, propKey, dataKeys);
-        
+        const processResult = processNonVariantProperty(
+          componentSet,
+          propKey,
+          dataKeys
+        );
+
         if (processResult.success) {
           result.processedProperties.push(propKey);
           result.deletedElements += processResult.deletedElements;
         } else {
           result.skippedProperties.push(propKey);
-          result.errors.push(processResult.error || `Failed to process ${propKey}`);
+          result.errors.push(
+            processResult.error || `Failed to process ${propKey}`
+          );
         }
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      result.errors.push(`Failed to process property "${propKey}": ${errorMessage}`);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      result.errors.push(
+        `Failed to process property "${propKey}": ${errorMessage}`
+      );
       result.skippedProperties.push(propKey);
-      
+
       errorService.handleError(error, {
-        operation: 'PROCESS_NON_VARIANT_PROPERTY',
+        operation: "PROCESS_NON_VARIANT_PROPERTY",
         propertyName: propKey,
       });
     }
@@ -71,7 +87,10 @@ function processNonVariantProperty(
 ): PropertyProcessResult {
   try {
     const propertyName = propKey.split("#")[0];
-    const foundElements = getElementsWithComponentProperty(componentSet, propKey);
+    const foundElements = getElementsWithComponentProperty(
+      componentSet,
+      propKey
+    );
     let deletedElements = 0;
 
     // Delete property and its elements
@@ -84,7 +103,7 @@ function processNonVariantProperty(
         deletedElements = foundElements.length;
       } catch (deleteError) {
         errorService.handleError(deleteError, {
-          operation: 'DELETE_PROPERTY_ELEMENTS',
+          operation: "DELETE_PROPERTY_ELEMENTS",
           propertyName: propKey,
           elementsCount: foundElements.length,
         });
@@ -97,12 +116,15 @@ function processNonVariantProperty(
       isDependentProperty(property, propertyName)
     );
 
-    if (dependentProp && componentSet.componentPropertyDefinitions[dependentProp]) {
+    if (
+      dependentProp &&
+      componentSet.componentPropertyDefinitions[dependentProp]
+    ) {
       try {
         componentSet.deleteComponentProperty(dependentProp);
       } catch (deleteError) {
         errorService.handleError(deleteError, {
-          operation: 'DELETE_DEPENDENT_PROPERTY',
+          operation: "DELETE_DEPENDENT_PROPERTY",
           propertyName: dependentProp,
           parentProperty: propertyName,
         });
@@ -115,22 +137,28 @@ function processNonVariantProperty(
     return {
       success: false,
       deletedElements: 0,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
 
 export function getDisabledPropertyKeys(buildData: BuildEventData): string[] {
-  return Object.keys(buildData).filter(key => !buildData[key]);
+  return Object.keys(buildData).filter((key) => !buildData[key]);
 }
 
-export function getPropertyElementCount(componentSet: ComponentSetNode, propertyName: string): number {
+export function getPropertyElementCount(
+  componentSet: ComponentSetNode,
+  propertyName: string
+): number {
   try {
-    const elements = getElementsWithComponentProperty(componentSet, propertyName);
+    const elements = getElementsWithComponentProperty(
+      componentSet,
+      propertyName
+    );
     return elements.length;
   } catch (error) {
     errorService.handleError(error, {
-      operation: 'GET_PROPERTY_ELEMENT_COUNT',
+      operation: "GET_PROPERTY_ELEMENT_COUNT",
       propertyName,
     });
     return 0;
@@ -144,7 +172,9 @@ export interface ComponentPropertyProcessingOptions {
   disabledProperties: PropertyUsedStates;
 }
 
-export function processComponentProperties(options: ComponentPropertyProcessingOptions): PropertyProcessingResult {
+export function processComponentProperties(
+  options: ComponentPropertyProcessingOptions
+): PropertyProcessingResult {
   const { buildData, component, disabledProperties } = options;
   const result: PropertyProcessingResult = {
     processedProperties: [],
@@ -157,24 +187,30 @@ export function processComponentProperties(options: ComponentPropertyProcessingO
 
   // Process properties that are disabled (unchecked in UI)
   for (const propKey of propKeys) {
-    if (!buildData[propKey]) { // Property is disabled (checkbox unchecked)
+    if (!buildData[propKey]) {
+      // Property is disabled (checkbox unchecked)
       try {
         const processResult = processComponentProperty(component, propKey);
-        
+
         if (processResult.success) {
           result.processedProperties.push(propKey);
           result.deletedElements += processResult.deletedElements;
         } else {
           result.skippedProperties.push(propKey);
-          result.errors.push(processResult.error || `Failed to process ${propKey}`);
+          result.errors.push(
+            processResult.error || `Failed to process ${propKey}`
+          );
         }
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        result.errors.push(`Failed to process property "${propKey}": ${errorMessage}`);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        result.errors.push(
+          `Failed to process property "${propKey}": ${errorMessage}`
+        );
         result.skippedProperties.push(propKey);
-        
+
         errorService.handleError(error, {
-          operation: 'PROCESS_COMPONENT_PROPERTY',
+          operation: "PROCESS_COMPONENT_PROPERTY",
           propertyName: propKey,
           componentName: component.name,
         });
@@ -194,18 +230,29 @@ function processComponentProperty(
 ): PropertyProcessResult {
   try {
     const propertyName = propKey.split("#")[0];
-    const foundElements = getElementsWithComponentPropertyFromComponent(component, propKey);
+    const foundElements = getElementsWithComponentPropertyFromComponent(
+      component,
+      propKey
+    );
     let deletedElements = 0;
 
-    console.log(`Processing component property: ${propKey}, found ${foundElements.length} elements`);
+    console.log(
+      `Processing component property: ${propKey}, found ${foundElements.length} elements`
+    );
 
     // Delete property definition if it exists
-    if (component.componentPropertyDefinitions && component.componentPropertyDefinitions[propKey]) {
+    if (
+      component.componentPropertyDefinitions &&
+      component.componentPropertyDefinitions[propKey]
+    ) {
       try {
         component.deleteComponentProperty(propKey);
         console.log(`Deleted component property definition: ${propKey}`);
       } catch (deleteError) {
-        console.warn(`Could not delete property definition for ${propKey}:`, deleteError);
+        console.log(
+          `Could not delete property definition for ${propKey}:`,
+          deleteError
+        );
         // Continue even if we can't delete the property definition
       }
     }
@@ -215,10 +262,12 @@ function processComponentProperty(
       try {
         foundElements.forEach((element) => element.remove());
         deletedElements = foundElements.length;
-        console.log(`Removed ${deletedElements} elements for property: ${propKey}`);
+        console.log(
+          `Removed ${deletedElements} elements for property: ${propKey}`
+        );
       } catch (deleteError) {
         errorService.handleError(deleteError, {
-          operation: 'DELETE_COMPONENT_PROPERTY_ELEMENTS',
+          operation: "DELETE_COMPONENT_PROPERTY_ELEMENTS",
           propertyName: propKey,
           elementsCount: foundElements.length,
         });
@@ -231,12 +280,15 @@ function processComponentProperty(
     return {
       success: false,
       deletedElements: 0,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
 
-export function hasPropertyDefinition(componentSet: ComponentSetNode, propertyName: string): boolean {
+export function hasPropertyDefinition(
+  componentSet: ComponentSetNode,
+  propertyName: string
+): boolean {
   return propertyName in componentSet.componentPropertyDefinitions;
 }
 
@@ -245,5 +297,5 @@ export function getDependentProperties(
   allPropertyKeys: string[]
 ): string[] {
   const baseName = propertyName.split("#")[0];
-  return allPropertyKeys.filter(key => isDependentProperty(key, baseName));
+  return allPropertyKeys.filter((key) => isDependentProperty(key, baseName));
 }

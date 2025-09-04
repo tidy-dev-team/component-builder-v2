@@ -1,5 +1,7 @@
 export function removeVariablesFromNode(node: SceneNode) {
-  console.log(`[DEBUG] *** UPDATED removeVariablesFromNode v2.0 *** Checking node: ${node.name} (${node.type}) for bound variables`);
+  console.log(
+    `[DEBUG] *** UPDATED removeVariablesFromNode v2.0 *** Checking node: ${node.name} (${node.type}) for bound variables`
+  );
   try {
     // Handle fills (background colors, etc.)
     if ("fills" in node && node.fills && Array.isArray(node.fills)) {
@@ -33,8 +35,11 @@ export function removeVariablesFromNode(node: SceneNode) {
       console.log(`[DEBUG] Node ${node.name} has no boundVariables`);
       return;
     }
-    
-    console.log(`[DEBUG] Node ${node.name} has boundVariables:`, Object.keys(node.boundVariables));
+
+    console.log(
+      `[DEBUG] Node ${node.name} has boundVariables:`,
+      Object.keys(node.boundVariables)
+    );
 
     // Create a mutable copy of boundVariables to work with
     const boundVars = { ...node.boundVariables };
@@ -68,13 +73,13 @@ export function removeVariablesFromNode(node: SceneNode) {
       delete boundVars.strokeWeight;
       hasChanges = true;
     }
-    
+
     // Handle individual stroke weights
     const strokeProps = [
       "strokeTopWeight",
-      "strokeBottomWeight", 
+      "strokeBottomWeight",
       "strokeLeftWeight",
-      "strokeRightWeight"
+      "strokeRightWeight",
     ] as const;
     strokeProps.forEach((prop) => {
       if (boundVars[prop]) {
@@ -135,11 +140,11 @@ export function removeVariablesFromNode(node: SceneNode) {
       delete boundVars.height;
       hasChanges = true;
     }
-    
+
     // Handle any remaining common variable properties
     const additionalProps = [
       "strokeAlign",
-      "strokeCap", 
+      "strokeCap",
       "strokeJoin",
       "strokeMiterLimit",
       "dashPattern",
@@ -147,24 +152,28 @@ export function removeVariablesFromNode(node: SceneNode) {
       "borderRadius", // alternative name for cornerRadius
       "gap", // for flex layouts
       "minWidth",
-      "maxWidth", 
+      "maxWidth",
       "minHeight",
-      "maxHeight"
+      "maxHeight",
     ] as const;
-    
+
     additionalProps.forEach((prop) => {
       if (boundVars[prop as keyof typeof boundVars]) {
         delete boundVars[prop as keyof typeof boundVars];
         hasChanges = true;
       }
     });
-    
+
     // Catch-all: Remove any remaining bound variable properties
     // This ensures we don't miss any variable types
     const remainingKeys = Object.keys(boundVars);
     if (remainingKeys.length > 0) {
-      console.log(`[DEBUG] Removing remaining bound variables: ${remainingKeys.join(', ')}`);
-      remainingKeys.forEach(key => {
+      console.log(
+        `[DEBUG] Removing remaining bound variables: ${remainingKeys.join(
+          ", "
+        )}`
+      );
+      remainingKeys.forEach((key) => {
         delete boundVars[key as keyof typeof boundVars];
         hasChanges = true;
       });
@@ -172,7 +181,10 @@ export function removeVariablesFromNode(node: SceneNode) {
 
     // Apply changes if any were made
     if (hasChanges) {
-      console.log(`[DEBUG] Applying changes to ${node.name}. Remaining keys:`, Object.keys(boundVars));
+      console.log(
+        `[DEBUG] Applying changes to ${node.name}. Remaining keys:`,
+        Object.keys(boundVars)
+      );
       if (Object.keys(boundVars).length === 0) {
         // Remove the entire boundVariables object if empty
         (node as any).boundVariables = undefined;
@@ -182,18 +194,23 @@ export function removeVariablesFromNode(node: SceneNode) {
         (node as any).boundVariables = boundVars;
         console.log(`[DEBUG] Updated boundVariables for ${node.name}`);
       }
-      
+
       // Verify the removal worked
       const finalBoundVars = node.boundVariables;
       if (!finalBoundVars || Object.keys(finalBoundVars).length === 0) {
-        console.log(`[DEBUG] ✅ CONFIRMED: ${node.name} has no bound variables after removal`);
+        console.log(
+          `[DEBUG] ✅ CONFIRMED: ${node.name} has no bound variables after removal`
+        );
       } else {
-        console.log(`[DEBUG] ❌ WARNING: ${node.name} still has bound variables:`, Object.keys(finalBoundVars));
+        console.log(
+          `[DEBUG] ❌ WARNING: ${node.name} still has bound variables:`,
+          Object.keys(finalBoundVars)
+        );
       }
     } else {
       console.log(`[DEBUG] No changes needed for ${node.name}`);
     }
   } catch (error) {
-    console.warn(`Failed to remove variables from node ${node.name}:`, error);
+    console.log(`Failed to remove variables from node ${node.name}:`, error);
   }
 }

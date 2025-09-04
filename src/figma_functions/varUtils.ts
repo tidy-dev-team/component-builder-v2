@@ -14,7 +14,7 @@ export async function createVariables() {
   for (const categoryName of categoryNames) {
     const category = getVariableCategory(categoryName);
     if (!category) {
-      console.warn(`Category ${categoryName} not found`);
+      console.log(`Category ${categoryName} not found`);
       continue;
     }
 
@@ -121,12 +121,12 @@ async function createVariablesForCategory(
             );
           }
         } else {
-          console.warn(
+          console.log(
             `Referenced variable not found: ${referencedGlobal.name}`
           );
         }
       } else {
-        console.warn(
+        console.log(
           `Referenced global variable not found for ${semanticVar.name}`
         );
       }
@@ -170,7 +170,7 @@ export async function getVariablesFromFigma(categoryName?: string) {
   for (const catName of categoriesToProcess) {
     const category = getVariableCategory(catName);
     if (!category) {
-      console.warn(`Category ${catName} not found`);
+      console.log(`Category ${catName} not found`);
       continue;
     }
 
@@ -239,7 +239,7 @@ export async function getVariablesFromFigma(categoryName?: string) {
 
 // Legacy function for backward compatibility
 export async function createRadiusVariables() {
-  console.warn(
+  console.log(
     "createRadiusVariables is deprecated. Use createVariables() instead."
   );
   const radiusCategory = getVariableCategory("radius");
@@ -250,7 +250,7 @@ export async function createRadiusVariables() {
 
 // Legacy function - now delegates to getVariablesFromFigma
 export async function getVariables(categoryName?: string) {
-  console.warn(
+  console.log(
     "getVariables is deprecated. Use getVariablesFromFigma() for new code."
   );
   return await getVariablesFromFigma(categoryName);
@@ -306,7 +306,7 @@ export async function applySemanticBorderRadiusVariables(node: ComponentNode | C
   // Get the radius variables from Figma
   const radiusVariables = await getVariablesFromFigma("radius");
   if (!radiusVariables) {
-    console.warn("No radius variables found");
+    console.log("No radius variables found");
     return;
   }
 
@@ -314,12 +314,12 @@ export async function applySemanticBorderRadiusVariables(node: ComponentNode | C
   const variableData = radiusVariables as { global: VariableData[]; semantic: VariableData[] };
   
   if (!variableData.semantic || variableData.semantic.length === 0) {
-    console.warn("No semantic radius variables found");
+    console.log("No semantic radius variables found");
     return;
   }
 
   if (!variableData.global || variableData.global.length === 0) {
-    console.warn("No global radius variables found");
+    console.log("No global radius variables found");
     return;
   }
 

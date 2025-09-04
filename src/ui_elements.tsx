@@ -65,7 +65,9 @@ function renderVariantProperties(
         }}
       >
         {variantProps
-          .filter((prop) => !shouldBeHidden(prop) && prop.name in propertyUsedStates)
+          .filter(
+            (prop) => !shouldBeHidden(prop) && prop.name in propertyUsedStates
+          )
           .map((prop, index) => {
             return (
               <div key={prop.name}>
@@ -84,25 +86,28 @@ function renderVariantProperties(
                       borderLeft: "2px solid #e8eaed",
                     }}
                   >
-                     {prop.variantOptions.map((option) => {
-                       const variantOptionKey = `${prop.name}#${option}`;
-                       const variantOptionProp: ComponentPropertyInfo = {
-                         name: variantOptionKey,
-                         type: prop.type,
-                         defaultValue: option,
-                         path: prop.path,
-                       };
-                       return (
-                         <div key={variantOptionKey}>
-                           <CheckboxComponent
-                             {...variantOptionProp}
-                             disabled={!propertyUsedStates[prop.name] || !(variantOptionKey in propertyUsedStates)}
-                             allProperties={componentProps}
-                           />
-                           <VerticalSpace space="small" />
-                         </div>
-                       );
-                     })}
+                    {prop.variantOptions.map((option) => {
+                      const variantOptionKey = `${prop.name}#${option}`;
+                      const variantOptionProp: ComponentPropertyInfo = {
+                        name: variantOptionKey,
+                        type: prop.type,
+                        defaultValue: option,
+                        path: prop.path,
+                      };
+                      return (
+                        <div key={variantOptionKey}>
+                          <CheckboxComponent
+                            {...variantOptionProp}
+                            disabled={
+                              !propertyUsedStates[prop.name] ||
+                              !(variantOptionKey in propertyUsedStates)
+                            }
+                            allProperties={componentProps}
+                          />
+                          <VerticalSpace space="small" />
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
                 {index <
@@ -161,7 +166,9 @@ function renderOtherProperties(
         }}
       >
         {otherProps
-          .filter((prop) => !shouldBeHidden(prop) && prop.name in propertyUsedStates)
+          .filter(
+            (prop) => !shouldBeHidden(prop) && prop.name in propertyUsedStates
+          )
           .map((prop, index) => {
             const depth = prop.path ? prop.path.length : 0;
             const indent = "    ".repeat(Math.max(0, depth - 1));
@@ -295,20 +302,22 @@ export function renderAllProperties(
   propertyUsedStates: PropertyUsedStates,
   nestedInstances?: { name: string; id: string; key: string }[]
 ) {
-  console.log('🎨 renderAllProperties called with:', {
+  console.log("🎨 renderAllProperties called with:", {
     componentPropsCount: componentProps.length,
     propertyUsedStatesKeys: Object.keys(propertyUsedStates),
-    propertyUsedStatesValues: propertyUsedStates
+    propertyUsedStatesValues: propertyUsedStates,
   });
 
   // Filter out properties that don't exist in propertyUsedStates to prevent invalid value errors
   const validProps = componentProps.filter((prop) => {
     if (!prop || !prop.name) {
-      console.warn('❌ Filtering out invalid property:', prop);
+      console.log("❌ Filtering out invalid property:", prop);
       return false;
     }
     if (!(prop.name in propertyUsedStates)) {
-      console.error(`🚨 CRITICAL: Property ${prop.name} not found in propertyUsedStates!`);
+      console.error(
+        `🚨 CRITICAL: Property ${prop.name} not found in propertyUsedStates!`
+      );
       console.error(`🚨 Available keys:`, Object.keys(propertyUsedStates));
       console.error(`🚨 Property details:`, prop);
       return false;
@@ -317,7 +326,9 @@ export function renderAllProperties(
     return true;
   });
 
-  console.log(`📊 After filtering: ${validProps.length} valid properties out of ${componentProps.length}`);
+  console.log(
+    `📊 After filtering: ${validProps.length} valid properties out of ${componentProps.length}`
+  );
 
   const variantProps = validProps.filter((prop) => prop.type === "VARIANT");
   const otherProps = validProps.filter((prop) => prop.type !== "VARIANT");

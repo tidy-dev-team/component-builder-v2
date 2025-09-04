@@ -80,16 +80,13 @@ export async function deleteVariantsExcept(
     if (variant.type === "COMPONENT") {
       const originalName = variant.name;
 
-      const properties = originalName.split(",").reduce(
-        (acc, part) => {
-          const [key, value] = part.split("=").map((s) => s.trim());
-          if (key && value) {
-            acc[key] = value;
-          }
-          return acc;
-        },
-        {} as Record<string, string>
-      );
+      const properties = originalName.split(",").reduce((acc, part) => {
+        const [key, value] = part.split("=").map((s) => s.trim());
+        if (key && value) {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as Record<string, string>);
 
       if (
         properties.hasOwnProperty(property) &&
@@ -130,7 +127,9 @@ export async function deleteVariantsWithValues(
   }
 
   figma.notify(
-    `Deleting variants where "${property}" is not in [${valuesToKeep.join(", ")}]...`
+    `Deleting variants where "${property}" is not in [${valuesToKeep.join(
+      ", "
+    )}]...`
   );
 
   const variants = [...componentSetNode.children];
@@ -140,16 +139,13 @@ export async function deleteVariantsWithValues(
     if (variant.type === "COMPONENT") {
       const originalName = variant.name;
 
-      const properties = originalName.split(",").reduce(
-        (acc, part) => {
-          const [key, value] = part.split("=").map((s) => s.trim());
-          if (key && value) {
-            acc[key] = value;
-          }
-          return acc;
-        },
-        {} as Record<string, string>
-      );
+      const properties = originalName.split(",").reduce((acc, part) => {
+        const [key, value] = part.split("=").map((s) => s.trim());
+        if (key && value) {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as Record<string, string>);
 
       if (
         properties.hasOwnProperty(property) &&
@@ -232,85 +228,124 @@ export function getComponentPropertyInfoFromComponent(
 
     // Check if the component has componentPropertyDefinitions (like component sets)
     // This is the main case for your component
-    if (node.componentPropertyDefinitions && Object.keys(node.componentPropertyDefinitions).length > 0) {
-      console.log("Component has componentPropertyDefinitions:", Object.keys(node.componentPropertyDefinitions));
-      
-      Object.entries(node.componentPropertyDefinitions).forEach(([propName, propDef]) => {
-        console.log(`🔍 Processing component property: ${propName}`, propDef);
-        // Validate property name
-        if (typeof propName === 'string' && propName.trim() !== '') {
-          const property = {
-            name: propName,
-            type: propDef.type,
-            defaultValue: propDef.defaultValue,
-            preferredValues: propDef.preferredValues,
-            variantOptions: propDef.variantOptions,
-            boundVariables: propDef.boundVariables,
-            path: [], // For regular components, we'll keep path empty for now
-          };
-          properties.push(property);
-          console.log(`✅ Added component property: ${propName} (${propDef.type})`);
-        } else {
-          console.warn('❌ Skipping property with invalid name:', propName);
+    if (
+      node.componentPropertyDefinitions &&
+      Object.keys(node.componentPropertyDefinitions).length > 0
+    ) {
+      console.log(
+        "Component has componentPropertyDefinitions:",
+        Object.keys(node.componentPropertyDefinitions)
+      );
+
+      Object.entries(node.componentPropertyDefinitions).forEach(
+        ([propName, propDef]) => {
+          console.log(`🔍 Processing component property: ${propName}`, propDef);
+          // Validate property name
+          if (typeof propName === "string" && propName.trim() !== "") {
+            const property = {
+              name: propName,
+              type: propDef.type,
+              defaultValue: propDef.defaultValue,
+              preferredValues: propDef.preferredValues,
+              variantOptions: propDef.variantOptions,
+              boundVariables: propDef.boundVariables,
+              path: [], // For regular components, we'll keep path empty for now
+            };
+            properties.push(property);
+            console.log(
+              `✅ Added component property: ${propName} (${propDef.type})`
+            );
+          } else {
+            console.log("❌ Skipping property with invalid name:", propName);
+          }
         }
-      });
+      );
     }
 
     // For regular components, check for componentPropertyReferences
-    if (node.componentPropertyReferences && Object.keys(node.componentPropertyReferences).length > 0) {
-      console.log("Component has componentPropertyReferences:", Object.keys(node.componentPropertyReferences));
+    if (
+      node.componentPropertyReferences &&
+      Object.keys(node.componentPropertyReferences).length > 0
+    ) {
+      console.log(
+        "Component has componentPropertyReferences:",
+        Object.keys(node.componentPropertyReferences)
+      );
       const refs = node.componentPropertyReferences;
-      
+
       // Extract unique property names from all references
       const propertyNames = new Set<string>();
-      Object.values(refs).forEach(propName => {
-        if (typeof propName === 'string') {
+      Object.values(refs).forEach((propName) => {
+        if (typeof propName === "string") {
           propertyNames.add(propName);
         }
       });
 
       // Create property info for each unique property (avoid duplicates)
-      propertyNames.forEach(propName => {
-        if (typeof propName === 'string' && propName.trim() !== '' && !properties.some(p => p.name === propName)) {
+      propertyNames.forEach((propName) => {
+        if (
+          typeof propName === "string" &&
+          propName.trim() !== "" &&
+          !properties.some((p) => p.name === propName)
+        ) {
           properties.push({
             name: propName,
             type: "TEXT", // Default to text type for regular components
             defaultValue: "",
             path: [],
           });
-        } else if (typeof propName !== 'string' || propName.trim() === '') {
-          console.warn('Skipping property reference with invalid name:', propName);
+        } else if (typeof propName !== "string" || propName.trim() === "") {
+          console.log(
+            "Skipping property reference with invalid name:",
+            propName
+          );
         }
       });
     }
 
     // Also check if the component has componentProperties (legacy/different case)
-    if ((node as any).componentProperties && Object.keys((node as any).componentProperties).length > 0) {
-      console.log("Component has componentProperties:", Object.keys((node as any).componentProperties));
-      
-      Object.entries((node as any).componentProperties).forEach(([propName, propDef]: [string, any]) => {
-        // Avoid duplicates
-        if (!properties.some(p => p.name === propName)) {
-          properties.push({
-            name: propName,
-            type: propDef.type || "TEXT",
-            defaultValue: propDef.defaultValue || "",
-            path: [],
-          });
+    if (
+      (node as any).componentProperties &&
+      Object.keys((node as any).componentProperties).length > 0
+    ) {
+      console.log(
+        "Component has componentProperties:",
+        Object.keys((node as any).componentProperties)
+      );
+
+      Object.entries((node as any).componentProperties).forEach(
+        ([propName, propDef]: [string, any]) => {
+          // Avoid duplicates
+          if (!properties.some((p) => p.name === propName)) {
+            properties.push({
+              name: propName,
+              type: propDef.type || "TEXT",
+              defaultValue: propDef.defaultValue || "",
+              path: [],
+            });
+          }
         }
-      });
+      );
     }
 
     // If no properties found, log it
     if (properties.length === 0) {
       console.log(`No exposed properties found for component: ${node.name}`);
-      console.log("Regular component imported successfully, but has no exposed properties");
+      console.log(
+        "Regular component imported successfully, but has no exposed properties"
+      );
     }
 
-    console.log(`Found ${properties.length} properties for component:`, properties.map(p => p.name));
+    console.log(
+      `Found ${properties.length} properties for component:`,
+      properties.map((p) => p.name)
+    );
     return properties.sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
-    console.error("Error getting component property info from component:", error);
+    console.error(
+      "Error getting component property info from component:",
+      error
+    );
     return [];
   }
 }
@@ -337,22 +372,33 @@ export function getComponentPropertyInfo(
 
     const properties = node.componentPropertyDefinitions;
 
-    if (!properties || typeof properties !== 'object') {
+    if (!properties || typeof properties !== "object") {
       console.error("Component property definitions are invalid");
       return [];
     }
 
-    console.log('🔍 Processing component set properties:', Object.keys(properties));
+    console.log(
+      "🔍 Processing component set properties:",
+      Object.keys(properties)
+    );
 
     return Object.entries(properties)
       .filter(([name, definition]) => {
-        console.log(`🔍 Processing component set property: ${name}`, definition);
+        console.log(
+          `🔍 Processing component set property: ${name}`,
+          definition
+        );
         // Validate property name
-        if (typeof name !== 'string' || name.trim() === '') {
-          console.warn('❌ Skipping component set property with invalid name:', name);
+        if (typeof name !== "string" || name.trim() === "") {
+          console.log(
+            "❌ Skipping component set property with invalid name:",
+            name
+          );
           return false;
         }
-        console.log(`✅ Component set property valid: ${name} (${definition.type})`);
+        console.log(
+          `✅ Component set property valid: ${name} (${definition.type})`
+        );
         return true;
       })
       .map(([name, definition]) => {
