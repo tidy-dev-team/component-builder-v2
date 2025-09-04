@@ -37,10 +37,10 @@ export const componentGroups = [
     ["Text Input Outlined", "3fa0112d53708a35080dfd22530ebf3dbbbcdf4d"],
     ["Text Input Contained", "46e44149a998ceae1bdbff378c85818e4ecd89e6"],
     ["Text Input Underlined", "2ef5964e087304eaecb3887bb3b2441834450f21"],
-    //what the actual fuck???
-    [`selectInpOutl`, "bb1ce670f2e5eb30645a8381232c4ab166a56834"],
+    ["Select Input Outlined", "bb1ce670f2e5eb30645a8381232c4ab166a56834"],
     ["Select Input Contained", "0aeeec1c853b6245284581b97e9f7c04f63e1f60"],
     ["Select Input Underlined", "cbba2e72a7ad213bef170e4856c5cc6d25f61025"],
+
     ["Text Area Outlined", "cd98d2840dfb806c6d4565cf350241e5154b77e6"],
     ["Text Area Contained", "db19df1e8d74d68586027a3adedd40c52b242c26"],
     ["Text Area Underlined", "da1e71702ca3f2fa022054c190c88dfa36cb4d7e"],
