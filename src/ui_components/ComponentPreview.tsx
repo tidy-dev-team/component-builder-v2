@@ -1,6 +1,10 @@
 import { h } from "preact";
 import { useAtom } from "jotai";
-import { selectedComponentAtom, selectedComponentPropertiesAtom, propertyUsedStatesAtom } from "../state/atoms";
+import {
+  selectedComponentAtom,
+  selectedComponentPropertiesAtom,
+  propertyUsedStatesAtom,
+} from "../state/atoms";
 import { renderAllProperties } from "../ui_elements";
 import { minimalStyles, symbols } from "../ui_styles_minimal";
 
@@ -38,7 +42,6 @@ const previewStyles = {
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
-    margin: minimalStyles.spacing[3],
   },
   placeholderText: {
     fontSize: minimalStyles.typography.fontSize.sm,
@@ -49,11 +52,11 @@ const previewStyles = {
   },
   content: {
     flex: 1,
-    padding: minimalStyles.spacing[3],
+    padding: minimalStyles.spacing[4],
     overflowY: "auto" as const,
     display: "flex",
     flexDirection: "column" as const,
-    gap: minimalStyles.spacing[3],
+    gap: minimalStyles.spacing[4],
   },
   descriptionBlock: {
     backgroundColor: minimalStyles.colors.surface,
@@ -119,7 +122,11 @@ interface ComponentPreviewProps {
   componentImage?: string | null;
 }
 
-export function ComponentPreview({ nestedInstances, description, componentImage }: ComponentPreviewProps) {
+export function ComponentPreview({
+  nestedInstances,
+  description,
+  componentImage,
+}: ComponentPreviewProps) {
   const [selectedComponent] = useAtom(selectedComponentAtom);
   const [componentProps] = useAtom(selectedComponentPropertiesAtom);
   const [propertyUsedStates] = useAtom(propertyUsedStatesAtom);
@@ -128,7 +135,7 @@ export function ComponentPreview({ nestedInstances, description, componentImage 
     return (
       <div style={previewStyles.container}>
         <div style={previewStyles.emptyState}>
-          <div style={previewStyles.emptyStateIcon}>{symbols.ui.divider}</div>
+          <div style={previewStyles.emptyStateIcon}>✦</div>
           <div style={previewStyles.emptyStateText}>select component</div>
           <div style={previewStyles.emptyStateSubtext}>
             choose component from list to preview properties
@@ -144,28 +151,29 @@ export function ComponentPreview({ nestedInstances, description, componentImage 
         {/* Component Name Header */}
         <div style={previewStyles.header}>
           <div style={previewStyles.componentName}>
-            {symbols.ui.divider} {selectedComponent.toLowerCase()} {symbols.ui.divider}
+            {symbols.ui.divider} {selectedComponent.toLowerCase()}{" "}
+            {symbols.ui.divider}
           </div>
         </div>
 
         {/* Component Image */}
         <div style={previewStyles.imagePlaceholder}>
           {componentImage ? (
-            <img 
-              src={componentImage} 
+            <img
+              src={componentImage}
               alt={selectedComponent}
               style={{
                 width: "auto",
                 height: "auto",
-                maxWidth: "100%",
-                maxHeight: "248px", // 256px - 8px padding
+                maxWidth: "calc(100% - 16px)",
+                maxHeight: "calc(200px - 16px)", // Account for container padding
                 objectFit: "contain",
                 objectPosition: "center",
                 borderRadius: "4px",
                 display: "block",
               }}
             />
-           ) : (
+          ) : (
             <div style={previewStyles.placeholderText}>
               {symbols.ui.divider} loading preview {symbols.ui.divider}
             </div>
@@ -174,46 +182,61 @@ export function ComponentPreview({ nestedInstances, description, componentImage 
 
         {/* Component Description */}
         <div style={previewStyles.descriptionBlock}>
-          {description && description !== "No description available" && description !== "Error loading description" ? (
+          {description &&
+          description !== "No description available" &&
+          description !== "Error loading description" ? (
             <div>
               {/* Parse and display the description with proper formatting */}
-              {description.split('\n').map((line, index) => {
+              {description.split("\n").map((line, index) => {
                 const trimmedLine = line.trim();
-                if (!trimmedLine) return <div key={index} style={{ height: "8px" }} />;
-                
+                if (!trimmedLine)
+                  return <div key={index} style={{ height: "8px" }} />;
+
                 // Check for hashtags
-                if (trimmedLine.startsWith('#')) {
+                if (trimmedLine.startsWith("#")) {
                   return (
-                    <div key={index} style={{ 
-                      color: "#6b7280", 
-                      fontSize: "11px", 
-                      marginBottom: "4px",
-                      fontFamily: "monospace"
-                    }}>
+                    <div
+                      key={index}
+                      style={{
+                        color: "#6b7280",
+                        fontSize: "11px",
+                        marginBottom: "4px",
+                        fontFamily: "monospace",
+                      }}
+                    >
                       {trimmedLine}
                     </div>
                   );
                 }
-                
+
                 // Check for emoji markers (info and folder)
-                if (trimmedLine.startsWith('ℹ️') || trimmedLine.startsWith('🗂️')) {
+                if (
+                  trimmedLine.startsWith("ℹ️") ||
+                  trimmedLine.startsWith("🗂️")
+                ) {
                   return (
-                    <div key={index} style={{ 
-                      fontSize: "14px", 
-                      marginBottom: trimmedLine.length > 2 ? "8px" : "4px",
-                      fontWeight: trimmedLine.length > 2 ? "500" : "normal"
-                    }}>
+                    <div
+                      key={index}
+                      style={{
+                        fontSize: "14px",
+                        marginBottom: trimmedLine.length > 2 ? "8px" : "4px",
+                        fontWeight: trimmedLine.length > 2 ? "500" : "normal",
+                      }}
+                    >
                       {trimmedLine}
                     </div>
                   );
                 }
-                
+
                 // Regular text
                 return (
-                  <div key={index} style={{ 
-                    marginBottom: "6px",
-                    lineHeight: "1.4"
-                  }}>
+                  <div
+                    key={index}
+                    style={{
+                      marginBottom: "6px",
+                      lineHeight: "1.4",
+                    }}
+                  >
                     {trimmedLine}
                   </div>
                 );
@@ -221,7 +244,7 @@ export function ComponentPreview({ nestedInstances, description, componentImage 
             </div>
           ) : (
             <div style={{ color: "#6b7280", fontStyle: "italic" }}>
-              {description === "Error loading description" 
+              {description === "Error loading description"
                 ? "Error loading component description"
                 : "No description available for this component"}
             </div>
@@ -232,14 +255,20 @@ export function ComponentPreview({ nestedInstances, description, componentImage 
         <div style={previewStyles.propertiesBlock}>
           {componentProps.length > 0 ? (
             <div style={previewStyles.propertiesContent}>
-              {renderAllProperties(componentProps, propertyUsedStates, nestedInstances)}
+              {renderAllProperties(
+                componentProps,
+                propertyUsedStates,
+                nestedInstances
+              )}
             </div>
           ) : (
-             <div style={{
-              ...previewStyles.propertiesPlaceholder,
-              padding: "40px 20px",
-              textAlign: "center" as const,
-            }}>
+            <div
+              style={{
+                ...previewStyles.propertiesPlaceholder,
+                padding: "40px 20px",
+                textAlign: "center" as const,
+              }}
+            >
               {symbols.ui.divider} property checkboxes {symbols.ui.divider}
             </div>
           )}

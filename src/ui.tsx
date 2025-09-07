@@ -136,8 +136,12 @@ function Plugin() {
         data
       );
 
-      const { cachedComponentProps, nestedInstances, componentDescription, componentImage } =
-        data;
+      const {
+        cachedComponentProps,
+        nestedInstances,
+        componentDescription,
+        componentImage,
+      } = data;
       console.log(
         "📋 Processing received data - Props:",
         cachedComponentProps,
@@ -245,9 +249,7 @@ function Plugin() {
     <Container space="medium" style={styles.container}>
       {/* Header */}
       <div style={styles.header}>
-        <div style={styles.title}>
-          {symbols.ui.divider} tidy-ds-pathfinder {symbols.ui.divider}
-        </div>
+        <div style={styles.title}>tidy-ds-pathfinder </div>
         <div style={styles.subtitle}>
           select component {symbols.ui.divider} customize properties
         </div>

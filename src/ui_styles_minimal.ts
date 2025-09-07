@@ -112,10 +112,10 @@ export const componentStyles = {
       fontSize: minimalStyles.typography.fontSize.sm,
       fontWeight: minimalStyles.typography.fontWeight.medium,
       lineHeight: minimalStyles.typography.lineHeight.tight,
-      border: `${minimalStyles.borders.thin} solid ${minimalStyles.colors.border}`,
+      border: `${minimalStyles.borders.thin} solid ${minimalStyles.colors.gray800}`,
       borderRadius: minimalStyles.borderRadius.base,
-      backgroundColor: minimalStyles.colors.white,
-      color: minimalStyles.colors.text,
+      backgroundColor: minimalStyles.colors.gray800,
+      color: minimalStyles.colors.white,
       cursor: 'pointer',
       transition: minimalStyles.transitions.fast,
       outline: 'none',
@@ -124,11 +124,11 @@ export const componentStyles = {
       whiteSpace: 'nowrap',
     },
     hover: {
-      backgroundColor: minimalStyles.colors.gray100,
-      borderColor: minimalStyles.colors.gray300,
+      backgroundColor: minimalStyles.colors.gray700,
+      borderColor: minimalStyles.colors.gray600,
     },
     active: {
-      backgroundColor: minimalStyles.colors.gray200,
+      backgroundColor: minimalStyles.colors.gray600,
       transform: 'translateY(0.5px)',
     },
     focus: {
