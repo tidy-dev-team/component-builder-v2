@@ -153,27 +153,56 @@ export function ComponentPreview({ nestedInstances, description }: ComponentPrev
 
         {/* Component Description */}
         <div style={previewStyles.descriptionBlock}>
-          {description && description !== "No description available" ? (
+          {description && description !== "No description available" && description !== "Error loading description" ? (
             <div>
-              <div style={{ marginBottom: "8px" }}>
-                <span style={{ fontSize: "14px" }}>ℹ️</span>
-              </div>
-              <div style={{ marginBottom: "12px" }}>
-                {description}
-              </div>
-              <div style={{ marginBottom: "8px" }}>
-                <span style={{ fontSize: "14px" }}>🗂️</span>
-              </div>
-              <div style={{ color: "#6b7280", fontSize: "12px", marginBottom: "8px" }}>
-                Design System Components
-              </div>
-              <div style={{ color: "#6b7280", fontSize: "11px" }}>
-                #ComponentLibrary #DesignSystem #UIComponents
-              </div>
+              {/* Parse and display the description with proper formatting */}
+              {description.split('\n').map((line, index) => {
+                const trimmedLine = line.trim();
+                if (!trimmedLine) return <div key={index} style={{ height: "8px" }} />;
+                
+                // Check for hashtags
+                if (trimmedLine.startsWith('#')) {
+                  return (
+                    <div key={index} style={{ 
+                      color: "#6b7280", 
+                      fontSize: "11px", 
+                      marginBottom: "4px",
+                      fontFamily: "monospace"
+                    }}>
+                      {trimmedLine}
+                    </div>
+                  );
+                }
+                
+                // Check for emoji markers (info and folder)
+                if (trimmedLine.startsWith('ℹ️') || trimmedLine.startsWith('🗂️')) {
+                  return (
+                    <div key={index} style={{ 
+                      fontSize: "14px", 
+                      marginBottom: trimmedLine.length > 2 ? "8px" : "4px",
+                      fontWeight: trimmedLine.length > 2 ? "500" : "normal"
+                    }}>
+                      {trimmedLine}
+                    </div>
+                  );
+                }
+                
+                // Regular text
+                return (
+                  <div key={index} style={{ 
+                    marginBottom: "6px",
+                    lineHeight: "1.4"
+                  }}>
+                    {trimmedLine}
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div style={{ color: "#6b7280", fontStyle: "italic" }}>
-              No description available for this component
+              {description === "Error loading description" 
+                ? "Error loading component description"
+                : "No description available for this component"}
             </div>
           )}
         </div>

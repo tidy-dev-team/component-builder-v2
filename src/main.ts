@@ -48,17 +48,9 @@ export default async function () {
         );
         
         lastComponentKey = componentSetData.key;
-        console.log(`📤 Emitting properties to UI: ${cachedComponentProps?.length || 0} properties, ${nestedInstances?.length || 0} nested instances`);
+        console.log(`📤 Will emit properties to UI: ${cachedComponentProps?.length || 0} properties, ${nestedInstances?.length || 0} nested instances`);
         console.log("📋 Properties data:", cachedComponentProps);
         console.log("🔗 Nested instances:", nestedInstances);
-        
-        emit("COMPONENT_SET_PROPERTIES", {
-          cachedComponentProps,
-          nestedInstances,
-          componentDescription: "",
-        });
-        
-        console.log("✅ Successfully emitted COMPONENT_SET_PROPERTIES");
       } catch (error) {
         console.error("❌ Error in GET_COMPONENT_SET_PROPERTIES:", error);
         const propGateError = errorService.handleError(error, {
@@ -216,16 +208,18 @@ async function getComponentSet(key: string): Promise<void> {
         nestedInstances = findExposedInstances(cachedComponentSet.defaultVariant);
         console.log(`✅ Component set processed: ${cachedComponentSet.name}, properties: ${cachedComponentProps.length}, instances: ${nestedInstances.length}`);
 
-        // Get component description
+        console.log(`✅ Component set processed: ${cachedComponentSet.name}, properties: ${cachedComponentProps.length}, instances: ${nestedInstances.length}`);
+        
+        // Emit data for component set
         const componentDescription = getComponentDescription(cachedComponentSet);
         console.log("📝 Component description:", componentDescription);
-
-        // Emit with description
+        console.log(`📤 Emitting properties to UI: ${cachedComponentProps?.length || 0} properties, ${nestedInstances?.length || 0} nested instances`);
         emit("COMPONENT_SET_PROPERTIES", {
           cachedComponentProps,
           nestedInstances,
           componentDescription,
         });
+        console.log("✅ Successfully emitted COMPONENT_SET_PROPERTIES with description");
         return;
       }
     } catch (error) {
@@ -264,16 +258,16 @@ async function getComponentSet(key: string): Promise<void> {
     nestedInstances = findExposedInstances(cachedComponent);
     console.log(`✅ Regular component processed: ${cachedComponent.name}, properties: ${cachedComponentProps.length}, instances: ${nestedInstances.length}`);
 
-    // Get component description
+    // Emit data for regular component
     const componentDescription = getComponentDescription(cachedComponent);
     console.log("📝 Component description:", componentDescription);
-
-    // Emit with description
+    console.log(`📤 Emitting properties to UI: ${cachedComponentProps?.length || 0} properties, ${nestedInstances?.length || 0} nested instances`);
     emit("COMPONENT_SET_PROPERTIES", {
       cachedComponentProps,
       nestedInstances,
       componentDescription,
     });
+    console.log("✅ Successfully emitted COMPONENT_SET_PROPERTIES with description");
     
   } catch (error) {
     console.error("❌ Error in getComponentSet:", error);
