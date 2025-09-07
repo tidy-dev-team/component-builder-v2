@@ -12,13 +12,12 @@ const previewStyles = {
     backgroundColor: "#f1f1f1",
     borderRadius: "4px",
     overflow: "hidden",
-    padding: "4px",
-    gap: "4px",
   },
   header: {
     padding: "12px",
     backgroundColor: "#ffffff",
     borderRadius: "4px",
+    flexShrink: 0,
   },
   componentName: {
     fontSize: "16px",
@@ -41,6 +40,7 @@ const previewStyles = {
     alignItems: "center",
     justifyContent: "center",
     marginBottom: "0px",
+    flexShrink: 0,
   },
   placeholderIcon: {
     fontSize: "16px",
@@ -67,16 +67,14 @@ const previewStyles = {
     fontSize: "13px",
     color: "#374151",
     lineHeight: "1.4",
-    minHeight: "80px",
+    flexShrink: 0,
   },
   propertiesBlock: {
     backgroundColor: "#ffffff",
     border: "1px solid #e8eaed",
     borderRadius: "4px",
     padding: "12px",
-    flex: 1,
-    overflowY: "auto" as const,
-    minHeight: "200px",
+    flexShrink: 0,
   },
   propertiesContent: {
     width: "100%",
@@ -207,20 +205,17 @@ export function ComponentPreview({ nestedInstances, description }: ComponentPrev
         </div>
 
         {/* Properties */}
-        <div style={{
-          ...previewStyles.propertiesBlock,
-          ...(componentProps.length === 0 ? {
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
-          } : {})
-        }}>
+        <div style={previewStyles.propertiesBlock}>
           {componentProps.length > 0 ? (
             <div style={previewStyles.propertiesContent}>
               {renderAllProperties(componentProps, propertyUsedStates, nestedInstances)}
             </div>
           ) : (
-            <div style={previewStyles.propertiesPlaceholder}>
+            <div style={{
+              ...previewStyles.propertiesPlaceholder,
+              padding: "40px 20px",
+              textAlign: "center" as const,
+            }}>
               property checkboxes
             </div>
           )}
