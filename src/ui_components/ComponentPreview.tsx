@@ -32,8 +32,8 @@ const previewStyles = {
   },
   imagePlaceholder: {
     width: "100%",
-    height: "65px",
-    backgroundColor: "#f8f9fa",
+    height: "256px",
+    backgroundColor: "#ffffff",
     border: "2px dashed #d1d5db",
     borderRadius: "4px",
     display: "flex",
@@ -41,6 +41,7 @@ const previewStyles = {
     justifyContent: "center",
     marginBottom: "0px",
     flexShrink: 0,
+    padding: "4px 0",
   },
   placeholderIcon: {
     fontSize: "16px",
@@ -151,10 +152,14 @@ export function ComponentPreview({ nestedInstances, description, componentImage 
               src={componentImage} 
               alt={selectedComponent}
               style={{
+                width: "auto",
+                height: "auto",
                 maxWidth: "100%",
-                maxHeight: "100%",
+                maxHeight: "248px", // 256px - 8px padding
                 objectFit: "contain",
+                objectPosition: "center",
                 borderRadius: "4px",
+                display: "block",
               }}
             />
           ) : (

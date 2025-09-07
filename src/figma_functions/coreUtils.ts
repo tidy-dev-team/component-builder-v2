@@ -527,12 +527,12 @@ export async function getComponentImage(node: ComponentSetNode | ComponentNode):
 
     console.log(`🖼️ Getting image for: ${nodeToRender.name} (${nodeToRender.type})`);
     
-    // Export the component as PNG
+    // Export the component as PNG with 2x resolution
     const imageBytes = await nodeToRender.exportAsync({
       format: "PNG",
       constraint: {
         type: "WIDTH",
-        value: 200 // Reasonable size for preview
+        value: 400 // 2x resolution (200px * 2) for crisp preview
       }
     });
 
