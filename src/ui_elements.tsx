@@ -3,6 +3,7 @@ import { h, Fragment } from "preact";
 import { ComponentPropertyInfo, PropertyUsedStates } from "./types";
 import { CheckboxComponent } from "./ui_components/Checkbox";
 import { shouldBeHidden, isChildDisabledByParent } from "./ui_utils";
+import { sharedStyles } from "./ui_styles";
 
 function sortPropertiesByPath(
   props: ComponentPropertyInfo[]
@@ -80,11 +81,11 @@ function renderVariantProperties(
                 {/* Show variant options as sub-properties */}
                 {prop.variantOptions && prop.variantOptions.length > 0 && (
                   <div
-                    style={{
-                      marginLeft: "20px",
-                      paddingLeft: "12px",
-                      borderLeft: "2px solid #e8eaed",
-                    }}
+                     style={{
+                       marginLeft: "20px",
+                       paddingLeft: "12px",
+                       borderLeft: `2px solid ${sharedStyles.colors.border}`,
+                     }}
                   >
                     {prop.variantOptions.map((option) => {
                       const variantOptionKey = `${prop.name}#${option}`;
@@ -113,11 +114,11 @@ function renderVariantProperties(
                 {index <
                   variantProps.filter((p) => !shouldBeHidden(p)).length - 1 && (
                   <div
-                    style={{
-                      height: "1px",
-                      backgroundColor: "#e8eaed",
-                      margin: "8px 0",
-                    }}
+                     style={{
+                       height: "1px",
+                       backgroundColor: sharedStyles.colors.border,
+                       margin: "8px 0",
+                     }}
                   />
                 )}
               </div>

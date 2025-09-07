@@ -1,8 +1,8 @@
 import { h } from "preact";
 import { useAtom } from "jotai";
 import { selectedComponentAtom, selectedComponentPropertiesAtom, propertyUsedStatesAtom } from "../state/atoms";
-import { ComponentPropertyInfo, PropertyUsedStates } from "../types";
 import { renderAllProperties } from "../ui_elements";
+import { sharedStyles } from "../ui_styles";
 
 const previewStyles = {
   container: {
@@ -10,12 +10,13 @@ const previewStyles = {
     display: "flex",
     flexDirection: "column" as const,
     backgroundColor: "#f1f1f1",
+    border: `1px solid ${sharedStyles.colors.border}`,
     borderRadius: "4px",
     overflow: "hidden",
   },
   header: {
-    padding: "12px",
-    backgroundColor: "#ffffff",
+    padding: sharedStyles.spacing.large,
+    backgroundColor: sharedStyles.colors.white,
     borderRadius: "4px",
     flexShrink: 0,
   },
@@ -25,56 +26,45 @@ const previewStyles = {
     color: "#1f2937",
     marginBottom: "4px",
   },
-  componentDescription: {
-    fontSize: "13px",
-    color: "#6b7280",
-    lineHeight: "1.4",
-  },
   imagePlaceholder: {
     width: "100%",
     height: "256px",
-    backgroundColor: "#ffffff",
+    backgroundColor: sharedStyles.colors.white,
     border: "2px dashed #d1d5db",
     borderRadius: "4px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: "0px",
     flexShrink: 0,
     padding: "4px 0",
   },
-  placeholderIcon: {
-    fontSize: "16px",
-    color: "#6b7280",
-  },
   placeholderText: {
     fontSize: "16px",
-    color: "#6b7280",
-    marginTop: "0px",
+    color: sharedStyles.colors.secondary,
     textAlign: "center" as const,
   },
   content: {
     flex: 1,
-    padding: "4px",
+    padding: sharedStyles.spacing.small,
     overflowY: "auto" as const,
     display: "flex",
     flexDirection: "column" as const,
-    gap: "4px",
+    gap: sharedStyles.spacing.small,
   },
   descriptionBlock: {
-    backgroundColor: "#ffffff",
+    backgroundColor: sharedStyles.colors.white,
     borderRadius: "4px",
-    padding: "8px",
+    padding: sharedStyles.spacing.medium,
     fontSize: "13px",
     color: "#374151",
     lineHeight: "1.4",
     flexShrink: 0,
   },
   propertiesBlock: {
-    backgroundColor: "#ffffff",
-    border: "1px solid #e8eaed",
+    backgroundColor: sharedStyles.colors.white,
+    border: `1px solid ${sharedStyles.colors.border}`,
     borderRadius: "4px",
-    padding: "12px",
+    padding: sharedStyles.spacing.large,
     flexShrink: 0,
   },
   propertiesContent: {
@@ -82,7 +72,7 @@ const previewStyles = {
     height: "100%",
   },
   propertiesPlaceholder: {
-    color: "#6b7280",
+    color: sharedStyles.colors.secondary,
     fontSize: "16px",
     textAlign: "center" as const,
     fontStyle: "italic" as const,
@@ -93,21 +83,21 @@ const previewStyles = {
     alignItems: "center",
     justifyContent: "center",
     height: "200px",
-    color: "#6b7280",
+    color: sharedStyles.colors.secondary,
     textAlign: "center" as const,
   },
   emptyStateIcon: {
     fontSize: "48px",
-    marginBottom: "16px",
+    marginBottom: sharedStyles.spacing.large,
     opacity: 0.5,
   },
   emptyStateText: {
-    fontSize: "14px",
-    fontWeight: "500",
-    marginBottom: "8px",
+    fontSize: sharedStyles.text.primary.fontSize,
+    fontWeight: sharedStyles.text.primary.fontWeight,
+    marginBottom: sharedStyles.spacing.medium,
   },
   emptyStateSubtext: {
-    fontSize: "12px",
+    fontSize: sharedStyles.text.secondary.fontSize,
     color: "#9ca3af",
   },
 };

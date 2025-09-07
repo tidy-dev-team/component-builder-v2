@@ -1,4 +1,4 @@
-import { Container, render, VerticalSpace } from "@create-figma-plugin/ui";
+import { Container, render } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
 import { useEffect, useState } from "preact/hooks";
@@ -16,60 +16,60 @@ import {
   componentDescriptionAtom,
   componentImageAtom,
 } from "./state/atoms";
-import { ComponentPropertyInfo, PropertyUsedStates } from "./types";
+import { PropertyUsedStates } from "./types";
+import { sharedStyles } from "./ui_styles";
 
-// Sleek UI styles
+// Consolidated UI styles using shared styles
 const styles = {
   container: {
     height: "100vh",
     display: "flex",
     flexDirection: "column" as const,
     background: "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)",
-    fontFamily:
-      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   },
   header: {
-    padding: "16px 0 12px 0",
-    borderBottom: "1px solid #e8eaed",
+    padding: `${sharedStyles.spacing.xlarge} 0 ${sharedStyles.spacing.large} 0`,
+    borderBottom: `1px solid ${sharedStyles.colors.border}`,
     marginBottom: "20px",
   },
   title: {
     fontSize: "13px",
     fontWeight: "600",
     color: "#1f2937",
-    marginBottom: "8px",
+    marginBottom: sharedStyles.spacing.medium,
     letterSpacing: "0.01em",
   },
   subtitle: {
-    fontSize: "11px",
-    color: "#6b7280",
+    fontSize: sharedStyles.text.secondary.fontSize,
+    color: sharedStyles.colors.secondary,
     lineHeight: "1.4",
   },
   content: {
     flex: 1,
     display: "flex",
-    gap: "12px",
+    gap: sharedStyles.spacing.large,
     padding: "0 2px",
-    minHeight: 0, // Allow flex children to shrink
+    minHeight: 0,
   },
   leftColumn: {
-    flex: "1", // Flexible width for preview (takes remaining space)
+    flex: "1",
     minHeight: 0,
     backgroundColor: "#f1f1f1",
-    border: "1px solid #e8eaed",
+    border: `1px solid ${sharedStyles.colors.border}`,
     borderRadius: "4px",
     overflow: "hidden",
   },
   rightColumn: {
-    flex: "0 0 240px", // Fixed width for component list (wider than before)
-    backgroundColor: "#ffffff",
-    border: "1px solid #e8eaed",
+    flex: "0 0 240px",
+    backgroundColor: sharedStyles.colors.white,
+    border: `1px solid ${sharedStyles.colors.border}`,
     borderRadius: "4px",
     overflow: "hidden",
   },
   footer: {
-    padding: "16px 0 12px 0",
-    borderTop: "1px solid #e8eaed",
+    padding: `${sharedStyles.spacing.xlarge} 0 ${sharedStyles.spacing.large} 0`,
+    borderTop: `1px solid ${sharedStyles.colors.border}`,
     marginTop: "auto",
   },
 };
