@@ -152,6 +152,30 @@ export default async function () {
 async function getComponentSet(key: string): Promise<void> {
   console.log("🔍 getComponentSet called with key:", key);
   
+  // Check component cache first
+  const { imageCache } = await import("./utils/imageCache");
+  const cachedComponentData = imageCache.getComponentData(key);
+  if (cachedComponentData) {
+    console.log(`🎯 COMPONENT CACHE HIT! Using cached data for: ${key}`);
+    
+    // Set cached data globally
+    cachedComponentProps = cachedComponentData.componentProps;
+    nestedInstances = cachedComponentData.nestedInstances;
+    
+    // Emit cached data immediately
+    emit("COMPONENT_SET_PROPERTIES", {
+      cachedComponentProps: cachedComponentData.componentProps,
+      nestedInstances: cachedComponentData.nestedInstances,
+      componentDescription: cachedComponentData.componentDescription,
+      componentImage: cachedComponentData.componentImage,
+    });
+    
+    console.log("✅ Emitted cached component data - INSTANT!");
+    return;
+  }
+  
+  console.log("❌ Component cache miss, processing component...");
+  
   // Validate and sanitize the component key
   const keyValidationResult = InputValidator.validateComponentKey(key);
   if (!keyValidationResult.valid) {
@@ -222,6 +246,15 @@ async function getComponentSet(key: string): Promise<void> {
         const componentImage = await getComponentImage(cachedComponentSet);
         console.log("🖼️ Component image:", componentImage ? "Generated successfully" : "Failed to generate");
         
+        // Cache the complete component data
+        const { imageCache } = await import("./utils/imageCache");
+        imageCache.setComponentData(key, {
+          componentProps: cachedComponentProps,
+          nestedInstances,
+          componentDescription,
+          componentImage,
+        });
+        
         console.log(`📤 Emitting properties to UI: ${cachedComponentProps?.length || 0} properties, ${nestedInstances?.length || 0} nested instances`);
         emit("COMPONENT_SET_PROPERTIES", {
           cachedComponentProps,
@@ -274,6 +307,15 @@ async function getComponentSet(key: string): Promise<void> {
     
     const componentImage = await getComponentImage(cachedComponent);
     console.log("🖼️ Component image:", componentImage ? "Generated successfully" : "Failed to generate");
+    
+    // Cache the complete component data
+    const { imageCache } = await import("./utils/imageCache");
+    imageCache.setComponentData(key, {
+      componentProps: cachedComponentProps,
+      nestedInstances,
+      componentDescription,
+      componentImage,
+    });
     
     console.log(`📤 Emitting properties to UI: ${cachedComponentProps?.length || 0} properties, ${nestedInstances?.length || 0} nested instances`);
     emit("COMPONENT_SET_PROPERTIES", {

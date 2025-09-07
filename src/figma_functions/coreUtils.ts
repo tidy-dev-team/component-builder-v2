@@ -1,6 +1,7 @@
 import { ComponentPropertyInfo } from "../types";
 import { ComponentPropertyReferences } from "../types/figma";
 import { errorService, ErrorCode } from "../errors";
+import { imageCache } from "../utils/imageCache";
 
 export function getElementsWithComponentProperty(
   componentSet: ComponentSetNode,
@@ -525,7 +526,24 @@ export async function getComponentImage(node: ComponentSetNode | ComponentNode):
       nodeToRender = node;
     }
 
-    console.log(`🖼️ Getting image for: ${nodeToRender.name} (${nodeToRender.type})`);
+    // Create cache key based on node ID and key for uniqueness
+    const cacheKey = `${nodeToRender.id}_${nodeToRender.key || 'nokey'}`;
+    console.log(`🔑 Cache key for ${nodeToRender.name}: ${cacheKey}`);
+    
+    // Log cache stats before checking
+    const statsBefore = imageCache.getStats();
+    console.log(`📊 Cache stats before lookup: ${statsBefore.imageEntries} images, ${statsBefore.componentEntries} components, ${statsBefore.utilization}`);
+    
+    // Check cache first
+    const cachedImage = imageCache.get(cacheKey);
+    if (cachedImage) {
+      console.log(`📦 CACHE HIT! Using cached image for: ${nodeToRender.name}`);
+      return cachedImage;
+    }
+    
+    console.log(`❌ Cache miss for: ${nodeToRender.name}, generating new image...`);
+
+    console.log(`🖼️ Generating new image for: ${nodeToRender.name} (${nodeToRender.type})`);
     
     // Export the component as PNG with 2x resolution
     const imageBytes = await nodeToRender.exportAsync({
@@ -540,7 +558,13 @@ export async function getComponentImage(node: ComponentSetNode | ComponentNode):
     const base64 = figma.base64Encode(imageBytes);
     const dataUrl = `data:image/png;base64,${base64}`;
     
-    console.log(`✅ Successfully generated image for: ${nodeToRender.name}`);
+    // Cache the generated image
+    imageCache.set(cacheKey, dataUrl);
+    
+    // Log cache stats periodically
+    const stats = imageCache.getStats();
+    console.log(`✅ Generated image for: ${nodeToRender.name} | Cache: ${stats.imageEntries} images, ${stats.componentEntries} components, ${stats.utilization}`);
+    
     return dataUrl;
     
   } catch (error) {
