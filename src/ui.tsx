@@ -30,8 +30,7 @@ const styles = {
   },
   header: {
     padding: `${sharedStyles.spacing.xlarge} 0 ${sharedStyles.spacing.large} 0`,
-    borderBottom: `1px solid ${sharedStyles.colors.border}`,
-    marginBottom: "20px",
+    marginBottom: "16px",
   },
   title: {
     fontSize: "13px",
@@ -68,8 +67,7 @@ const styles = {
     overflow: "hidden",
   },
   footer: {
-    padding: `${sharedStyles.spacing.xlarge} 0 ${sharedStyles.spacing.large} 0`,
-    borderTop: `1px solid ${sharedStyles.colors.border}`,
+    padding: `${sharedStyles.spacing.large} 0 ${sharedStyles.spacing.xlarge} 0`,
     marginTop: "auto",
   },
 };

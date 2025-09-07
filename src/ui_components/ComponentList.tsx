@@ -13,7 +13,6 @@ const listStyles = {
   },
   searchContainer: {
     padding: sharedStyles.spacing.medium,
-    borderBottom: `1px solid ${sharedStyles.colors.border}`,
     backgroundColor: sharedStyles.colors.white,
     position: "relative" as const,
   },
@@ -46,7 +45,7 @@ const listStyles = {
   listContainer: {
     flex: 1,
     overflowY: "auto" as const,
-    padding: sharedStyles.spacing.small,
+    padding: sharedStyles.spacing.medium,
   },
   componentItem: {
     padding: "16px 12px",
