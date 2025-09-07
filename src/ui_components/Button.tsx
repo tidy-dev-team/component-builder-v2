@@ -7,7 +7,8 @@ import { minimalStyles, componentStyles, symbols } from "../ui_styles_minimal";
 export function ButtonComponent({
   callback,
   disabled = false,
-}: ButtonComponentProps & { disabled?: boolean }) {
+  loading = false,
+}: ButtonComponentProps & { disabled?: boolean; loading?: boolean }) {
   const [isHovered, setIsHovered] = useState(false);
   
   const getButtonStyle = () => {
@@ -18,7 +19,7 @@ export function ButtonComponent({
       letterSpacing: '0.01em',
     };
 
-    if (disabled) {
+    if (disabled || loading) {
       return { ...baseStyle, ...componentStyles.button.disabled };
     }
     
@@ -29,16 +30,26 @@ export function ButtonComponent({
     return baseStyle;
   };
 
+  const getButtonText = () => {
+    if (loading) {
+      return `${symbols.ui.divider} loading... ${symbols.ui.divider}`;
+    }
+    if (disabled) {
+      return `${symbols.ui.divider} select component ${symbols.ui.divider}`;
+    }
+    return `${symbols.ui.divider} build on canvas ${symbols.ui.divider}`;
+  };
+
   return (
     <Button 
       fullWidth 
-      onClick={disabled ? undefined : callback} 
-      disabled={disabled}
+      onClick={disabled || loading ? undefined : callback} 
+      disabled={disabled || loading}
       style={getButtonStyle()}
-      onMouseEnter={() => !disabled && setIsHovered(true)}
+      onMouseEnter={() => !disabled && !loading && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {disabled ? `${symbols.ui.divider} select component ${symbols.ui.divider}` : `${symbols.ui.divider} build on canvas ${symbols.ui.divider}`}
+      {getButtonText()}
     </Button>
   );
 }

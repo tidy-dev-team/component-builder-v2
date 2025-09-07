@@ -29,7 +29,7 @@
       "figma"
     ],
     "id": "component-builder-test-v2",
-    "name": "Tidy DS Pathfinder",
+    "name": "Tidy DS Explorer",
     "main": "src/main.ts",
     "ui": "src/ui.tsx",
     "enablePrivatePluginApi": true

@@ -91,9 +91,35 @@ function Plugin() {
   const [nestedInstances, setNestedInstances] = useState<
     { name: string; id: string; key: string }[]
   >([]);
+  
+  // Add state to track if properties are ready
+  const [isPropertiesReady, setIsPropertiesReady] = useState(false);
 
   function handleButtonClick() {
-    console.log("propertyUsedStates :>> ", propertyUsedStates);
+    console.log("🎯 Build button clicked");
+    console.log("📋 Current propertyUsedStates:", propertyUsedStates);
+    console.log("🔧 Selected component:", selectedComponent);
+    console.log("⚡ Is loading:", isLoadingComponent);
+    console.log("✅ Properties ready:", isPropertiesReady);
+    
+    // Guard against building with no component or while loading
+    if (!selectedComponent || isLoadingComponent) {
+      console.log("🚫 Build prevented - no component selected or still loading");
+      return;
+    }
+    
+    // Guard against building with empty properties (indicates incomplete state)
+    if (Object.keys(propertyUsedStates).length === 0) {
+      console.log("🚫 Build prevented - no properties available (incomplete state)");
+      return;
+    }
+    
+    // Guard against building before properties are fully loaded
+    if (!isPropertiesReady) {
+      console.log("🚫 Build prevented - properties not ready");
+      return;
+    }
+    
     emit("BUILD", propertyUsedStates);
   }
 
@@ -104,7 +130,9 @@ function Plugin() {
     );
     if (selectedComponent) {
       console.log("🚀 Selected component changed, triggering data load...");
+      console.log("🧹 Clearing previous state...");
       setIsLoadingComponent(true);
+      setIsPropertiesReady(false); // Reset properties ready state
       setComponentProps([]);
       setPropertyUsedStates({});
       setComponentDescription("");
@@ -118,6 +146,8 @@ function Plugin() {
       emit("GET_COMPONENT_SET_PROPERTIES", componentData);
     } else {
       console.log("🧹 No component selected, clearing state");
+      setIsPropertiesReady(false);
+      setPropertyUsedStates({});
     }
   }, [
     selectedComponent,
@@ -226,9 +256,11 @@ function Plugin() {
           Object.keys(initialUsedStates)
         );
         setPropertyUsedStates(initialUsedStates);
+        setIsPropertiesReady(true); // Properties are now ready
       } else {
         console.log("🧹 Resetting property used states to empty");
         setPropertyUsedStates({});
+        setIsPropertiesReady(false); // No properties available
       }
 
       // Add a small delay to ensure UI has time to render before hiding loading state
@@ -249,7 +281,7 @@ function Plugin() {
     <Container space="medium" style={styles.container}>
       {/* Header */}
       <div style={styles.header}>
-        <div style={styles.title}>tidy-ds-pathfinder </div>
+        <div style={styles.title}>tidy-ds-explorer</div>
         <div style={styles.subtitle}>
           select component {symbols.ui.divider} customize properties
         </div>
@@ -276,7 +308,8 @@ function Plugin() {
       <div style={styles.footer}>
         <ButtonComponent
           callback={handleButtonClick}
-          disabled={!selectedComponent || isLoadingComponent}
+          disabled={!selectedComponent || isLoadingComponent || !isPropertiesReady}
+          loading={isLoadingComponent}
         />
       </div>
     </Container>
