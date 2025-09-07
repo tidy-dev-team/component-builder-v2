@@ -5,15 +5,6 @@ import { selectedComponentAtom, componentSearchTermAtom } from "../state/atoms";
 import { ComponentData } from "../types";
 import { minimalStyles, symbols } from "../ui_styles_minimal";
 
-// Simple debounce function
-const debounce = <T extends (...args: any[]) => void>(func: T, wait: number): T => {
-  let timeout: ReturnType<typeof setTimeout>;
-  return ((...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  }) as T;
-};
-
 const listStyles = {
   container: {
     height: "100%",
@@ -77,12 +68,12 @@ const listStyles = {
   },
   componentItemHover: {
     backgroundColor: minimalStyles.colors.gray100,
-    borderColor: minimalStyles.colors.gray200,
+    border: `${minimalStyles.borders.thin} solid ${minimalStyles.colors.gray200}`,
   },
   componentItemSelected: {
     backgroundColor: minimalStyles.colors.gray900,
     color: minimalStyles.colors.white,
-    borderColor: minimalStyles.colors.gray900,
+    border: `${minimalStyles.borders.thin} solid ${minimalStyles.colors.gray900}`,
   },
   componentName: {
     fontWeight: minimalStyles.typography.fontWeight.medium,
@@ -137,47 +128,19 @@ export function ComponentList({ components }: ComponentListProps) {
     setHoveredComponent(null);
   }, [searchTerm]);
 
-  // Window-level mouse move handler to detect when mouse leaves the component area
+  // Simple cleanup when hoveredComponent changes
   useEffect(() => {
-    const handleWindowMouseMove = (e: MouseEvent) => {
-      // If we have a hovered component but mouse is moving outside our bounds, clear it
-      if (hoveredComponent) {
-        const component = document.querySelector(`[data-component-name="${hoveredComponent}"]`);
-        if (component) {
-          const rect = component.getBoundingClientRect();
-          const x = e.clientX;
-          const y = e.clientY;
-          
-          // Check if mouse is far away from the hovered component
-          const buffer = 50; // pixels
-          if (x < rect.left - buffer || x > rect.right + buffer || 
-              y < rect.top - buffer || y > rect.bottom + buffer) {
-            setHoveredComponent(null);
-          }
-        }
-      }
-    };
-
-    // Add a small delay to prevent excessive checks
-    const debouncedHandler = debounce(handleWindowMouseMove, 100);
+    // Ensure clean state transitions
+    if (!hoveredComponent) {
+      return;
+    }
     
-    window.addEventListener('mousemove', debouncedHandler);
-    
-    return () => {
-      window.removeEventListener('mousemove', debouncedHandler);
-    };
+    // Optional: Add any additional cleanup logic here if needed
   }, [hoveredComponent]);
 
-  // Global mouse leave handler for the list container
-  const handleContainerMouseLeave = (e: Event) => {
-    // Check if the mouse actually left the container (not just moved to a child)
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const x = (e as MouseEvent).clientX;
-    const y = (e as MouseEvent).clientY;
-    
-    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
-      setHoveredComponent(null);
-    }
+  // Simple container mouse leave handler
+  const handleContainerMouseLeave = () => {
+    setHoveredComponent(null);
   };
 
   // Filter components based on search term
@@ -217,7 +180,7 @@ export function ComponentList({ components }: ComponentListProps) {
 
   const handleComponentClick = (componentName: string) => {
     setSelectedComponent(componentName);
-    // Clear hover state when clicking to prevent sticking
+    // Always clear hover state when clicking to prevent sticking
     setHoveredComponent(null);
   };
 
@@ -232,27 +195,13 @@ export function ComponentList({ components }: ComponentListProps) {
     setHoveredComponent(null);
   };
 
-  // More robust hover handlers with error boundaries
-  const handleMouseEnter = (componentName: string) => (e: Event) => {
-    try {
-      e.stopPropagation();
-      e.preventDefault();
-      setHoveredComponent(componentName);
-    } catch (error) {
-      console.warn('Mouse enter error:', error);
-      setHoveredComponent(null);
-    }
+  // Simplified and more reliable hover handlers
+  const handleMouseEnter = (componentName: string) => () => {
+    setHoveredComponent(componentName);
   };
 
-  const handleMouseLeave = () => (e: Event) => {
-    try {
-      e.stopPropagation();
-      e.preventDefault();
-      setHoveredComponent(null);
-    } catch (error) {
-      console.warn('Mouse leave error:', error);
-      setHoveredComponent(null);
-    }
+  const handleMouseLeave = () => {
+    setHoveredComponent(null);
   };
 
   return (
@@ -325,18 +274,36 @@ export function ComponentList({ components }: ComponentListProps) {
             const isSelected = selectedComponent === name;
             const isHovered = hoveredComponent === name;
 
+            // Calculate styles more explicitly to prevent conflicts
+            const getItemStyles = () => {
+              const baseStyles = listStyles.componentItem;
+              
+              if (isSelected) {
+                // Selected state takes priority over hover
+                return {
+                  ...baseStyles,
+                  ...listStyles.componentItemSelected,
+                };
+              } else if (isHovered) {
+                // Only apply hover if not selected
+                return {
+                  ...baseStyles,
+                  ...listStyles.componentItemHover,
+                };
+              } else {
+                // Default state
+                return baseStyles;
+              }
+            };
+
             return (
               <div key={name}>
                 <div
                   data-component-name={name}
-                  style={{
-                    ...listStyles.componentItem,
-                    ...(isHovered ? listStyles.componentItemHover : {}),
-                    ...(isSelected ? listStyles.componentItemSelected : {}),
-                  }}
+                  style={getItemStyles()}
                   onClick={() => handleComponentClick(name)}
                   onMouseEnter={handleMouseEnter(name)}
-                  onMouseLeave={handleMouseLeave()}
+                  onMouseLeave={handleMouseLeave}
                 >
               <div style={listStyles.componentName}>
                 {highlightMatch(name.toLowerCase(), searchTerm)}
