@@ -1,4 +1,5 @@
 import { h, JSX } from "preact";
+import { useState } from "preact/hooks";
 import { useAtom } from "jotai";
 import { selectedComponentAtom } from "../state/atoms";
 import { ComponentData } from "../types";
@@ -37,22 +38,7 @@ const listStyles = {
     color: "#1f2937",
     border: "1px solid #e8eaed",
     backgroundColor: "#ffffff",
-    textAlign: "center" as const,
-  },
-  componentItemHover: {
-    backgroundColor: "#f8f9fa",
-    borderColor: "#d1d5db",
-    color: "#1f2937",
-  },
-  componentItemSelected: {
-    backgroundColor: "#4F46E5",
-    color: "#ffffff",
-    borderColor: "#4F46E5",
-  },
-  componentItemSelectedHover: {
-    backgroundColor: "#4338CA",
-    borderColor: "#4338CA",
-    color: "#ffffff",
+    textAlign: "left" as const,
   },
   componentName: {
     fontWeight: "500",
@@ -63,9 +49,6 @@ const listStyles = {
     color: "#6b7280",
     marginTop: "4px",
   },
-  componentTypeSelected: {
-    color: "#e0e7ff",
-  },
 };
 
 interface ComponentListProps {
@@ -74,6 +57,7 @@ interface ComponentListProps {
 
 export function ComponentList({ components }: ComponentListProps) {
   const [selectedComponent, setSelectedComponent] = useAtom(selectedComponentAtom);
+  const [hoveredComponent, setHoveredComponent] = useState<string | null>(null);
 
   // Convert to flat list - we don't need complex grouping for scrollable list
   const allComponents = Object.entries(components).filter(
@@ -104,36 +88,42 @@ export function ComponentList({ components }: ComponentListProps) {
     <div style={listStyles.container}>
       {allComponents.map(([name, component], index) => {
         const isSelected = selectedComponent === name;
+        const isHovered = hoveredComponent === name;
+
+        // Simplified style calculation - no more style spreading
+        let itemStyle = {
+          ...listStyles.componentItem,
+        };
+        
+        if (isSelected) {
+          itemStyle = {
+            ...itemStyle,
+            backgroundColor: isHovered ? "#4338CA" : "#4F46E5",
+            color: "#ffffff",
+            border: `1px solid ${isHovered ? "#4338CA" : "#4F46E5"}`,
+          };
+        } else if (isHovered) {
+          itemStyle = {
+            ...itemStyle,
+            backgroundColor: "#f8f9fa",
+            border: "1px solid #d1d5db",
+          };
+        }
 
         return (
           <div key={name}>
             <div
-              style={{
-                ...listStyles.componentItem,
-                ...(isSelected ? listStyles.componentItemSelected : {}),
-              }}
+              style={itemStyle}
               onClick={() => handleComponentClick(name)}
-              onMouseEnter={(e: JSX.TargetedMouseEvent<HTMLDivElement>) => {
-                if (!isSelected) {
-                  Object.assign(e.currentTarget.style, listStyles.componentItemHover);
-                } else {
-                  Object.assign(e.currentTarget.style, listStyles.componentItemSelectedHover);
-                }
-              }}
-              onMouseLeave={(e: JSX.TargetedMouseEvent<HTMLDivElement>) => {
-                if (!isSelected) {
-                  Object.assign(e.currentTarget.style, listStyles.componentItem);
-                } else {
-                  Object.assign(e.currentTarget.style, listStyles.componentItemSelected);
-                }
-              }}
+              onMouseEnter={() => setHoveredComponent(name)}
+              onMouseLeave={() => setHoveredComponent(null)}
             >
               <div style={listStyles.componentName}>{name}</div>
               {component.type && (
                 <div
                   style={{
                     ...listStyles.componentType,
-                    ...(isSelected ? listStyles.componentTypeSelected : {}),
+                    color: isSelected ? "#e0e7ff" : "#6b7280",
                   }}
                 >
                   {component.type}
