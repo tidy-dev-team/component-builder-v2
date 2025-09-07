@@ -14,3 +14,5 @@ export const isLoadingComponentAtom = atom<boolean>(false);
 export const componentDescriptionAtom = atom<string>("");
 
 export const componentImageAtom = atom<string | null>(null);
+
+export const componentSearchTermAtom = atom<string>("");
