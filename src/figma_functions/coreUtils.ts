@@ -485,3 +485,25 @@ export function hasPropertyInComponent(
 
   return false;
 }
+
+export function getComponentDescription(node: ComponentSetNode | ComponentNode): string {
+  try {
+    // Check if the node has a description property
+    if (node.description && typeof node.description === "string" && node.description.trim() !== "") {
+      return node.description.trim();
+    }
+
+    // For component sets, check the default variant
+    if (node.type === "COMPONENT_SET" && node.defaultVariant) {
+      if (node.defaultVariant.description && typeof node.defaultVariant.description === "string" && node.defaultVariant.description.trim() !== "") {
+        return node.defaultVariant.description.trim();
+      }
+    }
+
+    // Return a default description if none found
+    return "No description available";
+  } catch (error) {
+    console.error("Error getting component description:", error);
+    return "Error loading description";
+  }
+}

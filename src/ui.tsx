@@ -5,16 +5,17 @@ import { useEffect, useState } from "preact/hooks";
 import { components } from "./componentData";
 import { useAtom } from "jotai";
 
-import { DropdownComponent } from "./ui_components/Dropdown";
+import { ComponentList } from "./ui_components/ComponentList";
+import { ComponentPreview } from "./ui_components/ComponentPreview";
 import { ButtonComponent } from "./ui_components/Button";
 import {
   selectedComponentAtom,
   selectedComponentPropertiesAtom,
   propertyUsedStatesAtom,
   isLoadingComponentAtom,
+  componentDescriptionAtom,
 } from "./state/atoms";
 import { ComponentPropertyInfo, PropertyUsedStates } from "./types";
-import { renderAllProperties } from "./ui_elements";
 
 // Sleek UI styles
 const styles = {
@@ -45,39 +46,30 @@ const styles = {
   },
   content: {
     flex: 1,
-    overflowY: "auto" as const,
+    display: "flex",
+    gap: "12px",
     padding: "0 2px",
+    minHeight: 0, // Allow flex children to shrink
+  },
+  leftColumn: {
+    flex: "1", // Flexible width for preview (takes remaining space)
+    minHeight: 0,
+    backgroundColor: "#f1f1f1",
+    border: "1px solid #e8eaed",
+    borderRadius: "4px",
+    overflow: "hidden",
+  },
+  rightColumn: {
+    flex: "0 0 240px", // Fixed width for component list (wider than before)
+    backgroundColor: "#ffffff",
+    border: "1px solid #e8eaed",
+    borderRadius: "4px",
+    overflow: "hidden",
   },
   footer: {
     padding: "16px 0 12px 0",
     borderTop: "1px solid #e8eaed",
     marginTop: "auto",
-  },
-  emptyState: {
-    textAlign: "center" as const,
-    padding: "40px 20px",
-    color: "#6b7280",
-  },
-  emptyStateIcon: {
-    fontSize: "24px",
-    marginBottom: "12px",
-    opacity: 0.6,
-  },
-  emptyStateText: {
-    fontSize: "12px",
-    lineHeight: "1.5",
-  },
-  loadingState: {
-    display: "flex",
-    flexDirection: "column" as const,
-    alignItems: "center",
-    justifyContent: "center",
-    height: "200px",
-    color: "#6b7280",
-  },
-  loadingText: {
-    fontSize: "12px",
-    color: "#6b7280",
   },
 };
 
@@ -91,6 +83,9 @@ function Plugin() {
   );
   const [isLoadingComponent, setIsLoadingComponent] = useAtom(
     isLoadingComponentAtom
+  );
+  const [componentDescription, setComponentDescription] = useAtom(
+    componentDescriptionAtom
   );
   const [nestedInstances, setNestedInstances] = useState<
     { name: string; id: string; key: string }[]
@@ -111,6 +106,7 @@ function Plugin() {
       setIsLoadingComponent(true);
       setComponentProps([]);
       setPropertyUsedStates({});
+      setComponentDescription("");
 
       const componentData = components[selectedComponent];
       console.log(
@@ -126,6 +122,7 @@ function Plugin() {
     setIsLoadingComponent,
     setComponentProps,
     setPropertyUsedStates,
+    setComponentDescription,
   ]);
 
   useEffect(() => {
@@ -136,7 +133,7 @@ function Plugin() {
         data
       );
 
-      const { cachedComponentProps, nestedInstances } = data;
+      const { cachedComponentProps, nestedInstances, componentDescription } = data;
       console.log(
         "📋 Processing received data - Props:",
         cachedComponentProps,
@@ -151,6 +148,7 @@ function Plugin() {
       // First, set the component props
       setComponentProps(safeComponentProps);
       setNestedInstances(safeNestedInstances);
+      setComponentDescription(componentDescription || "");
 
       // Only process if we have valid component props
       if (safeComponentProps && Array.isArray(safeComponentProps)) {
@@ -230,7 +228,7 @@ function Plugin() {
       }, 100);
     });
     return unsubscribe;
-  }, [setComponentProps, setPropertyUsedStates, setIsLoadingComponent]);
+  }, [setComponentProps, setPropertyUsedStates, setIsLoadingComponent, setComponentDescription]);
 
   return (
     <Container space="medium" style={styles.container}>
@@ -242,35 +240,17 @@ function Plugin() {
         </div>
       </div>
 
-      {/* Component Selection */}
-      <div style={{ marginBottom: "20px" }}>
-        <DropdownComponent components={components} />
-      </div>
-
-      {/* Content */}
+      {/* Two-Column Content */}
       <div style={styles.content}>
-        {isLoadingComponent ? (
-          <div style={styles.loadingState}>
-            <div style={styles.loadingText}>Loading...</div>
-          </div>
-        ) : selectedComponent && componentProps.length > 0 ? (
-          renderAllProperties(
-            componentProps,
-            propertyUsedStates,
-            nestedInstances
-          )
-        ) : (
-          <div style={styles.emptyState}>
-            <div style={styles.emptyStateIcon}>⚡</div>
-            <div style={styles.emptyStateText}>
-              {selectedComponent
-                ? componentProps === null
-                  ? "Error loading component properties. Please try selecting the component again."
-                  : "Loading component properties..."
-                : "Choose a component to get started"}
-            </div>
-          </div>
-        )}
+        {/* Left Column - Component Preview (Dynamic Content) */}
+        <div style={styles.leftColumn}>
+          <ComponentPreview nestedInstances={nestedInstances} description={componentDescription} />
+        </div>
+
+        {/* Right Column - Component List */}
+        <div style={styles.rightColumn}>
+          <ComponentList components={components} />
+        </div>
       </div>
 
       {/* Footer */}

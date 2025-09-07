@@ -57,7 +57,7 @@ function renderVariantProperties(
       </div>
       <div
         style={{
-          background: "#fafbfc",
+          background: "transparent",
           border: "1px solid #e8eaed",
           borderRadius: "8px",
           padding: "12px",
@@ -159,7 +159,7 @@ function renderOtherProperties(
       </div>
       <div
         style={{
-          background: "#fafbfc",
+          background: "transparent",
           border: "1px solid #e8eaed",
           borderRadius: "8px",
           padding: "12px",
@@ -251,7 +251,7 @@ function renderNestedComponents(
       </div>
       <div
         style={{
-          background: "#fafbfc",
+          background: "transparent",
           border: "1px solid #e8eaed",
           borderRadius: "8px",
           padding: "12px",
