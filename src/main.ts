@@ -1,5 +1,5 @@
 import { on, emit, showUI } from "@create-figma-plugin/utilities";
-import { getComponentPropertyInfo, getComponentPropertyInfoFromComponent } from "./figma_functions/coreUtils";
+import { getComponentPropertyInfo, getComponentPropertyInfoFromComponent, getComponentDescription } from "./figma_functions/coreUtils";
 import type {
   ComponentPropertyInfo,
   ComponentSetEventData,
@@ -55,6 +55,7 @@ export default async function () {
         emit("COMPONENT_SET_PROPERTIES", {
           cachedComponentProps,
           nestedInstances,
+          componentDescription: "",
         });
         
         console.log("✅ Successfully emitted COMPONENT_SET_PROPERTIES");
@@ -214,6 +215,17 @@ async function getComponentSet(key: string): Promise<void> {
         console.log("🔍 Finding nested instances...");
         nestedInstances = findExposedInstances(cachedComponentSet.defaultVariant);
         console.log(`✅ Component set processed: ${cachedComponentSet.name}, properties: ${cachedComponentProps.length}, instances: ${nestedInstances.length}`);
+
+        // Get component description
+        const componentDescription = getComponentDescription(cachedComponentSet);
+        console.log("📝 Component description:", componentDescription);
+
+        // Emit with description
+        emit("COMPONENT_SET_PROPERTIES", {
+          cachedComponentProps,
+          nestedInstances,
+          componentDescription,
+        });
         return;
       }
     } catch (error) {
@@ -251,6 +263,17 @@ async function getComponentSet(key: string): Promise<void> {
     console.log("🔍 Finding nested instances in regular component...");
     nestedInstances = findExposedInstances(cachedComponent);
     console.log(`✅ Regular component processed: ${cachedComponent.name}, properties: ${cachedComponentProps.length}, instances: ${nestedInstances.length}`);
+
+    // Get component description
+    const componentDescription = getComponentDescription(cachedComponent);
+    console.log("📝 Component description:", componentDescription);
+
+    // Emit with description
+    emit("COMPONENT_SET_PROPERTIES", {
+      cachedComponentProps,
+      nestedInstances,
+      componentDescription,
+    });
     
   } catch (error) {
     console.error("❌ Error in getComponentSet:", error);

@@ -7,5 +7,5 @@ export const HIDDEN_PROPERTIES = ["selection type"] as const;
 
 export const UI_DIMENSIONS = {
   HEIGHT: 800,
-  WIDTH: 320,
+  WIDTH: 1200,
 } as const;
