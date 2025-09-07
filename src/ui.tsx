@@ -14,6 +14,7 @@ import {
   propertyUsedStatesAtom,
   isLoadingComponentAtom,
   componentDescriptionAtom,
+  componentImageAtom,
 } from "./state/atoms";
 import { ComponentPropertyInfo, PropertyUsedStates } from "./types";
 
@@ -87,6 +88,7 @@ function Plugin() {
   const [componentDescription, setComponentDescription] = useAtom(
     componentDescriptionAtom
   );
+  const [componentImage, setComponentImage] = useAtom(componentImageAtom);
   const [nestedInstances, setNestedInstances] = useState<
     { name: string; id: string; key: string }[]
   >([]);
@@ -107,6 +109,7 @@ function Plugin() {
       setComponentProps([]);
       setPropertyUsedStates({});
       setComponentDescription("");
+      setComponentImage(null);
 
       const componentData = components[selectedComponent];
       console.log(
@@ -123,6 +126,7 @@ function Plugin() {
     setComponentProps,
     setPropertyUsedStates,
     setComponentDescription,
+    setComponentImage,
   ]);
 
   useEffect(() => {
@@ -133,7 +137,7 @@ function Plugin() {
         data
       );
 
-      const { cachedComponentProps, nestedInstances, componentDescription } =
+      const { cachedComponentProps, nestedInstances, componentDescription, componentImage } =
         data;
       console.log(
         "📋 Processing received data - Props:",
@@ -150,6 +154,7 @@ function Plugin() {
       setComponentProps(safeComponentProps);
       setNestedInstances(safeNestedInstances);
       setComponentDescription(componentDescription || "");
+      setComponentImage(componentImage || null);
 
       // Only process if we have valid component props
       if (safeComponentProps && Array.isArray(safeComponentProps)) {
@@ -234,6 +239,7 @@ function Plugin() {
     setPropertyUsedStates,
     setIsLoadingComponent,
     setComponentDescription,
+    setComponentImage,
   ]);
 
   return (
@@ -253,6 +259,7 @@ function Plugin() {
           <ComponentPreview
             nestedInstances={nestedInstances}
             description={componentDescription}
+            componentImage={componentImage}
           />
         </div>
 

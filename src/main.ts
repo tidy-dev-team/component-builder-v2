@@ -1,5 +1,5 @@
 import { on, emit, showUI } from "@create-figma-plugin/utilities";
-import { getComponentPropertyInfo, getComponentPropertyInfoFromComponent, getComponentDescription } from "./figma_functions/coreUtils";
+import { getComponentPropertyInfo, getComponentPropertyInfoFromComponent, getComponentDescription, getComponentImage } from "./figma_functions/coreUtils";
 import type {
   ComponentPropertyInfo,
   ComponentSetEventData,
@@ -63,7 +63,12 @@ export default async function () {
          const recovered = await errorRecovery.attemptRecovery(propGateError);
          if (!recovered) {
            console.log("❌ Recovery failed, emitting empty data");
-           emit("COMPONENT_SET_PROPERTIES", { cachedComponentProps: [], nestedInstances: [] });
+            emit("COMPONENT_SET_PROPERTIES", { 
+              cachedComponentProps: [], 
+              nestedInstances: [], 
+              componentDescription: "",
+              componentImage: null 
+            });
          }
       }
     }
@@ -213,13 +218,18 @@ async function getComponentSet(key: string): Promise<void> {
         // Emit data for component set
         const componentDescription = getComponentDescription(cachedComponentSet);
         console.log("📝 Component description:", componentDescription);
+        
+        const componentImage = await getComponentImage(cachedComponentSet);
+        console.log("🖼️ Component image:", componentImage ? "Generated successfully" : "Failed to generate");
+        
         console.log(`📤 Emitting properties to UI: ${cachedComponentProps?.length || 0} properties, ${nestedInstances?.length || 0} nested instances`);
         emit("COMPONENT_SET_PROPERTIES", {
           cachedComponentProps,
           nestedInstances,
           componentDescription,
+          componentImage,
         });
-        console.log("✅ Successfully emitted COMPONENT_SET_PROPERTIES with description");
+        console.log("✅ Successfully emitted COMPONENT_SET_PROPERTIES with description and image");
         return;
       }
     } catch (error) {
@@ -261,13 +271,18 @@ async function getComponentSet(key: string): Promise<void> {
     // Emit data for regular component
     const componentDescription = getComponentDescription(cachedComponent);
     console.log("📝 Component description:", componentDescription);
+    
+    const componentImage = await getComponentImage(cachedComponent);
+    console.log("🖼️ Component image:", componentImage ? "Generated successfully" : "Failed to generate");
+    
     console.log(`📤 Emitting properties to UI: ${cachedComponentProps?.length || 0} properties, ${nestedInstances?.length || 0} nested instances`);
     emit("COMPONENT_SET_PROPERTIES", {
       cachedComponentProps,
       nestedInstances,
       componentDescription,
+      componentImage,
     });
-    console.log("✅ Successfully emitted COMPONENT_SET_PROPERTIES with description");
+    console.log("✅ Successfully emitted COMPONENT_SET_PROPERTIES with description and image");
     
   } catch (error) {
     console.error("❌ Error in getComponentSet:", error);

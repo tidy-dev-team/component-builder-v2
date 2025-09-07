@@ -12,3 +12,5 @@ export const propertyUsedStatesAtom = atom<PropertyUsedStates>({});
 export const isLoadingComponentAtom = atom<boolean>(false);
 
 export const componentDescriptionAtom = atom<string>("");
+
+export const componentImageAtom = atom<string | null>(null);

@@ -507,3 +507,44 @@ export function getComponentDescription(node: ComponentSetNode | ComponentNode):
     return "Error loading description";
   }
 }
+
+export async function getComponentImage(node: ComponentSetNode | ComponentNode): Promise<string | null> {
+  try {
+    // Determine which node to render
+    let nodeToRender: ComponentNode;
+    
+    if (node.type === "COMPONENT_SET") {
+      // For component sets, use the default variant
+      if (!node.defaultVariant) {
+        console.error("Component set has no default variant");
+        return null;
+      }
+      nodeToRender = node.defaultVariant;
+    } else {
+      // For regular components, use the component itself
+      nodeToRender = node;
+    }
+
+    console.log(`🖼️ Getting image for: ${nodeToRender.name} (${nodeToRender.type})`);
+    
+    // Export the component as PNG
+    const imageBytes = await nodeToRender.exportAsync({
+      format: "PNG",
+      constraint: {
+        type: "WIDTH",
+        value: 200 // Reasonable size for preview
+      }
+    });
+
+    // Convert Uint8Array to base64 data URL
+    const base64 = figma.base64Encode(imageBytes);
+    const dataUrl = `data:image/png;base64,${base64}`;
+    
+    console.log(`✅ Successfully generated image for: ${nodeToRender.name}`);
+    return dataUrl;
+    
+  } catch (error) {
+    console.error("Error getting component image:", error);
+    return null;
+  }
+}
