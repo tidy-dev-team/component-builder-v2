@@ -75,13 +75,12 @@ const previewStyles = {
     borderRadius: "4px",
     padding: "12px",
     flex: 1,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    overflowY: "auto" as const,
     minHeight: "200px",
   },
   propertiesContent: {
     width: "100%",
+    height: "100%",
   },
   propertiesPlaceholder: {
     color: "#6b7280",
@@ -208,7 +207,14 @@ export function ComponentPreview({ nestedInstances, description }: ComponentPrev
         </div>
 
         {/* Properties */}
-        <div style={previewStyles.propertiesBlock}>
+        <div style={{
+          ...previewStyles.propertiesBlock,
+          ...(componentProps.length === 0 ? {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          } : {})
+        }}>
           {componentProps.length > 0 ? (
             <div style={previewStyles.propertiesContent}>
               {renderAllProperties(componentProps, propertyUsedStates, nestedInstances)}
