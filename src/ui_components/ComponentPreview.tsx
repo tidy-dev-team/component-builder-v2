@@ -137,15 +137,15 @@ export function ComponentPreview({ nestedInstances, description }: ComponentPrev
 
   return (
     <div style={previewStyles.container}>
-      {/* Component Image Placeholder */}
-      <div style={previewStyles.imagePlaceholder}>
-        <div style={previewStyles.placeholderText}>placeholder image</div>
-      </div>
-
       <div style={previewStyles.content}>
         {/* Component Name Header */}
         <div style={previewStyles.header}>
           <div style={previewStyles.componentName}>{selectedComponent}</div>
+        </div>
+
+        {/* Component Image Placeholder */}
+        <div style={previewStyles.imagePlaceholder}>
+          <div style={previewStyles.placeholderText}>placeholder image</div>
         </div>
 
         {/* Component Description */}
