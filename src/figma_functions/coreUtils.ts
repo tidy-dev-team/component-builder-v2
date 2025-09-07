@@ -1,6 +1,7 @@
 import { ComponentPropertyInfo } from "../types";
 import { ComponentPropertyReferences } from "../types/figma";
 import { errorService, ErrorCode } from "../errors";
+import { imageCache } from "../utils/imageCache";
 
 export function getElementsWithComponentProperty(
   componentSet: ComponentSetNode,
@@ -505,5 +506,69 @@ export function getComponentDescription(node: ComponentSetNode | ComponentNode):
   } catch (error) {
     console.error("Error getting component description:", error);
     return "Error loading description";
+  }
+}
+
+export async function getComponentImage(node: ComponentSetNode | ComponentNode): Promise<string | null> {
+  try {
+    // Determine which node to render
+    let nodeToRender: ComponentNode;
+    
+    if (node.type === "COMPONENT_SET") {
+      // For component sets, use the default variant
+      if (!node.defaultVariant) {
+        console.error("Component set has no default variant");
+        return null;
+      }
+      nodeToRender = node.defaultVariant;
+    } else {
+      // For regular components, use the component itself
+      nodeToRender = node;
+    }
+
+    // Create cache key based on node ID and key for uniqueness
+    const cacheKey = `${nodeToRender.id}_${nodeToRender.key || 'nokey'}`;
+    console.log(`🔑 Cache key for ${nodeToRender.name}: ${cacheKey}`);
+    
+    // Log cache stats before checking
+    const statsBefore = imageCache.getStats();
+    console.log(`📊 Cache stats before lookup: ${statsBefore.imageEntries} images, ${statsBefore.componentEntries} components, ${statsBefore.utilization}`);
+    
+    // Check cache first
+    const cachedImage = imageCache.get(cacheKey);
+    if (cachedImage) {
+      console.log(`📦 CACHE HIT! Using cached image for: ${nodeToRender.name}`);
+      return cachedImage;
+    }
+    
+    console.log(`❌ Cache miss for: ${nodeToRender.name}, generating new image...`);
+
+    console.log(`🖼️ Generating new image for: ${nodeToRender.name} (${nodeToRender.type})`);
+    
+    // Export the component as PNG with 2x resolution
+    const imageBytes = await nodeToRender.exportAsync({
+      format: "PNG",
+      constraint: {
+        type: "WIDTH",
+        value: 400 // 2x resolution (200px * 2) for crisp preview
+      }
+    });
+
+    // Convert Uint8Array to base64 data URL
+    const base64 = figma.base64Encode(imageBytes);
+    const dataUrl = `data:image/png;base64,${base64}`;
+    
+    // Cache the generated image
+    imageCache.set(cacheKey, dataUrl);
+    
+    // Log cache stats periodically
+    const stats = imageCache.getStats();
+    console.log(`✅ Generated image for: ${nodeToRender.name} | Cache: ${stats.imageEntries} images, ${stats.componentEntries} components, ${stats.utilization}`);
+    
+    return dataUrl;
+    
+  } catch (error) {
+    console.error("Error getting component image:", error);
+    return null;
   }
 }

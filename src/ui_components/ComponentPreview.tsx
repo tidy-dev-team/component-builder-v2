@@ -32,8 +32,8 @@ const previewStyles = {
   },
   imagePlaceholder: {
     width: "100%",
-    height: "65px",
-    backgroundColor: "#f8f9fa",
+    height: "256px",
+    backgroundColor: "#ffffff",
     border: "2px dashed #d1d5db",
     borderRadius: "4px",
     display: "flex",
@@ -41,6 +41,7 @@ const previewStyles = {
     justifyContent: "center",
     marginBottom: "0px",
     flexShrink: 0,
+    padding: "4px 0",
   },
   placeholderIcon: {
     fontSize: "16px",
@@ -114,9 +115,10 @@ const previewStyles = {
 interface ComponentPreviewProps {
   nestedInstances?: { name: string; id: string; key: string }[];
   description?: string;
+  componentImage?: string | null;
 }
 
-export function ComponentPreview({ nestedInstances, description }: ComponentPreviewProps) {
+export function ComponentPreview({ nestedInstances, description, componentImage }: ComponentPreviewProps) {
   const [selectedComponent] = useAtom(selectedComponentAtom);
   const [componentProps] = useAtom(selectedComponentPropertiesAtom);
   const [propertyUsedStates] = useAtom(propertyUsedStatesAtom);
@@ -143,9 +145,26 @@ export function ComponentPreview({ nestedInstances, description }: ComponentPrev
           <div style={previewStyles.componentName}>{selectedComponent}</div>
         </div>
 
-        {/* Component Image Placeholder */}
+        {/* Component Image */}
         <div style={previewStyles.imagePlaceholder}>
-          <div style={previewStyles.placeholderText}>placeholder image</div>
+          {componentImage ? (
+            <img 
+              src={componentImage} 
+              alt={selectedComponent}
+              style={{
+                width: "auto",
+                height: "auto",
+                maxWidth: "100%",
+                maxHeight: "248px", // 256px - 8px padding
+                objectFit: "contain",
+                objectPosition: "center",
+                borderRadius: "4px",
+                display: "block",
+              }}
+            />
+          ) : (
+            <div style={previewStyles.placeholderText}>Loading preview...</div>
+          )}
         </div>
 
         {/* Component Description */}

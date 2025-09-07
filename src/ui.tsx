@@ -14,6 +14,7 @@ import {
   propertyUsedStatesAtom,
   isLoadingComponentAtom,
   componentDescriptionAtom,
+  componentImageAtom,
 } from "./state/atoms";
 import { ComponentPropertyInfo, PropertyUsedStates } from "./types";
 
@@ -87,6 +88,7 @@ function Plugin() {
   const [componentDescription, setComponentDescription] = useAtom(
     componentDescriptionAtom
   );
+  const [componentImage, setComponentImage] = useAtom(componentImageAtom);
   const [nestedInstances, setNestedInstances] = useState<
     { name: string; id: string; key: string }[]
   >([]);
@@ -107,6 +109,7 @@ function Plugin() {
       setComponentProps([]);
       setPropertyUsedStates({});
       setComponentDescription("");
+      setComponentImage(null);
 
       const componentData = components[selectedComponent];
       console.log(
@@ -123,6 +126,7 @@ function Plugin() {
     setComponentProps,
     setPropertyUsedStates,
     setComponentDescription,
+    setComponentImage,
   ]);
 
   useEffect(() => {
@@ -133,7 +137,8 @@ function Plugin() {
         data
       );
 
-      const { cachedComponentProps, nestedInstances, componentDescription } = data;
+      const { cachedComponentProps, nestedInstances, componentDescription, componentImage } =
+        data;
       console.log(
         "📋 Processing received data - Props:",
         cachedComponentProps,
@@ -149,6 +154,7 @@ function Plugin() {
       setComponentProps(safeComponentProps);
       setNestedInstances(safeNestedInstances);
       setComponentDescription(componentDescription || "");
+      setComponentImage(componentImage || null);
 
       // Only process if we have valid component props
       if (safeComponentProps && Array.isArray(safeComponentProps)) {
@@ -228,13 +234,19 @@ function Plugin() {
       }, 100);
     });
     return unsubscribe;
-  }, [setComponentProps, setPropertyUsedStates, setIsLoadingComponent, setComponentDescription]);
+  }, [
+    setComponentProps,
+    setPropertyUsedStates,
+    setIsLoadingComponent,
+    setComponentDescription,
+    setComponentImage,
+  ]);
 
   return (
     <Container space="medium" style={styles.container}>
       {/* Header */}
       <div style={styles.header}>
-        <div style={styles.title}>PropGate</div>
+        <div style={styles.title}>Tidy DS Pathfinder</div>
         <div style={styles.subtitle}>
           Select a component and customize its properties
         </div>
@@ -244,7 +256,11 @@ function Plugin() {
       <div style={styles.content}>
         {/* Left Column - Component Preview (Dynamic Content) */}
         <div style={styles.leftColumn}>
-          <ComponentPreview nestedInstances={nestedInstances} description={componentDescription} />
+          <ComponentPreview
+            nestedInstances={nestedInstances}
+            description={componentDescription}
+            componentImage={componentImage}
+          />
         </div>
 
         {/* Right Column - Component List */}
