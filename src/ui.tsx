@@ -133,7 +133,8 @@ function Plugin() {
         data
       );
 
-      const { cachedComponentProps, nestedInstances, componentDescription } = data;
+      const { cachedComponentProps, nestedInstances, componentDescription } =
+        data;
       console.log(
         "📋 Processing received data - Props:",
         cachedComponentProps,
@@ -228,13 +229,18 @@ function Plugin() {
       }, 100);
     });
     return unsubscribe;
-  }, [setComponentProps, setPropertyUsedStates, setIsLoadingComponent, setComponentDescription]);
+  }, [
+    setComponentProps,
+    setPropertyUsedStates,
+    setIsLoadingComponent,
+    setComponentDescription,
+  ]);
 
   return (
     <Container space="medium" style={styles.container}>
       {/* Header */}
       <div style={styles.header}>
-        <div style={styles.title}>PropGate</div>
+        <div style={styles.title}>Tidy DS Pathfinder</div>
         <div style={styles.subtitle}>
           Select a component and customize its properties
         </div>
@@ -244,7 +250,10 @@ function Plugin() {
       <div style={styles.content}>
         {/* Left Column - Component Preview (Dynamic Content) */}
         <div style={styles.leftColumn}>
-          <ComponentPreview nestedInstances={nestedInstances} description={componentDescription} />
+          <ComponentPreview
+            nestedInstances={nestedInstances}
+            description={componentDescription}
+          />
         </div>
 
         {/* Right Column - Component List */}
