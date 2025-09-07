@@ -1,28 +1,22 @@
 import { Button } from "@create-figma-plugin/ui";
 import { h } from "preact";
 import { ButtonComponentProps } from "../types";
-import { sharedStyles } from "../ui_styles";
-
-const buttonStyle = {
-  height: "36px",
-  fontSize: "13px",
-  fontWeight: "500",
-  borderRadius: "8px",
-  border: "none",
-  cursor: "pointer",
-  transition: sharedStyles.transitions.medium,
-  background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
-  color: "#ffffff",
-  boxShadow: "0 2px 4px rgba(79, 70, 229, 0.2)",
-};
+import { minimalStyles, componentStyles, symbols } from "../ui_styles_minimal";
 
 export function ButtonComponent({
   callback,
   disabled = false,
 }: ButtonComponentProps & { disabled?: boolean }) {
+  const baseStyle = {
+    ...componentStyles.button.base,
+    width: '100%',
+    textTransform: 'lowercase',
+    letterSpacing: '0.01em',
+  };
+
   const style = disabled 
-    ? { ...buttonStyle, opacity: 0.5, cursor: "not-allowed" }
-    : buttonStyle;
+    ? { ...baseStyle, ...componentStyles.button.disabled }
+    : baseStyle;
 
   return (
     <Button 
@@ -30,8 +24,18 @@ export function ButtonComponent({
       onClick={disabled ? undefined : callback} 
       disabled={disabled}
       style={style}
+      onMouseEnter={(e) => {
+        if (!disabled) {
+          Object.assign(e.currentTarget.style, componentStyles.button.hover);
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!disabled) {
+          Object.assign(e.currentTarget.style, baseStyle);
+        }
+      }}
     >
-      {disabled ? "Select a component" : "Build on canvas"}
+      {disabled ? `${symbols.ui.divider} select component ${symbols.ui.divider}` : `${symbols.ui.divider} build on canvas ${symbols.ui.divider}`}
     </Button>
   );
 }

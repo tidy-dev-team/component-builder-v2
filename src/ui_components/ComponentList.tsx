@@ -3,18 +3,19 @@ import { useState } from "preact/hooks";
 import { useAtom } from "jotai";
 import { selectedComponentAtom, componentSearchTermAtom } from "../state/atoms";
 import { ComponentData } from "../types";
-import { sharedStyles, getHoverStyles } from "../ui_styles";
+import { minimalStyles, symbols } from "../ui_styles_minimal";
 
 const listStyles = {
   container: {
     height: "100%",
     display: "flex",
     flexDirection: "column" as const,
+    backgroundColor: minimalStyles.colors.background,
   },
   searchContainer: {
-    padding: sharedStyles.spacing.medium,
-    backgroundColor: sharedStyles.colors.white,
-    position: "relative" as const,
+    padding: minimalStyles.spacing[3],
+    backgroundColor: minimalStyles.colors.surface,
+    borderBottom: `${minimalStyles.borders.thin} solid ${minimalStyles.colors.border}`,
   },
   searchInputWrapper: {
     position: "relative" as const,
@@ -23,62 +24,82 @@ const listStyles = {
   },
   searchIcon: {
     position: "absolute" as const,
-    left: "12px",
-    color: sharedStyles.colors.secondary,
-    fontSize: "14px",
+    left: minimalStyles.spacing[3],
+    color: minimalStyles.colors.textSecondary,
+    fontSize: minimalStyles.typography.fontSize.base,
+    fontFamily: minimalStyles.typography.fontFamily,
     pointerEvents: "none" as const,
   },
   searchInput: {
     width: "100%",
-    padding: "8px 12px 8px 36px", // Extra padding for icon
-    fontSize: "13px",
-    border: `1px solid ${sharedStyles.colors.border}`,
-    borderRadius: "6px",
+    padding: `${minimalStyles.spacing[2]} ${minimalStyles.spacing[3]} ${minimalStyles.spacing[2]} ${minimalStyles.spacing[6]}`,
+    fontSize: minimalStyles.typography.fontSize.sm,
+    fontFamily: minimalStyles.typography.fontFamily,
+    border: `${minimalStyles.borders.thin} solid ${minimalStyles.colors.border}`,
+    borderRadius: minimalStyles.borderRadius.sm,
     outline: "none",
-    transition: sharedStyles.transitions.fast,
-    backgroundColor: sharedStyles.colors.white,
+    transition: minimalStyles.transitions.fast,
+    backgroundColor: minimalStyles.colors.surface,
+    color: minimalStyles.colors.text,
   },
   searchInputFocus: {
-    borderColor: sharedStyles.colors.primary,
-    boxShadow: `0 0 0 2px rgba(79, 70, 229, 0.1)`,
+    borderColor: minimalStyles.colors.accent,
+    boxShadow: `0 0 0 1px ${minimalStyles.colors.accent}`,
   },
   listContainer: {
     flex: 1,
     overflowY: "auto" as const,
-    padding: sharedStyles.spacing.medium,
+    padding: minimalStyles.spacing[2],
   },
   componentItem: {
-    padding: "16px 12px",
-    marginBottom: sharedStyles.spacing.small,
-    borderRadius: "4px",
+    padding: `${minimalStyles.spacing[3]} ${minimalStyles.spacing[3]}`,
+    marginBottom: minimalStyles.spacing[1],
+    borderRadius: minimalStyles.borderRadius.sm,
     cursor: "pointer",
-    transition: sharedStyles.transitions.fast,
-    fontSize: sharedStyles.text.primary.fontSize,
-    color: sharedStyles.text.primary.color,
-    border: `1px solid ${sharedStyles.colors.border}`,
-    backgroundColor: sharedStyles.colors.white,
-    textAlign: "left" as const,
+    transition: minimalStyles.transitions.fast,
+    fontSize: minimalStyles.typography.fontSize.sm,
+    fontFamily: minimalStyles.typography.fontFamily,
+    color: minimalStyles.colors.text,
+    border: `${minimalStyles.borders.thin} solid transparent`,
+    backgroundColor: "transparent",
+  },
+  componentItemHover: {
+    backgroundColor: minimalStyles.colors.gray100,
+    borderColor: minimalStyles.colors.gray200,
+  },
+  componentItemSelected: {
+    backgroundColor: minimalStyles.colors.gray900,
+    color: minimalStyles.colors.white,
+    borderColor: minimalStyles.colors.gray900,
   },
   componentName: {
-    fontWeight: sharedStyles.text.primary.fontWeight,
+    fontWeight: minimalStyles.typography.fontWeight.medium,
     color: "inherit",
+    fontFamily: minimalStyles.typography.fontFamily,
   },
   componentType: {
-    fontSize: "11px",
-    color: sharedStyles.colors.secondary,
-    marginTop: "4px",
+    fontSize: minimalStyles.typography.fontSize.xs,
+    color: "inherit",
+    opacity: 0.7,
+    marginTop: minimalStyles.spacing[1],
+    fontFamily: minimalStyles.typography.fontFamily,
+    textTransform: "lowercase" as const,
   },
   resultsCount: {
-    padding: `0 ${sharedStyles.spacing.medium} ${sharedStyles.spacing.small} ${sharedStyles.spacing.medium}`,
-    fontSize: "11px",
-    color: sharedStyles.colors.secondary,
+    padding: `${minimalStyles.spacing[2]} ${minimalStyles.spacing[3]}`,
+    fontSize: minimalStyles.typography.fontSize.xs,
+    color: minimalStyles.colors.textSecondary,
+    fontFamily: minimalStyles.typography.fontFamily,
     textAlign: "center" as const,
+    textTransform: "lowercase" as const,
   },
   noResults: {
-    padding: sharedStyles.spacing.xlarge,
+    padding: minimalStyles.spacing[6],
     textAlign: "center" as const,
-    color: sharedStyles.colors.secondary,
-    fontSize: sharedStyles.text.secondary.fontSize,
+    color: minimalStyles.colors.textSecondary,
+    fontSize: minimalStyles.typography.fontSize.sm,
+    fontFamily: minimalStyles.typography.fontFamily,
+    textTransform: "lowercase" as const,
   },
 };
 
@@ -116,7 +137,11 @@ export function ComponentList({ components }: ComponentListProps) {
     
     return parts.map((part, index) => 
       regex.test(part) ? (
-        <span key={index} style={{ backgroundColor: '#fef3c7', fontWeight: '600' }}>
+        <span key={index} style={{ 
+          backgroundColor: minimalStyles.colors.gray900, 
+          color: minimalStyles.colors.white,
+          fontWeight: minimalStyles.typography.fontWeight.semibold 
+        }}>
           {part}
         </span>
       ) : part
@@ -141,10 +166,10 @@ export function ComponentList({ components }: ComponentListProps) {
       {/* Search Input */}
       <div style={listStyles.searchContainer}>
         <div style={listStyles.searchInputWrapper}>
-          <span style={listStyles.searchIcon}>🔍</span>
+          <span style={listStyles.searchIcon}>{symbols.search}</span>
           <input
             type="text"
-            placeholder="Search components..."
+            placeholder="search components..."
             value={searchTerm}
             onInput={handleSearchChange}
             onFocus={() => setIsSearchFocused(true)}
@@ -159,20 +184,21 @@ export function ComponentList({ components }: ComponentListProps) {
               onClick={clearSearch}
               style={{
                 position: "absolute" as const,
-                right: "8px",
+                right: minimalStyles.spacing[2],
                 top: "50%",
                 transform: "translateY(-50%)",
                 background: "none",
                 border: "none",
-                fontSize: "16px",
+                fontSize: minimalStyles.typography.fontSize.lg,
                 cursor: "pointer",
-                color: sharedStyles.colors.secondary,
-                padding: "4px",
+                color: minimalStyles.colors.textSecondary,
+                padding: minimalStyles.spacing[1],
                 lineHeight: "1",
+                fontFamily: minimalStyles.typography.fontFamily,
               }}
               onMouseDown={(e) => e.preventDefault()} // Prevent input blur
             >
-              ×
+              {symbols.clear}
             </button>
           )}
         </div>
@@ -189,15 +215,15 @@ export function ComponentList({ components }: ComponentListProps) {
           <div style={listStyles.noResults}>
             {searchTerm.trim() ? (
               <Fragment>
-                <div style={{ marginBottom: sharedStyles.spacing.small }}>
-                  No components found for "{searchTerm}"
+                <div style={{ marginBottom: minimalStyles.spacing[2] }}>
+                  no components found for "{searchTerm}"
                 </div>
-                <div style={{ fontSize: "11px", opacity: 0.7 }}>
-                  Try searching with different keywords
+                <div style={{ fontSize: minimalStyles.typography.fontSize.xs, opacity: 0.7 }}>
+                  try searching with different keywords
                 </div>
               </Fragment>
             ) : (
-              "No components available"
+              "no components available"
             )}
           </div>
         ) : (
@@ -205,35 +231,29 @@ export function ComponentList({ components }: ComponentListProps) {
             const isSelected = selectedComponent === name;
             const isHovered = hoveredComponent === name;
 
-            const itemStyle = {
-              ...listStyles.componentItem,
-              ...getHoverStyles(isHovered, isSelected),
-            };
-
             return (
               <div key={name}>
                 <div
-                  style={itemStyle}
+                  style={{
+                    ...listStyles.componentItem,
+                    ...(isHovered ? listStyles.componentItemHover : {}),
+                    ...(isSelected ? listStyles.componentItemSelected : {}),
+                  }}
                   onClick={() => handleComponentClick(name)}
                   onMouseEnter={() => setHoveredComponent(name)}
                   onMouseLeave={() => setHoveredComponent(null)}
                 >
               <div style={listStyles.componentName}>
-                {highlightMatch(name, searchTerm)}
+                {highlightMatch(name.toLowerCase(), searchTerm)}
               </div>
               {component.type && (
-                <div
-                  style={{
-                    ...listStyles.componentType,
-                    color: isSelected ? "#e0e7ff" : sharedStyles.colors.secondary,
-                  }}
-                >
-                  {highlightMatch(component.type, searchTerm)}
+                <div style={listStyles.componentType}>
+                  {highlightMatch(component.type.toLowerCase(), searchTerm)}
                 </div>
               )}
-                </div>
-              </div>
-            );
+            </div>
+          </div>
+        );
           })
         )}
       </div>

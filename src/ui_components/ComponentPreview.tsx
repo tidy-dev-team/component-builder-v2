@@ -2,69 +2,75 @@ import { h } from "preact";
 import { useAtom } from "jotai";
 import { selectedComponentAtom, selectedComponentPropertiesAtom, propertyUsedStatesAtom } from "../state/atoms";
 import { renderAllProperties } from "../ui_elements";
-import { sharedStyles } from "../ui_styles";
+import { minimalStyles, symbols } from "../ui_styles_minimal";
 
 const previewStyles = {
   container: {
     height: "100%",
     display: "flex",
     flexDirection: "column" as const,
-    backgroundColor: "#f1f1f1",
-    border: `1px solid ${sharedStyles.colors.border}`,
-    borderRadius: "4px",
+    backgroundColor: minimalStyles.colors.background,
+    border: `${minimalStyles.borders.thin} solid ${minimalStyles.colors.border}`,
+    borderRadius: minimalStyles.borderRadius.base,
     overflow: "hidden",
   },
   header: {
-    padding: sharedStyles.spacing.large,
-    backgroundColor: sharedStyles.colors.white,
-    borderRadius: "4px",
+    padding: minimalStyles.spacing[4],
+    backgroundColor: minimalStyles.colors.surface,
+    borderBottom: `${minimalStyles.borders.thin} solid ${minimalStyles.colors.border}`,
     flexShrink: 0,
   },
   componentName: {
-    fontSize: "16px",
-    fontWeight: "600",
-    color: "#1f2937",
-    marginBottom: "4px",
+    fontSize: minimalStyles.typography.fontSize.lg,
+    fontWeight: minimalStyles.typography.fontWeight.semibold,
+    color: minimalStyles.colors.text,
+    marginBottom: minimalStyles.spacing[1],
+    fontFamily: minimalStyles.typography.fontFamily,
+    textTransform: "lowercase" as const,
   },
   imagePlaceholder: {
     width: "100%",
-    height: "256px",
-    backgroundColor: sharedStyles.colors.white,
-    border: "2px dashed #d1d5db",
-    borderRadius: "4px",
+    height: "200px",
+    backgroundColor: minimalStyles.colors.background,
+    border: `${minimalStyles.borders.thin} solid ${minimalStyles.colors.border}`,
+    borderRadius: minimalStyles.borderRadius.sm,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
-    padding: "4px 0",
+    margin: minimalStyles.spacing[3],
   },
   placeholderText: {
-    fontSize: "16px",
-    color: sharedStyles.colors.secondary,
+    fontSize: minimalStyles.typography.fontSize.sm,
+    color: minimalStyles.colors.textSecondary,
     textAlign: "center" as const,
+    fontFamily: minimalStyles.typography.fontFamily,
+    textTransform: "lowercase" as const,
   },
   content: {
     flex: 1,
-    padding: sharedStyles.spacing.small,
+    padding: minimalStyles.spacing[3],
     overflowY: "auto" as const,
     display: "flex",
     flexDirection: "column" as const,
-    gap: sharedStyles.spacing.small,
+    gap: minimalStyles.spacing[3],
   },
   descriptionBlock: {
-    backgroundColor: sharedStyles.colors.white,
-    borderRadius: "4px",
-    padding: sharedStyles.spacing.medium,
-    fontSize: "13px",
-    color: "#374151",
-    lineHeight: "1.4",
+    backgroundColor: minimalStyles.colors.surface,
+    border: `${minimalStyles.borders.thin} solid ${minimalStyles.colors.border}`,
+    borderRadius: minimalStyles.borderRadius.sm,
+    padding: minimalStyles.spacing[3],
+    fontSize: minimalStyles.typography.fontSize.sm,
+    color: minimalStyles.colors.text,
+    lineHeight: minimalStyles.typography.lineHeight.normal,
     flexShrink: 0,
+    fontFamily: minimalStyles.typography.fontFamily,
   },
   propertiesBlock: {
-    backgroundColor: sharedStyles.colors.white,
-    border: `1px solid ${sharedStyles.colors.border}`,
-    borderRadius: "4px",
-    padding: sharedStyles.spacing.large,
+    backgroundColor: minimalStyles.colors.surface,
+    border: `${minimalStyles.borders.thin} solid ${minimalStyles.colors.border}`,
+    borderRadius: minimalStyles.borderRadius.sm,
+    padding: minimalStyles.spacing[3],
     flexShrink: 0,
   },
   propertiesContent: {
@@ -72,10 +78,11 @@ const previewStyles = {
     height: "100%",
   },
   propertiesPlaceholder: {
-    color: sharedStyles.colors.secondary,
-    fontSize: "16px",
+    color: minimalStyles.colors.textSecondary,
+    fontSize: minimalStyles.typography.fontSize.sm,
     textAlign: "center" as const,
-    fontStyle: "italic" as const,
+    fontFamily: minimalStyles.typography.fontFamily,
+    textTransform: "lowercase" as const,
   },
   emptyState: {
     display: "flex",
@@ -83,22 +90,26 @@ const previewStyles = {
     alignItems: "center",
     justifyContent: "center",
     height: "200px",
-    color: sharedStyles.colors.secondary,
+    color: minimalStyles.colors.textSecondary,
     textAlign: "center" as const,
+    fontFamily: minimalStyles.typography.fontFamily,
   },
   emptyStateIcon: {
-    fontSize: "48px",
-    marginBottom: sharedStyles.spacing.large,
-    opacity: 0.5,
+    fontSize: "32px",
+    marginBottom: minimalStyles.spacing[4],
+    opacity: 0.3,
+    fontFamily: minimalStyles.typography.fontFamily,
   },
   emptyStateText: {
-    fontSize: sharedStyles.text.primary.fontSize,
-    fontWeight: sharedStyles.text.primary.fontWeight,
-    marginBottom: sharedStyles.spacing.medium,
+    fontSize: minimalStyles.typography.fontSize.base,
+    fontWeight: minimalStyles.typography.fontWeight.medium,
+    marginBottom: minimalStyles.spacing[2],
+    textTransform: "lowercase" as const,
   },
   emptyStateSubtext: {
-    fontSize: sharedStyles.text.secondary.fontSize,
-    color: "#9ca3af",
+    fontSize: minimalStyles.typography.fontSize.xs,
+    color: minimalStyles.colors.textMuted,
+    textTransform: "lowercase" as const,
   },
 };
 
@@ -117,10 +128,10 @@ export function ComponentPreview({ nestedInstances, description, componentImage 
     return (
       <div style={previewStyles.container}>
         <div style={previewStyles.emptyState}>
-          <div style={previewStyles.emptyStateIcon}>🎨</div>
-          <div style={previewStyles.emptyStateText}>Select a component</div>
+          <div style={previewStyles.emptyStateIcon}>{symbols.ui.divider}</div>
+          <div style={previewStyles.emptyStateText}>select component</div>
           <div style={previewStyles.emptyStateSubtext}>
-            Choose a component from the list to see its properties and preview
+            choose component from list to preview properties
           </div>
         </div>
       </div>
@@ -132,7 +143,9 @@ export function ComponentPreview({ nestedInstances, description, componentImage 
       <div style={previewStyles.content}>
         {/* Component Name Header */}
         <div style={previewStyles.header}>
-          <div style={previewStyles.componentName}>{selectedComponent}</div>
+          <div style={previewStyles.componentName}>
+            {symbols.ui.divider} {selectedComponent.toLowerCase()} {symbols.ui.divider}
+          </div>
         </div>
 
         {/* Component Image */}
@@ -152,8 +165,10 @@ export function ComponentPreview({ nestedInstances, description, componentImage 
                 display: "block",
               }}
             />
-          ) : (
-            <div style={previewStyles.placeholderText}>Loading preview...</div>
+           ) : (
+            <div style={previewStyles.placeholderText}>
+              {symbols.ui.divider} loading preview {symbols.ui.divider}
+            </div>
           )}
         </div>
 
@@ -220,12 +235,12 @@ export function ComponentPreview({ nestedInstances, description, componentImage 
               {renderAllProperties(componentProps, propertyUsedStates, nestedInstances)}
             </div>
           ) : (
-            <div style={{
+             <div style={{
               ...previewStyles.propertiesPlaceholder,
               padding: "40px 20px",
               textAlign: "center" as const,
             }}>
-              property checkboxes
+              {symbols.ui.divider} property checkboxes {symbols.ui.divider}
             </div>
           )}
         </div>

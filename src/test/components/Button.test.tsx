@@ -9,14 +9,15 @@ describe('ButtonComponent', () => {
     const mockCallback = vi.fn();
     render(<ButtonComponent callback={mockCallback} />);
     
-    expect(screen.getByText('Build on canvas')).toBeInTheDocument();
+    const button = screen.getByText(/build on canvas/);
+    expect(button).toBeTruthy();
   });
 
   it('should call callback when clicked', async () => {
     const mockCallback = vi.fn();
     render(<ButtonComponent callback={mockCallback} />);
     
-    const button = screen.getByText('Build on canvas');
+    const button = screen.getByText(/build on canvas/);
     fireEvent.click(button);
     
     expect(mockCallback).toHaveBeenCalledTimes(1);

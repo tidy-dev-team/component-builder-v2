@@ -17,57 +17,58 @@ import {
   componentImageAtom,
 } from "./state/atoms";
 import { PropertyUsedStates } from "./types";
-import { sharedStyles } from "./ui_styles";
+import { minimalStyles, symbols } from "./ui_styles_minimal";
 
-// Consolidated UI styles using shared styles
+// Minimal, flat, monochrome UI styles
 const styles = {
   container: {
     height: "100vh",
     display: "flex",
     flexDirection: "column" as const,
-    background: "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)",
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    backgroundColor: minimalStyles.colors.background,
+    fontFamily: minimalStyles.typography.fontFamily,
+    color: minimalStyles.colors.text,
   },
   header: {
-    padding: `${sharedStyles.spacing.xlarge} 0 ${sharedStyles.spacing.large} 0`,
-    marginBottom: "16px",
+    padding: `${minimalStyles.spacing[5]} ${minimalStyles.spacing[4]}`,
+    marginBottom: minimalStyles.spacing[1],
   },
   title: {
-    fontSize: "13px",
-    fontWeight: "600",
-    color: "#1f2937",
-    marginBottom: sharedStyles.spacing.medium,
-    letterSpacing: "0.01em",
+    fontSize: minimalStyles.typography.fontSize.lg,
+    fontWeight: minimalStyles.typography.fontWeight.semibold,
+    color: minimalStyles.colors.text,
+    marginBottom: minimalStyles.spacing[1],
+    letterSpacing: "-0.01em",
   },
   subtitle: {
-    fontSize: sharedStyles.text.secondary.fontSize,
-    color: sharedStyles.colors.secondary,
-    lineHeight: "1.4",
+    fontSize: minimalStyles.typography.fontSize.sm,
+    color: minimalStyles.colors.textSecondary,
+    lineHeight: minimalStyles.typography.lineHeight.normal,
   },
   content: {
     flex: 1,
     display: "flex",
-    gap: sharedStyles.spacing.large,
-    padding: "0 2px",
+    gap: minimalStyles.spacing[3],
+    padding: `0 ${minimalStyles.spacing[4]}`,
     minHeight: 0,
   },
   leftColumn: {
     flex: "1",
     minHeight: 0,
-    backgroundColor: "#f1f1f1",
-    border: `1px solid ${sharedStyles.colors.border}`,
-    borderRadius: "4px",
+    backgroundColor: minimalStyles.colors.surface,
+    border: `${minimalStyles.borders.thin} solid ${minimalStyles.colors.border}`,
+    borderRadius: minimalStyles.borderRadius.base,
     overflow: "hidden",
   },
   rightColumn: {
     flex: "0 0 240px",
-    backgroundColor: sharedStyles.colors.white,
-    border: `1px solid ${sharedStyles.colors.border}`,
-    borderRadius: "4px",
+    backgroundColor: minimalStyles.colors.surface,
+    border: `${minimalStyles.borders.thin} solid ${minimalStyles.colors.border}`,
+    borderRadius: minimalStyles.borderRadius.base,
     overflow: "hidden",
   },
   footer: {
-    padding: `${sharedStyles.spacing.large} 0 ${sharedStyles.spacing.xlarge} 0`,
+    padding: `${minimalStyles.spacing[4]} ${minimalStyles.spacing[4]} ${minimalStyles.spacing[5]}`,
     marginTop: "auto",
   },
 };
@@ -244,9 +245,11 @@ function Plugin() {
     <Container space="medium" style={styles.container}>
       {/* Header */}
       <div style={styles.header}>
-        <div style={styles.title}>Tidy DS Pathfinder</div>
+        <div style={styles.title}>
+          {symbols.ui.divider} tidy-ds-pathfinder {symbols.ui.divider}
+        </div>
         <div style={styles.subtitle}>
-          Select a component and customize its properties
+          select component {symbols.ui.divider} customize properties
         </div>
       </div>
 
