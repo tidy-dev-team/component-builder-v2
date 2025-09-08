@@ -115,6 +115,7 @@ export function ComponentList({ components }: ComponentListProps) {
   const [searchTerm, setSearchTerm] = useAtom(componentSearchTermAtom);
   const [hoveredComponent, setHoveredComponent] = useState<string | null>(null);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [optimisticSelection, setOptimisticSelection] = useState<string | null>(null);
 
   // Cleanup hover state when component unmounts or search changes
   useEffect(() => {
@@ -127,6 +128,13 @@ export function ComponentList({ components }: ComponentListProps) {
   useEffect(() => {
     setHoveredComponent(null);
   }, [searchTerm]);
+
+  // Reset optimistic selection when actual selection changes
+  useEffect(() => {
+    if (selectedComponent) {
+      setOptimisticSelection(null);
+    }
+  }, [selectedComponent]);
 
   // Simple cleanup when hoveredComponent changes
   useEffect(() => {
@@ -179,6 +187,8 @@ export function ComponentList({ components }: ComponentListProps) {
   };
 
   const handleComponentClick = (componentName: string) => {
+    // Set optimistic selection immediately for instant visual feedback
+    setOptimisticSelection(componentName);
     setSelectedComponent(componentName);
     // Always clear hover state when clicking to prevent sticking
     setHoveredComponent(null);
@@ -271,7 +281,7 @@ export function ComponentList({ components }: ComponentListProps) {
           </div>
         ) : (
           allComponents.map(([name, component]) => {
-            const isSelected = selectedComponent === name;
+            const isSelected = selectedComponent === name || optimisticSelection === name;
             const isHovered = hoveredComponent === name;
 
             // Calculate styles more explicitly to prevent conflicts
