@@ -1,7 +1,7 @@
 import { Container, render } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useState, useCallback, useMemo, useRef } from "preact/hooks";
 import { components } from "./componentData";
 import { useAtom } from "jotai";
 
@@ -95,25 +95,28 @@ function Plugin() {
   // Add state to track if properties are ready
   const [isPropertiesReady, setIsPropertiesReady] = useState(false);
 
-  function handleButtonClick() {
+  // Ref to store the build function to avoid dependency issues
+  const buildFunctionRef = useRef<() => void>();
+
+  const handleButtonClick = useCallback(() => {
     console.log("🎯 Build button clicked");
     console.log("📋 Current propertyUsedStates:", propertyUsedStates);
     console.log("🔧 Selected component:", selectedComponent);
     console.log("⚡ Is loading:", isLoadingComponent);
     console.log("✅ Properties ready:", isPropertiesReady);
-    
+
     // Guard against building with no component or while loading
     if (!selectedComponent || isLoadingComponent) {
       console.log("🚫 Build prevented - no component selected or still loading");
       return;
     }
-    
+
     // Allow building components with no properties - this is valid for simple components
     // Only prevent if we have a loading state or no component selected
-    
+
     // Allow building even with empty properties - components without properties are valid
     console.log("✅ Component ready for build (empty properties are valid)");
-    
+
     // CRITICAL FIX: Include component key in build data to ensure correct component
     const componentData = components[selectedComponent];
     const buildData = {
@@ -122,7 +125,24 @@ function Plugin() {
     };
 
     emit("BUILD", buildData);
-  }
+  }, [selectedComponent, isLoadingComponent, isPropertiesReady, propertyUsedStates]);
+
+  // Store the build function in ref and set up keyboard event listener
+  useEffect(() => {
+    buildFunctionRef.current = handleButtonClick;
+
+    const handleKeyboardBuild = () => {
+      console.log("🎹 Enter key event received, calling build function");
+      if (buildFunctionRef.current) {
+        buildFunctionRef.current();
+      } else {
+        console.log("❌ Build function ref not available");
+      }
+    };
+
+    window.addEventListener('trigger-build', handleKeyboardBuild);
+    return () => window.removeEventListener('trigger-build', handleKeyboardBuild);
+  }, [handleButtonClick]);
 
   useEffect(() => {
     if (selectedComponent) {

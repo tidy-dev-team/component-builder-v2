@@ -41,9 +41,9 @@ export function ButtonComponent({
   };
 
   return (
-    <Button 
-      fullWidth 
-      onClick={disabled || loading ? undefined : callback} 
+    <Button
+      fullWidth
+      onClick={disabled || loading ? undefined : callback}
       disabled={disabled || loading}
       style={getButtonStyle()}
       onMouseEnter={() => !disabled && !loading && setIsHovered(true)}

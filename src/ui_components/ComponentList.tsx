@@ -179,39 +179,50 @@ export function ComponentList({ components }: ComponentListProps) {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Only handle arrow keys when search is not focused
       if (isSearchFocused) return;
-      
+
       if (event.key === "ArrowUp" || event.key === "ArrowDown") {
         event.preventDefault();
-        
+
         if (allComponents.length === 0) return;
-        
+
         let newIndex = focusedIndex;
-        
+
         if (event.key === "ArrowUp") {
           newIndex = focusedIndex <= 0 ? allComponents.length - 1 : focusedIndex - 1;
         } else {
           newIndex = focusedIndex >= allComponents.length - 1 ? 0 : focusedIndex + 1;
         }
-        
+
         setFocusedIndex(newIndex);
-        
+
         // Select the component at the new focused index
         const [componentName] = allComponents[newIndex];
         setSelectedComponent(componentName);
-        
+
         // Scroll the focused component into view
         const element = document.querySelector(`[data-component-name="${componentName}"]`);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
-      } else if (event.key === "Enter" && focusedIndex >= 0) {
-        // Enter key to select the focused component (if not already selected)
+       } else if (event.key === "Enter") {
         event.preventDefault();
+        console.log("⌨️ Enter key pressed, focusedIndex:", focusedIndex);
+
+        // If we have a focused component, trigger build
         if (focusedIndex >= 0 && focusedIndex < allComponents.length) {
           const [componentName] = allComponents[focusedIndex];
+          console.log("🎯 Triggering build for component:", componentName);
+
+          // Ensure the component is selected first
           if (componentName !== selectedComponent) {
             setSelectedComponent(componentName);
           }
+
+          // Trigger build by dispatching a custom event
+          console.log("📡 Dispatching trigger-build event");
+          window.dispatchEvent(new CustomEvent('trigger-build'));
+        } else {
+          console.log("❌ No valid focused component for Enter key");
         }
       }
     };
