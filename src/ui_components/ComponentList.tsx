@@ -75,6 +75,11 @@ const listStyles = {
     color: minimalStyles.colors.white,
     border: `${minimalStyles.borders.thin} solid ${minimalStyles.colors.gray900}`,
   },
+  componentItemFocused: {
+    outline: `2px solid ${minimalStyles.colors.accent}`,
+    outlineOffset: "-2px",
+    boxShadow: `0 0 0 2px ${minimalStyles.colors.accent}`,
+  },
   componentName: {
     fontWeight: minimalStyles.typography.fontWeight.medium,
     color: "inherit",
@@ -116,6 +121,7 @@ export function ComponentList({ components }: ComponentListProps) {
   const [hoveredComponent, setHoveredComponent] = useState<string | null>(null);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [optimisticSelection, setOptimisticSelection] = useState<string | null>(null);
+  const [focusedIndex, setFocusedIndex] = useState<number>(-1);
 
   // Cleanup hover state when component unmounts or search changes
   useEffect(() => {
@@ -168,6 +174,67 @@ export function ComponentList({ components }: ComponentListProps) {
     );
   }, [components, searchTerm]);
 
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Only handle arrow keys when search is not focused
+      if (isSearchFocused) return;
+      
+      if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+        event.preventDefault();
+        
+        if (allComponents.length === 0) return;
+        
+        let newIndex = focusedIndex;
+        
+        if (event.key === "ArrowUp") {
+          newIndex = focusedIndex <= 0 ? allComponents.length - 1 : focusedIndex - 1;
+        } else {
+          newIndex = focusedIndex >= allComponents.length - 1 ? 0 : focusedIndex + 1;
+        }
+        
+        setFocusedIndex(newIndex);
+        
+        // Select the component at the new focused index
+        const [componentName] = allComponents[newIndex];
+        setSelectedComponent(componentName);
+        
+        // Scroll the focused component into view
+        const element = document.querySelector(`[data-component-name="${componentName}"]`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      } else if (event.key === "Enter" && focusedIndex >= 0) {
+        // Enter key to select the focused component (if not already selected)
+        event.preventDefault();
+        if (focusedIndex >= 0 && focusedIndex < allComponents.length) {
+          const [componentName] = allComponents[focusedIndex];
+          if (componentName !== selectedComponent) {
+            setSelectedComponent(componentName);
+          }
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [focusedIndex, allComponents, isSearchFocused, selectedComponent]);
+
+  // Reset focused index when search results change
+  useEffect(() => {
+    setFocusedIndex(-1); // Reset focused index when search changes
+  }, [searchTerm]);
+
+  // Reset focused index when component selection changes via click/external
+  useEffect(() => {
+    if (selectedComponent) {
+      const selectedIndex = allComponents.findIndex(([name]) => name === selectedComponent);
+      if (selectedIndex !== -1) {
+        setFocusedIndex(selectedIndex);
+      }
+    }
+  }, [selectedComponent, allComponents]);
+
   // Memoized function to highlight search matches in text
   const highlightMatch = useCallback((text: string, searchTerm: string) => {
     if (!searchTerm.trim()) return text;
@@ -188,10 +255,12 @@ export function ComponentList({ components }: ComponentListProps) {
     );
   }, []);
 
-  const handleComponentClick = useCallback((componentName: string) => {
+  const handleComponentClick = useCallback((componentName: string, index: number) => {
     // Set optimistic selection immediately for instant visual feedback
     setOptimisticSelection(componentName);
     setSelectedComponent(componentName);
+    // Update focused index to match clicked component
+    setFocusedIndex(index);
     // Always clear hover state when clicking to prevent sticking
     setHoveredComponent(null);
   }, [setSelectedComponent]);
@@ -282,9 +351,10 @@ export function ComponentList({ components }: ComponentListProps) {
             )}
           </div>
         ) : (
-          allComponents.map(([name, component]) => {
+          allComponents.map(([name, component], index) => {
             const isSelected = selectedComponent === name || optimisticSelection === name;
             const isHovered = hoveredComponent === name;
+            const isFocused = focusedIndex === index;
 
             // Calculate styles more explicitly to prevent conflicts
             const getItemStyles = () => {
@@ -295,16 +365,21 @@ export function ComponentList({ components }: ComponentListProps) {
                 return {
                   ...baseStyles,
                   ...listStyles.componentItemSelected,
+                  ...(isFocused && listStyles.componentItemFocused),
                 };
               } else if (isHovered) {
                 // Only apply hover if not selected
                 return {
                   ...baseStyles,
                   ...listStyles.componentItemHover,
+                  ...(isFocused && listStyles.componentItemFocused),
                 };
               } else {
                 // Default state
-                return baseStyles;
+                return {
+                  ...baseStyles,
+                  ...(isFocused && listStyles.componentItemFocused),
+                };
               }
             };
 
@@ -313,7 +388,7 @@ export function ComponentList({ components }: ComponentListProps) {
                 <div
                   data-component-name={name}
                   style={getItemStyles()}
-                  onClick={() => handleComponentClick(name)}
+                   onClick={() => handleComponentClick(name, index)}
                   onMouseEnter={handleMouseEnter(name)}
                   onMouseLeave={handleMouseLeave}
                 >
