@@ -108,7 +108,7 @@ export function DropdownComponent({ components }: DropdownComponentProps) {
               />
             );
           } catch (error) {
-            console.error("❌ Dropdown render error:", error);
+            console.log("❌ Dropdown render error:", error);
             console.log("Debug - Options:", dropdownOptions);
             console.log("Debug - Value:", value);
             return <div>Dropdown Error: {String(error)}</div>;

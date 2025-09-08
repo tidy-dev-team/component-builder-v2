@@ -120,34 +120,42 @@ function Plugin() {
       return;
     }
     
-    emit("BUILD", propertyUsedStates);
+    // CRITICAL FIX: Include component key in build data to ensure correct component
+    const componentData = components[selectedComponent];
+    const buildData = {
+      ...propertyUsedStates,
+      componentKey: componentData.key // Use the actual component key, not the name
+    };
+
+    emit("BUILD", buildData);
   }
 
   useEffect(() => {
-    console.log(
-      "🎯 Setting up useEffect for selectedComponent:",
-      selectedComponent
-    );
     if (selectedComponent) {
-      console.log("🚀 Selected component changed, triggering data load...");
-      console.log("🧹 Clearing previous state...");
+      // CRITICAL FIX: Clear ALL previous state immediately when component changes
+      // This prevents property state bleeding between components
       setIsLoadingComponent(true);
-      setIsPropertiesReady(false); // Reset properties ready state
+      setIsPropertiesReady(false);
       setComponentProps([]);
       setPropertyUsedStates({});
       setComponentDescription("");
       setComponentImage(null);
+      setNestedInstances([]); // Also clear nested instances
 
       const componentData = components[selectedComponent];
-      console.log(
-        "📤 Emitting GET_COMPONENT_SET_PROPERTIES with:",
-        componentData
-      );
-      emit("GET_COMPONENT_SET_PROPERTIES", componentData);
+      
+      // CRITICAL FIX: Add component key to the build data to ensure correct component
+      const componentDataWithKey = {
+        ...componentData,
+        componentKey: componentData.key // Use the actual component key
+      };
+      
+      emit("GET_COMPONENT_SET_PROPERTIES", componentDataWithKey);
     } else {
-      console.log("🧹 No component selected, clearing state");
+      // Clear state when no component is selected
       setIsPropertiesReady(false);
       setPropertyUsedStates({});
+      setNestedInstances([]);
     }
   }, [
     selectedComponent,

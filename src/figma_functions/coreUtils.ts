@@ -220,7 +220,7 @@ export function getComponentPropertyInfoFromComponent(
   try {
     // Validate that the node has the required properties
     if (!node) {
-      console.error("Component node is null or undefined");
+      console.log("Component node is null or undefined");
       return [];
     }
 
@@ -343,10 +343,7 @@ export function getComponentPropertyInfoFromComponent(
     );
     return properties.sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
-    console.error(
-      "Error getting component property info from component:",
-      error
-    );
+    console.log("Error getting component property info from component:", error);
     return [];
   }
 }
@@ -357,24 +354,24 @@ export function getComponentPropertyInfo(
   try {
     // Validate that the node has the required properties
     if (!node) {
-      console.error("Component set node is null or undefined");
+      console.log("Component set node is null or undefined");
       return [];
     }
 
     if (!node.componentPropertyDefinitions) {
-      console.error("Component set does not have componentPropertyDefinitions");
+      console.log("Component set does not have componentPropertyDefinitions");
       return [];
     }
 
     if (!node.defaultVariant) {
-      console.error("Component set does not have defaultVariant");
+      console.log("Component set does not have defaultVariant");
       return [];
     }
 
     const properties = node.componentPropertyDefinitions;
 
     if (!properties || typeof properties !== "object") {
-      console.error("Component property definitions are invalid");
+      console.log("Component property definitions are invalid");
       return [];
     }
 
@@ -419,7 +416,7 @@ export function getComponentPropertyInfo(
             path,
           };
         } catch (error) {
-          console.error(`Error processing property "${name}":`, error);
+          console.log(`Error processing property "${name}":`, error);
           // Return a basic property definition without path if there's an error
           return {
             name,
@@ -430,7 +427,7 @@ export function getComponentPropertyInfo(
       })
       .sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
-    console.error("Error getting component property info:", error);
+    console.log("Error getting component property info:", error);
     return [];
   }
 }
@@ -487,16 +484,26 @@ export function hasPropertyInComponent(
   return false;
 }
 
-export function getComponentDescription(node: ComponentSetNode | ComponentNode): string {
+export function getComponentDescription(
+  node: ComponentSetNode | ComponentNode
+): string {
   try {
     // Check if the node has a description property
-    if (node.description && typeof node.description === "string" && node.description.trim() !== "") {
+    if (
+      node.description &&
+      typeof node.description === "string" &&
+      node.description.trim() !== ""
+    ) {
       return node.description.trim();
     }
 
     // For component sets, check the default variant
     if (node.type === "COMPONENT_SET" && node.defaultVariant) {
-      if (node.defaultVariant.description && typeof node.defaultVariant.description === "string" && node.defaultVariant.description.trim() !== "") {
+      if (
+        node.defaultVariant.description &&
+        typeof node.defaultVariant.description === "string" &&
+        node.defaultVariant.description.trim() !== ""
+      ) {
         return node.defaultVariant.description.trim();
       }
     }
@@ -504,20 +511,22 @@ export function getComponentDescription(node: ComponentSetNode | ComponentNode):
     // Return a default description if none found
     return "No description available";
   } catch (error) {
-    console.error("Error getting component description:", error);
+    console.log("Error getting component description:", error);
     return "Error loading description";
   }
 }
 
-export async function getComponentImage(node: ComponentSetNode | ComponentNode): Promise<string | null> {
+export async function getComponentImage(
+  node: ComponentSetNode | ComponentNode
+): Promise<string | null> {
   try {
     // Determine which node to render
     let nodeToRender: ComponentNode;
-    
+
     if (node.type === "COMPONENT_SET") {
       // For component sets, use the default variant
       if (!node.defaultVariant) {
-        console.error("Component set has no default variant");
+        console.log("Component set has no default variant");
         return null;
       }
       nodeToRender = node.defaultVariant;
@@ -527,48 +536,55 @@ export async function getComponentImage(node: ComponentSetNode | ComponentNode):
     }
 
     // Create cache key based on node ID and key for uniqueness
-    const cacheKey = `${nodeToRender.id}_${nodeToRender.key || 'nokey'}`;
+    const cacheKey = `${nodeToRender.id}_${nodeToRender.key || "nokey"}`;
     console.log(`🔑 Cache key for ${nodeToRender.name}: ${cacheKey}`);
-    
+
     // Log cache stats before checking
     const statsBefore = imageCache.getStats();
-    console.log(`📊 Cache stats before lookup: ${statsBefore.imageEntries} images, ${statsBefore.componentEntries} components, ${statsBefore.utilization}`);
-    
+    console.log(
+      `📊 Cache stats before lookup: ${statsBefore.imageEntries} images, ${statsBefore.componentEntries} components, ${statsBefore.utilization}`
+    );
+
     // Check cache first
     const cachedImage = imageCache.get(cacheKey);
     if (cachedImage) {
       console.log(`📦 CACHE HIT! Using cached image for: ${nodeToRender.name}`);
       return cachedImage;
     }
-    
-    console.log(`❌ Cache miss for: ${nodeToRender.name}, generating new image...`);
 
-    console.log(`🖼️ Generating new image for: ${nodeToRender.name} (${nodeToRender.type})`);
-    
+    console.log(
+      `❌ Cache miss for: ${nodeToRender.name}, generating new image...`
+    );
+
+    console.log(
+      `🖼️ Generating new image for: ${nodeToRender.name} (${nodeToRender.type})`
+    );
+
     // Export the component as PNG with 2x resolution
     const imageBytes = await nodeToRender.exportAsync({
       format: "PNG",
       constraint: {
         type: "WIDTH",
-        value: 400 // 2x resolution (200px * 2) for crisp preview
-      }
+        value: 400, // 2x resolution (200px * 2) for crisp preview
+      },
     });
 
     // Convert Uint8Array to base64 data URL
     const base64 = figma.base64Encode(imageBytes);
     const dataUrl = `data:image/png;base64,${base64}`;
-    
+
     // Cache the generated image
     imageCache.set(cacheKey, dataUrl);
-    
+
     // Log cache stats periodically
     const stats = imageCache.getStats();
-    console.log(`✅ Generated image for: ${nodeToRender.name} | Cache: ${stats.imageEntries} images, ${stats.componentEntries} components, ${stats.utilization}`);
-    
+    console.log(
+      `✅ Generated image for: ${nodeToRender.name} | Cache: ${stats.imageEntries} images, ${stats.componentEntries} components, ${stats.utilization}`
+    );
+
     return dataUrl;
-    
   } catch (error) {
-    console.error("Error getting component image:", error);
+    console.log("Error getting component image:", error);
     return null;
   }
 }

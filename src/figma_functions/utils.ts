@@ -55,12 +55,12 @@ export function findExposedInstances(node: ComponentNode) {
 
   try {
     if (!node) {
-      console.error("Component node is null or undefined");
+      console.log("Component node is null or undefined");
       return exposedInstances;
     }
 
     if (!node.findAll) {
-      console.error("Component node does not have findAll method");
+      console.log("Component node does not have findAll method");
       return exposedInstances;
     }
 
@@ -74,12 +74,12 @@ export function findExposedInstances(node: ComponentNode) {
           });
         }
       } catch (error) {
-        console.error("Error processing child node:", error);
+        console.log("Error processing child node:", error);
       }
       return false; // Continue searching through all nodes
     });
   } catch (error) {
-    console.error("Error finding exposed instances:", error);
+    console.log("Error finding exposed instances:", error);
   }
 
   return exposedInstances;

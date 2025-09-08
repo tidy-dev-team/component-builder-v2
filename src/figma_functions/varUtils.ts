@@ -71,7 +71,7 @@ async function createVariablesForCategory(
         createdVariables.set(globalVar.name, variable);
         console.log(`Created global variable: ${globalVar.name}`);
       } catch (error) {
-        console.error(`Could not set value for ${globalVar.name}:`, error);
+        console.log(`Could not set value for ${globalVar.name}:`, error);
       }
     } else {
       // Add existing variable to map for semantic variable references
@@ -115,7 +115,7 @@ async function createVariablesForCategory(
               `Created semantic variable: ${semanticVar.name} -> ${referencedGlobal.name}`
             );
           } catch (error) {
-            console.error(
+            console.log(
               `Could not set alias for ${semanticVar.name}:`,
               error
             );
@@ -394,7 +394,7 @@ async function applySemanticVariablesToNode(
             console.log(`Applied ${semanticVar.name} to ${node.name} (radius: ${cornerRadius})`);
           }
         } catch (error) {
-          console.error(`Failed to apply variable ${semanticVar.name} to ${node.name}:`, error);
+          console.log(`Failed to apply variable ${semanticVar.name} to ${node.name}:`, error);
         }
       }
     } else if (typeof cornerRadius === "object" && cornerRadius !== figma.mixed) {
@@ -414,7 +414,7 @@ async function applySemanticVariablesToNode(
                   console.log(`Applied ${semanticVar.name} to ${node.name} ${corner} (radius: ${radiusValue})`);
                 }
               } catch (error) {
-                console.error(`Failed to apply variable ${semanticVar.name} to ${node.name} ${corner}:`, error);
+                console.log(`Failed to apply variable ${semanticVar.name} to ${node.name} ${corner}:`, error);
               }
             }
           }

@@ -2,6 +2,14 @@ import { emit, on } from "@create-figma-plugin/utilities";
 import { errorService, ErrorCode } from "../errors";
 import { cachedComponentSet, cachedComponent } from "../main";
 
+// Import the last selected component key from main module
+let lastSelectedComponentKey: string | null = null;
+
+// Update the lastSelectedComponentKey when main module changes
+export function updateLastSelectedComponentKey(key: string | null) {
+  lastSelectedComponentKey = key;
+}
+
 function isNodeValid(node: SceneNode): boolean {
   try {
     // Try to access a property that would fail if the node is invalid
