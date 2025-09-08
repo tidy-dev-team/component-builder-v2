@@ -122,6 +122,7 @@ export default async function () {
 
   on("BUILD", async (buildData: BuildEventData) => {
     console.log("buildData :>> ", buildData);
+    console.log("📊 Build data property count:", Object.keys(buildData).length);
 
     // CRITICAL FIX: Extract component key from build data and validate it matches current selection
     const componentKey = String(buildData.componentKey || "");
@@ -133,7 +134,7 @@ export default async function () {
       try {
         await getComponentSet(componentKey);
       } catch (error) {
-        console.log("Failed to refresh component for build request:", error);
+        console.error("Failed to refresh component for build request:", error);
         throw errorService.createBuildError(
           "Component key mismatch and refresh failed",
           { requestedKey: componentKey, currentKey: lastComponentKey }
@@ -143,6 +144,11 @@ export default async function () {
 
     // Remove the componentKey from buildData before processing to avoid validation issues
     const { componentKey: _, ...cleanBuildData } = buildData;
+
+    // Allow building components with no properties
+    if (Object.keys(cleanBuildData).length === 0) {
+      console.log("✅ Building component with no properties - this is valid");
+    }
 
     try {
       // Validate build data

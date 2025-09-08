@@ -108,17 +108,11 @@ function Plugin() {
       return;
     }
     
-    // Guard against building with empty properties (indicates incomplete state)
-    if (Object.keys(propertyUsedStates).length === 0) {
-      console.log("🚫 Build prevented - no properties available (incomplete state)");
-      return;
-    }
+    // Allow building components with no properties - this is valid for simple components
+    // Only prevent if we have a loading state or no component selected
     
-    // Guard against building before properties are fully loaded
-    if (!isPropertiesReady) {
-      console.log("🚫 Build prevented - properties not ready");
-      return;
-    }
+    // Allow building even with empty properties - components without properties are valid
+    console.log("✅ Component ready for build (empty properties are valid)");
     
     // CRITICAL FIX: Include component key in build data to ensure correct component
     const componentData = components[selectedComponent];
@@ -266,9 +260,9 @@ function Plugin() {
         setPropertyUsedStates(initialUsedStates);
         setIsPropertiesReady(true); // Properties are now ready
       } else {
-        console.log("🧹 Resetting property used states to empty");
+        console.log("🧹 Component has no properties - this is valid for simple components");
         setPropertyUsedStates({});
-        setIsPropertiesReady(false); // No properties available
+        setIsPropertiesReady(true); // Still ready, just no properties
       }
 
       // Add a small delay to ensure UI has time to render before hiding loading state
@@ -316,7 +310,7 @@ function Plugin() {
       <div style={styles.footer}>
         <ButtonComponent
           callback={handleButtonClick}
-          disabled={!selectedComponent || isLoadingComponent || !isPropertiesReady}
+          disabled={!selectedComponent || isLoadingComponent}
           loading={isLoadingComponent}
         />
       </div>
