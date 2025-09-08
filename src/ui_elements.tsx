@@ -1,14 +1,13 @@
 import { VerticalSpace } from "@create-figma-plugin/ui";
 import { h, Fragment } from "preact";
+import { useMemo } from "preact/hooks";
 import { ComponentPropertyInfo, PropertyUsedStates } from "./types";
 import { CheckboxComponent } from "./ui_components/Checkbox";
 import { shouldBeHidden, isChildDisabledByParent } from "./ui_utils";
 import { sharedStyles } from "./ui_styles";
 
-function sortPropertiesByPath(
-  props: ComponentPropertyInfo[]
-): ComponentPropertyInfo[] {
-  return props.sort((a, b) => {
+const sortPropertiesByPath = (props: ComponentPropertyInfo[]): ComponentPropertyInfo[] => {
+  return [...props].sort((a, b) => {
     const pathA = a.path || [];
     const pathB = b.path || [];
 
@@ -25,12 +24,12 @@ function sortPropertiesByPath(
     // If paths are equal, sort by name
     return a.name.localeCompare(b.name);
   });
-}
-function renderVariantProperties(
+};
+const renderVariantProperties = (
   variantProps: ComponentPropertyInfo[],
   componentProps: ComponentPropertyInfo[],
   propertyUsedStates: PropertyUsedStates
-) {
+) => {
   if (variantProps.length === 0) return null;
 
   return (
@@ -128,11 +127,11 @@ function renderVariantProperties(
     </Fragment>
   );
 }
-function renderOtherProperties(
+const renderOtherProperties = (
   otherProps: ComponentPropertyInfo[],
   componentProps: ComponentPropertyInfo[],
   propertyUsedStates: PropertyUsedStates
-) {
+) => {
   if (otherProps.length === 0) return null;
 
   return (
@@ -221,9 +220,9 @@ function renderOtherProperties(
     </Fragment>
   );
 }
-function renderNestedComponents(
+const renderNestedComponents = (
   nestedInstances: { name: string; id: string; key: string }[]
-) {
+) => {
   if (nestedInstances.length === 0) return null;
 
   return (
@@ -303,42 +302,29 @@ export function renderAllProperties(
   propertyUsedStates: PropertyUsedStates,
   nestedInstances?: { name: string; id: string; key: string }[]
 ) {
-  console.log("🎨 renderAllProperties called with:", {
-    componentPropsCount: componentProps.length,
-    propertyUsedStatesKeys: Object.keys(propertyUsedStates),
-    propertyUsedStatesValues: propertyUsedStates,
-  });
+  // Memoize the heavy computations
+  const processedProps = useMemo(() => {
+    // Filter out properties that don't exist in propertyUsedStates to prevent invalid value errors
+    const validProps = componentProps.filter((prop) => {
+      if (!prop || !prop.name) {
+        return false;
+      }
+      return prop.name in propertyUsedStates;
+    });
 
-  // Filter out properties that don't exist in propertyUsedStates to prevent invalid value errors
-  const validProps = componentProps.filter((prop) => {
-    if (!prop || !prop.name) {
-      console.log("❌ Filtering out invalid property:", prop);
-      return false;
-    }
-    if (!(prop.name in propertyUsedStates)) {
-      console.error(
-        `🚨 CRITICAL: Property ${prop.name} not found in propertyUsedStates!`
-      );
-      console.error(`🚨 Available keys:`, Object.keys(propertyUsedStates));
-      console.error(`🚨 Property details:`, prop);
-      return false;
-    }
-    console.log(`✅ Rendering property: ${prop.name} (${prop.type})`);
-    return true;
-  });
+    const variantProps = validProps.filter((prop) => prop.type === "VARIANT");
+    const otherProps = validProps.filter((prop) => prop.type !== "VARIANT");
 
-  console.log(
-    `📊 After filtering: ${validProps.length} valid properties out of ${componentProps.length}`
-  );
+    // Sort variants alphabetically
+    variantProps.sort((a, b) => a.name.localeCompare(b.name));
 
-  const variantProps = validProps.filter((prop) => prop.type === "VARIANT");
-  const otherProps = validProps.filter((prop) => prop.type !== "VARIANT");
+    // Sort other props by path hierarchy (depth first, then by path values)
+    const sortedOtherProps = sortPropertiesByPath(otherProps);
 
-  // Sort variants alphabetically
-  variantProps.sort((a, b) => a.name.localeCompare(b.name));
+    return { variantProps, sortedOtherProps };
+  }, [componentProps, propertyUsedStates]);
 
-  // Sort other props by path hierarchy (depth first, then by path values)
-  const sortedOtherProps = sortPropertiesByPath(otherProps);
+  const { variantProps, sortedOtherProps } = processedProps;
 
   return (
     <div

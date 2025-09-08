@@ -1,5 +1,5 @@
 import { h, Fragment } from "preact";
-import { useState, useEffect } from "preact/hooks";
+import { useState, useEffect, useMemo, useCallback } from "preact/hooks";
 import { useAtom } from "jotai";
 import { selectedComponentAtom, componentSearchTermAtom } from "../state/atoms";
 import { ComponentData } from "../types";
@@ -151,68 +151,70 @@ export function ComponentList({ components }: ComponentListProps) {
     setHoveredComponent(null);
   };
 
-  // Filter components based on search term
-  const allComponents = Object.entries(components).filter(
-    ([name, component]) => {
-      if (component.type === "separator") return false;
-      if (!searchTerm.trim()) return true;
-      
-      // Case-insensitive search in component name and type
-      const searchLower = searchTerm.toLowerCase().trim();
-      const nameMatch = name.toLowerCase().includes(searchLower);
-      const typeMatch = component.type?.toLowerCase().includes(searchLower) || false;
-      
-      return nameMatch || typeMatch;
-    }
-  );
+  // Memoize filtered components based on search term
+  const allComponents = useMemo(() => {
+    return Object.entries(components).filter(
+      ([name, component]) => {
+        if (component.type === "separator") return false;
+        if (!searchTerm.trim()) return true;
 
-  // Function to highlight search matches in text
-  const highlightMatch = (text: string, searchTerm: string) => {
+        // Case-insensitive search in component name and type
+        const searchLower = searchTerm.toLowerCase().trim();
+        const nameMatch = name.toLowerCase().includes(searchLower);
+        const typeMatch = component.type?.toLowerCase().includes(searchLower) || false;
+
+        return nameMatch || typeMatch;
+      }
+    );
+  }, [components, searchTerm]);
+
+  // Memoized function to highlight search matches in text
+  const highlightMatch = useCallback((text: string, searchTerm: string) => {
     if (!searchTerm.trim()) return text;
-    
+
     const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
     const parts = text.split(regex);
-    
-    return parts.map((part, index) => 
+
+    return parts.map((part, index) =>
       regex.test(part) ? (
-        <span key={index} style={{ 
-          backgroundColor: minimalStyles.colors.gray900, 
+        <span key={index} style={{
+          backgroundColor: minimalStyles.colors.gray900,
           color: minimalStyles.colors.white,
-          fontWeight: minimalStyles.typography.fontWeight.semibold 
+          fontWeight: minimalStyles.typography.fontWeight.semibold
         }}>
           {part}
         </span>
       ) : part
     );
-  };
+  }, []);
 
-  const handleComponentClick = (componentName: string) => {
+  const handleComponentClick = useCallback((componentName: string) => {
     // Set optimistic selection immediately for instant visual feedback
     setOptimisticSelection(componentName);
     setSelectedComponent(componentName);
     // Always clear hover state when clicking to prevent sticking
     setHoveredComponent(null);
-  };
+  }, [setSelectedComponent]);
 
-  const handleSearchChange = (event: Event) => {
+  const handleSearchChange = useCallback((event: Event) => {
     const target = event.target as HTMLInputElement;
     setSearchTerm(target.value);
-  };
+  }, [setSearchTerm]);
 
-  const clearSearch = () => {
+  const clearSearch = useCallback(() => {
     setSearchTerm("");
     // Clear hover state when clearing search
     setHoveredComponent(null);
-  };
+  }, [setSearchTerm]);
 
   // Simplified and more reliable hover handlers
-  const handleMouseEnter = (componentName: string) => () => {
+  const handleMouseEnter = useCallback((componentName: string) => () => {
     setHoveredComponent(componentName);
-  };
+  }, []);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     setHoveredComponent(null);
-  };
+  }, []);
 
   return (
     <div style={listStyles.container}>
