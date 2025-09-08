@@ -76,9 +76,8 @@ const listStyles = {
     border: `${minimalStyles.borders.thin} solid ${minimalStyles.colors.gray900}`,
   },
   componentItemFocused: {
-    outline: `2px solid ${minimalStyles.colors.accent}`,
-    outlineOffset: "-2px",
-    boxShadow: `0 0 0 2px ${minimalStyles.colors.accent}`,
+    outline: `1px solid ${minimalStyles.colors.gray400}`,
+    outlineOffset: "-1px",
   },
   componentName: {
     fontWeight: minimalStyles.typography.fontWeight.medium,
@@ -204,7 +203,7 @@ export function ComponentList({ components }: ComponentListProps) {
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
-       } else if (event.key === "Enter") {
+        } else if (event.key === "Enter") {
         event.preventDefault();
         console.log("⌨️ Enter key pressed, focusedIndex:", focusedIndex);
 
@@ -224,6 +223,10 @@ export function ComponentList({ components }: ComponentListProps) {
         } else {
           console.log("❌ No valid focused component for Enter key");
         }
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        console.log("⌨️ Escape key pressed, clearing focus");
+        setFocusedIndex(-1);
       }
     };
 
